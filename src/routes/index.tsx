@@ -7,12 +7,12 @@ export const Route = createFileRoute("/")({
       { title: "FRANKY'S — BE RIGHT BACK" },
       { name: "description", content: "Franky's arcade is temporarily down for maintenance. Insert coin soon." },
       { property: "og:title", content: "FRANKY'S — BE RIGHT BACK" },
-      { property: "og:description", content: "Franky's arcade is temporarily down for maintenance. Insert coin soon." },
+      { property: "og:description", content: "Franky's arcade is temporarily down for maintenance." },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" },
     ],
   }),
   component: Maintenance,
@@ -35,124 +35,118 @@ function Maintenance() {
   const target = new Date(Date.now() + 1000 * 60 * 60 * 6);
   const { h, m, s } = useCountdown(target);
   const pad = (n: number) => String(n).padStart(2, "0");
-
-  const marqueeText = "★ FRANKY'S IS DOWN FOR MAINTENANCE ★ INSERT COIN SOON ★ HIGH SCORES SAFE ★ SKATERS WELCOME ★ ";
+  const marqueeText = "WIN STORE COUPONS  ★  BE RIGHT BACK  ★  MAINTENANCE MODE  ★  INSERT COIN SOON  ★  ";
 
   return (
-    <main className="min-h-screen flex flex-col bg-cream text-ink font-arcade">
-      {/* Marquee */}
-      <div className="bg-marquee border-y-4 border-ink overflow-hidden">
-        <div
-          className="flex whitespace-nowrap py-3 text-[10px] sm:text-xs text-ink"
-          style={{ animation: "marquee 30s linear infinite" }}
-        >
-          <span className="px-4">{marqueeText.repeat(4)}</span>
-          <span className="px-4">{marqueeText.repeat(4)}</span>
+    <main className="min-h-screen flex flex-col bg-cream text-ink" style={{ fontFamily: "VT323, monospace" }}>
+      {/* Top orange marquee */}
+      <div className="bg-marquee border-b-2 border-ink overflow-hidden h-7 flex items-center">
+        <div className="flex whitespace-nowrap text-ink text-base tracking-widest" style={{ animation: "marquee 30s linear infinite" }}>
+          <span className="px-6">{marqueeText.repeat(6)}</span>
+          <span className="px-6">{marqueeText.repeat(6)}</span>
         </div>
       </div>
 
-      {/* Checker bar */}
-      <div className="checker-bg h-4 border-b-4 border-ink" />
+      {/* Header bar */}
+      <header className="border-b-2 border-ink flex items-center justify-between px-4 h-14 bg-cream">
+        <div className="w-9 h-9 rounded-full border-2 border-ink flex items-center justify-center">
+          <span className="text-xl leading-none">⏻</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <PixelHorse size={5} />
+          <span style={{ fontFamily: "VT323" }} className="text-3xl leading-none mt-1">franky's</span>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <span className="block w-7 h-[2px] bg-ink" />
+          <span className="block w-7 h-[2px] bg-ink" />
+          <span className="block w-7 h-[2px] bg-ink" />
+        </div>
+      </header>
 
       {/* Body */}
-      <section className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-3xl">
-          <div className="border-4 border-ink bg-cream p-6 sm:p-10">
-            {/* Top bar */}
-            <div className="flex items-center justify-between border-b-4 border-ink pb-3 mb-6 text-[8px] sm:text-[10px]">
-              <span>FRANKY'S // SYS.404</span>
-              <span className="flex items-center gap-2">
-                <span className="inline-block w-2 h-2 bg-buy" style={{ animation: "blink 1s steps(1) infinite" }} />
-                REC
-              </span>
-            </div>
-
-            {/* Pixel mascot */}
-            <div className="flex justify-center mb-6">
-              <PixelHorse />
-            </div>
-
-            <h1 className="text-center text-2xl sm:text-4xl leading-[1.4] font-normal mb-4">
-              BE RIGHT
-              <br />
-              BACK!
-            </h1>
-
-            <p className="text-center text-[10px] sm:text-xs leading-relaxed max-w-md mx-auto mb-8">
-              THE ARCADE IS DOWN FOR SCHEDULED MAINTENANCE. OUR PIXEL JANITORS ARE WAXING THE RAMPS AND SWAPPING THE TOKEN HOPPER.
-            </p>
-
-            {/* Countdown */}
-            <div className="border-4 border-ink p-4 sm:p-6 mb-8 bg-cream">
-              <div className="text-center text-[8px] sm:text-[10px] mb-4 tracking-widest">RESPAWN IN</div>
-              <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                {[
-                  { v: pad(h), l: "HRS" },
-                  { v: pad(m), l: "MIN" },
-                  { v: pad(s), l: "SEC" },
-                ].map((t) => (
-                  <div key={t.l} className="border-4 border-ink bg-cream py-4 sm:py-6 text-center">
-                    <div className="text-2xl sm:text-4xl">{t.v}</div>
-                    <div className="text-[8px] sm:text-[10px] mt-2">{t.l}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Checker divider */}
-            <div className="checker-bg h-3 mb-8 border-y-4 border-ink" />
-
-            {/* Status list */}
-            <ul className="text-[10px] sm:text-xs space-y-3 mb-8">
-              <StatusRow label="SERVERS" status="REBOOTING" tone="marquee" />
-              <StatusRow label="HIGH SCORES" status="SAFE" tone="buy" />
-              <StatusRow label="SHOP" status="OFFLINE" tone="ink" />
-              <StatusRow label="MASCOT" status="DANCING" tone="buy" />
-            </ul>
-
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a
-                href="mailto:hello@frankys.arcade"
-                className="border-4 border-ink bg-buy text-cream px-5 py-3 text-[10px] sm:text-xs text-center hover:translate-y-[2px] transition-transform"
-                style={{ boxShadow: "inset 0 0 0 2px var(--cream)" }}
-              >
-                PRESS START → EMAIL US
-              </a>
-              <button
-                onClick={() => location.reload()}
-                className="border-4 border-ink bg-cream text-ink px-5 py-3 text-[10px] sm:text-xs hover:bg-ink hover:text-cream transition-colors"
-              >
-                INSERT COIN (RETRY)
-              </button>
+      <section className="flex-1 grid lg:grid-cols-[2fr_1fr] gap-3 p-3">
+        {/* Hero panel */}
+        <div className="border-2 border-ink relative flex flex-col">
+          <div className="checker-bg flex-1 relative flex items-center justify-center min-h-[420px] overflow-hidden">
+            {/* Pixel mascot huge */}
+            <div className="relative z-10 bg-cream border-2 border-ink p-8 sm:p-12">
+              <PixelHorse size={14} />
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="mt-6 flex items-center justify-between text-[8px] sm:text-[10px]">
-            <span>© FRANKY'S ARCADE</span>
-            <span>v1.0.4 — MAINT MODE</span>
+          {/* 3D / AR pill */}
+          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 bg-ink text-cream rounded-full border-2 border-ink flex text-sm overflow-hidden">
+            <span className="px-4 py-1.5 font-bold">3D</span>
+            <span className="px-4 py-1.5 bg-cream text-ink border-l-2 border-ink">AR</span>
           </div>
+
+          {/* Bottom strip — title + price */}
+          <div className="border-t-2 border-ink bg-cream px-4 pt-3 pb-2 flex items-baseline justify-between text-2xl">
+            <h1 className="font-bold tracking-wider">FRANKY'S * OFFLINE</h1>
+            <span>—:—</span>
+          </div>
+          <div className="px-4 pb-3 text-lg tracking-widest border-b-2 border-ink border-dashed">
+            SCHEDULED * MAINTENANCE * HIGH SCORES SAFE * SKATERS WELCOME * RESPAWN INCOMING
+          </div>
+          {/* Green CTA */}
+          <a
+            href="mailto:hello@frankys.arcade"
+            className="block text-center bg-buy text-cream py-3 text-xl tracking-[0.4em] border-2 border-ink mt-0"
+            style={{ boxShadow: "inset 0 0 0 2px var(--cream), inset 0 0 0 4px var(--buy)" }}
+          >
+            EMAIL US
+          </a>
+          <div className="flex justify-between px-3 py-1.5 text-base">
+            <span>© FRANKY'S AMSTERDAM 2026</span>
+            <span>MAINT MODE v1.0.4</span>
+          </div>
+        </div>
+
+        {/* Right rail — status cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+          <StatusCard label="RESPAWN IN" big={`${pad(h)}:${pad(m)}:${pad(s)}`} sub="HRS : MIN : SEC" tone="cream" />
+          <StatusCard label="SERVERS" big="REBOOT" sub="● IN PROGRESS" tone="orange" />
+          <StatusCard label="HIGH SCORES" big="SAFE" sub="● BACKED UP" tone="green" />
+          <StatusCard label="SHOP" big="OFFLINE" sub="● TRY AGAIN SOON" tone="ink" />
         </div>
       </section>
 
-      <div className="checker-bg h-4 border-t-4 border-ink" />
+      {/* Bottom marquee */}
+      <div className="bg-marquee border-t-2 border-ink overflow-hidden h-6 flex items-center">
+        <div className="flex whitespace-nowrap text-ink text-sm tracking-widest" style={{ animation: "marquee 40s linear infinite reverse" }}>
+          <span className="px-6">{marqueeText.repeat(6)}</span>
+          <span className="px-6">{marqueeText.repeat(6)}</span>
+        </div>
+      </div>
     </main>
   );
 }
 
-function StatusRow({ label, status, tone }: { label: string; status: string; tone: "marquee" | "buy" | "ink" }) {
-  const toneClass = tone === "marquee" ? "bg-marquee text-ink" : tone === "buy" ? "bg-buy text-cream" : "bg-ink text-cream";
+function StatusCard({
+  label,
+  big,
+  sub,
+  tone,
+}: {
+  label: string;
+  big: string;
+  sub: string;
+  tone: "cream" | "orange" | "green" | "ink";
+}) {
+  const bg = tone === "orange" ? "bg-marquee" : tone === "green" ? "bg-buy text-cream" : tone === "ink" ? "bg-ink text-cream" : "bg-cream";
   return (
-    <li className="flex items-center justify-between border-b-2 border-ink border-dashed pb-2">
-      <span>● {label}</span>
-      <span className={`${toneClass} px-2 py-1 border-2 border-ink`}>{status}</span>
-    </li>
+    <div className={`border-2 border-ink ${bg} p-4 flex flex-col justify-between min-h-[160px]`}>
+      <div className="flex items-center justify-between text-base tracking-widest">
+        <span>{label}</span>
+        <span className="border border-current px-1.5 text-xs">i</span>
+      </div>
+      <div className="text-4xl sm:text-5xl font-bold mt-2 tracking-wider">{big}</div>
+      <div className="text-base tracking-widest border-t border-current border-dashed pt-2 mt-2">{sub}</div>
+    </div>
   );
 }
 
-function PixelHorse() {
-  // 16x12 pixel horse in ink color
+function PixelHorse({ size = 8 }: { size?: number }) {
   const grid = [
     "................",
     "......##.##.....",
@@ -167,13 +161,12 @@ function PixelHorse() {
     "................",
     "................",
   ];
-  const px = 8;
   return (
     <div
       className="grid"
       style={{
-        gridTemplateColumns: `repeat(16, ${px}px)`,
-        gridTemplateRows: `repeat(12, ${px}px)`,
+        gridTemplateColumns: `repeat(16, ${size}px)`,
+        gridTemplateRows: `repeat(12, ${size}px)`,
       }}
     >
       {grid.flatMap((row, y) =>
@@ -181,9 +174,9 @@ function PixelHorse() {
           <div
             key={`${x}-${y}`}
             style={{
-              width: px,
-              height: px,
-              background: c === "#" ? "var(--ink)" : "transparent",
+              width: size,
+              height: size,
+              background: c === "#" ? "currentColor" : "transparent",
             }}
           />
         ))

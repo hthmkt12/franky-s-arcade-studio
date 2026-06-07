@@ -1,13 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
+
+import { CartProvider, useCart } from "@/lib/cart/CartContext";
+import { createOrder, computeTotals, formatPrice, getProducts } from "@/lib/api/shop";
+import type { Customer, Product, ProductSize } from "@/lib/api/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FRANKY'S — BE RIGHT BACK" },
-      { name: "description", content: "Franky's is offline for scheduled maintenance. Respawn soon." },
-      { property: "og:title", content: "FRANKY'S — BE RIGHT BACK" },
-      { property: "og:description", content: "Franky's is offline for scheduled maintenance. Respawn soon." },
+      { title: "FRANKY'S — HAT SHOP" },
+      { name: "description", content: "Franky's Amsterdam — handmade merino wool 5-panel caps. Order online." },
+      { property: "og:title", content: "FRANKY'S — HAT SHOP" },
+      { property: "og:description", content: "Handmade merino wool 5-panel caps from Amsterdam." },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -18,190 +23,437 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  component: Maintenance,
+  component: () => (
+    <CartProvider>
+      <Shop />
+    </CartProvider>
+  ),
 });
 
-type Hat = { id: string; name: string; price: number; sizes: string[] };
-const HATS: Hat[] = [
-  { id: "pony-cap", name: "PONY CAP", price: 38, sizes: ["S", "M", "L"] },
-  { id: "checker-trucker", name: "CHECKER TRUCKER", price: 42, sizes: ["ONE"] },
-  { id: "marquee-beanie", name: "MARQUEE BEANIE", price: 30, sizes: ["ONE"] },
-];
+function Shop() {
+  const { data: products, isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [size, setSize] = useState<ProductSize>("M");
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const cart = useCart();
 
-function useCountdown(target: Date) {
-  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const i = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(i);
-  }, []);
-  const diff = Math.max(0, target.getTime() - now);
-  const h = Math.floor(diff / 3.6e6);
-  const m = Math.floor((diff % 3.6e6) / 6e4);
-  const s = Math.floor((diff % 6e4) / 1000);
-  return { h, m, s };
-}
+    if (!selectedId && products && products.length) {
+      const first = products.find((p) => p.inStock) ?? products[0];
+      setSelectedId(first.id);
+    }
+  }, [products, selectedId]);
 
-function Maintenance() {
-  const target = useMemo(() => new Date(Date.now() + 1000 * 60 * 60 * 6), []);
-  const { h, m, s } = useCountdown(target);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const marqueeText = "ORDER  HATS  NOW   ★   FREE  STICKERS  ON  ORDERS  OVER  $50   ★   MAINTENANCE  MODE   ★   ";
-  const [orderOpen, setOrderOpen] = useState(false);
+  const selected = useMemo(
+    () => products?.find((p) => p.id === selectedId) ?? null,
+    [products, selectedId],
+  );
+
+  const variants = useMemo(
+    () => (products ?? []).filter((p) => p.id !== selectedId).slice(0, 4),
+    [products, selectedId],
+  );
+
+  const marqueeText = "WIN  STORE  COUPONS   ★   FREE  SHIPPING  OVER  €100   ★   HANDMADE  IN  PORTUGAL   ★   ";
 
   return (
     <main className="min-h-screen flex flex-col bg-cream text-ink">
-      <div className="marquee-sheen border-b border-pixel overflow-hidden h-6 flex items-center">
-        <div
-          className="flex whitespace-nowrap text-ink"
-          style={{ fontFamily: "var(--font-arcade)", fontSize: 10, lineHeight: 1, animation: "marquee 35s linear infinite" }}
-        >
-          <span className="px-6">{marqueeText.repeat(8)}</span>
-          <span className="px-6">{marqueeText.repeat(8)}</span>
+      <TopMarquee text={marqueeText} />
+      <Header onCartClick={cart.open} cartCount={cart.itemCount} />
+
+      {isLoading || !selected ? (
+        <div className="flex-1 flex items-center justify-center" style={{ fontSize: 10 }}>
+          LOADING...
         </div>
-      </div>
-
-      <header className="border-b border-pixel flex items-center justify-between px-4 h-14 bg-cream">
-        <button
-          aria-label="Power"
-          className="w-9 h-9 rounded-full border border-pixel flex items-center justify-center bg-cream arcade-bevel"
-          style={{ fontSize: 14 }}
-        >
-          ⏻
-        </button>
-        <div className="flex items-center gap-2">
-          <PixelHorse size={4} color="var(--ink)" />
-          <span style={{ fontFamily: "VT323, monospace", fontSize: 28, lineHeight: 1 }} className="mt-1">
-            franky's
-          </span>
-        </div>
-        <button
-          onClick={() => setOrderOpen(true)}
-          className="px-3 h-9 rounded-btn border border-ink bg-buy text-cream arcade-bevel"
-          style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 1 }}
-        >
-          ORDER HAT
-        </button>
-      </header>
-
-      <section className="flex-1 grid lg:grid-cols-[2fr_1fr] gap-1 p-1">
-        <div className="border border-pixel rounded-card overflow-hidden flex flex-col bg-cream">
-          <div className="checker-bg relative flex-1 min-h-[420px] flex items-center justify-center">
-            <div className="relative bg-cream border border-pixel rounded-card px-10 py-8 arcade-bevel">
-              <PixelHorse size={12} color="var(--ink)" />
-            </div>
-            <div
-              className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-ink text-cream border border-ink flex overflow-hidden"
-              style={{ borderRadius: 9999, fontSize: 10 }}
-            >
-              <span className="px-3 py-1.5" style={{ fontWeight: 700 }}>3D</span>
-              <span className="px-3 py-1.5 bg-cream text-ink border-l border-ink">AR</span>
-            </div>
-          </div>
-
-          <div className="border-t border-pixel px-3 pt-2.5 pb-1 flex items-baseline justify-between" style={{ fontSize: 18 }}>
-            <h1 style={{ fontWeight: 700 }}>FRANKY'S * HAT DROP</h1>
-            <span style={{ fontSize: 14 }}>{HATS.length} SKUS</span>
-          </div>
-          <div className="px-3 pb-2 border-b border-pixel" style={{ fontSize: 10, lineHeight: 1.5 }}>
-            ORDER * AHEAD * SHOP REOPENS WHEN COUNTDOWN ENDS * HIGH SCORES SAFE
-          </div>
-
-          {/* Hat list */}
-          <ul className="px-3 py-3 flex flex-col gap-1.5 border-b border-pixel">
-            {HATS.map((hat) => (
-              <li
-                key={hat.id}
-                className="flex items-center justify-between border border-pixel rounded-btn px-2.5 py-2 bg-cream arcade-bevel"
-                style={{ fontSize: 10 }}
-              >
-                <span style={{ fontWeight: 700, letterSpacing: 1 }}>{hat.name}</span>
-                <span className="flex items-center gap-3">
-                  <span className="text-muted-foreground">{hat.sizes.join("/")}</span>
-                  <span>${hat.price}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-
-          <button
-            onClick={() => setOrderOpen(true)}
-            className="block text-center bg-buy text-cream py-3 rounded-btn arcade-bevel mx-3 my-3 border border-ink"
-            style={{ fontSize: 14, fontWeight: 700, letterSpacing: 2 }}
-          >
-            PRESS  START → ORDER
-          </button>
-
-          <div className="flex justify-between px-3 py-1.5 border-t border-pixel" style={{ fontSize: 10 }}>
-            <span>© FRANKY'S AMSTERDAM 2026</span>
-            <span className="text-muted">SUBSCRIBE  SHIPPING</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-1">
-          <CountdownCard label="RESPAWN  IN" h={pad(h)} m={pad(m)} s={pad(s)} />
-          <StatusCard label="SERVERS" value="REBOOT" sub="● IN  PROGRESS" />
-          <StatusCard label="HIGH  SCORES" value="SAFE" sub="● BACKED  UP" />
-          <button
-            type="button"
-            onClick={() => setOrderOpen(true)}
-            className="text-left border border-pixel rounded-card bg-marquee p-3 flex flex-col gap-2 min-h-[120px] arcade-bevel"
-          >
-            <div className="flex items-center justify-between" style={{ fontSize: 10 }}>
-              <span style={{ fontWeight: 700 }}>HAT  SHOP</span>
-              <span
-                className="inline-block"
-                style={{ width: 6, height: 6, background: "var(--ink)", animation: "blink 1.2s steps(1) infinite" }}
+      ) : (
+        <section className="flex-1 grid lg:grid-cols-[3fr_2fr] gap-1 p-1">
+          {/* Left — selected product hero */}
+          <article className="border border-ink rounded-card overflow-hidden flex flex-col bg-cream">
+            <div className="checker-bg relative flex-1 min-h-[440px] flex items-center justify-center p-6">
+              <img
+                src={selected.image.url}
+                alt={selected.image.alt}
+                width={768}
+                height={768}
+                className="max-h-[60vh] w-auto object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.25)]"
               />
+              <div
+                className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-ink text-cream border border-ink flex overflow-hidden"
+                style={{ borderRadius: 9999, fontSize: 10 }}
+              >
+                <span className="px-3 py-1.5" style={{ fontWeight: 700 }}>3D</span>
+                <span className="px-3 py-1.5 bg-cream text-ink border-l border-ink">AR</span>
+              </div>
             </div>
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>PRE-ORDER</div>
-            <div className="mt-auto border-t border-ink border-dashed pt-2" style={{ fontSize: 10 }}>
-              ● TAP  TO  INSERT  COIN
-            </div>
-          </button>
-        </div>
-      </section>
 
-      {orderOpen && <OrderModal onClose={() => setOrderOpen(false)} />}
+            <div className="border-t border-ink px-3 pt-2.5 pb-1 flex items-baseline justify-between" style={{ fontSize: 16 }}>
+              <h1 style={{ fontWeight: 700 }}>{selected.name}</h1>
+              <span>{formatPrice(selected.priceCents, selected.currency)}</span>
+            </div>
+            <div className="px-3 pb-2 border-b border-pixel truncate" style={{ fontSize: 10, lineHeight: 1.5 }}>
+              * {selected.materials.join(" * ")} *
+            </div>
+
+            {/* Size selector */}
+            <div className="px-3 pt-3 flex items-center gap-2" style={{ fontSize: 10 }}>
+              <span style={{ fontWeight: 700 }}>SIZE</span>
+              <div className="flex gap-1">
+                {selected.sizes.map((sz) => (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => setSize(sz)}
+                    className={`min-w-9 px-2 py-1.5 border rounded-btn arcade-bevel ${
+                      size === sz ? "bg-ink text-cream border-ink" : "bg-cream border-pixel"
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={!selected.inStock}
+              onClick={() => cart.addItem(selected.id, size, 1)}
+              className="block w-auto text-center bg-buy text-cream py-3 rounded-btn arcade-bevel mx-3 my-3 border border-ink disabled:bg-muted disabled:cursor-not-allowed"
+              style={{ fontSize: 14, fontWeight: 700, letterSpacing: 2 }}
+            >
+              {selected.inStock ? "ADD TO CART" : "OUT OF STOCK"}
+            </button>
+
+            <div className="flex justify-between px-3 py-1.5 border-t border-pixel" style={{ fontSize: 10 }}>
+              <span>© FRANKY'S AMSTERDAM 2026</span>
+              <span className="text-muted">SUBSCRIBE  SHIPPING</span>
+            </div>
+          </article>
+
+          {/* Right — variant grid 2x2 */}
+          <aside className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+            {variants.map((p) => (
+              <VariantCard
+                key={p.id}
+                product={p}
+                onSelect={() => setSelectedId(p.id)}
+                onAdd={() => cart.addItem(p.id, p.sizes[0] ?? "ONE", 1)}
+              />
+            ))}
+          </aside>
+        </section>
+      )}
+
+      <BottomMarquee text={marqueeText} />
+
+      {products && (
+        <CartDrawer
+          products={products}
+          onCheckout={() => {
+            cart.close();
+            setCheckoutOpen(true);
+          }}
+        />
+      )}
+      {products && checkoutOpen && (
+        <CheckoutModal
+          products={products}
+          onClose={() => setCheckoutOpen(false)}
+        />
+      )}
     </main>
   );
 }
 
-function OrderModal({ onClose }: { onClose: () => void }) {
-  const [hatId, setHatId] = useState(HATS[0].id);
-  const hat = HATS.find((h) => h.id === hatId)!;
-  const [size, setSize] = useState(hat.sizes[0]);
-  const [qty, setQty] = useState(1);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+function TopMarquee({ text }: { text: string }) {
+  return (
+    <div className="marquee-sheen border-b border-ink overflow-hidden h-7 flex items-center">
+      <div
+        className="flex whitespace-nowrap text-ink"
+        style={{ fontFamily: "var(--font-arcade)", fontSize: 10, lineHeight: 1, animation: "marquee 40s linear infinite" }}
+      >
+        <span className="px-6">{text.repeat(8)}</span>
+        <span className="px-6">{text.repeat(8)}</span>
+      </div>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    setSize(hat.sizes[0]);
-  }, [hatId, hat.sizes]);
+function BottomMarquee({ text }: { text: string }) {
+  return (
+    <div className="border-t border-ink overflow-hidden h-6 flex items-center bg-cream">
+      <div
+        className="flex whitespace-nowrap text-muted"
+        style={{ fontFamily: "var(--font-arcade)", fontSize: 9, lineHeight: 1, animation: "marquee 60s linear infinite" }}
+      >
+        <span className="px-6">{text.repeat(8)}</span>
+        <span className="px-6">{text.repeat(8)}</span>
+      </div>
+    </div>
+  );
+}
 
-  const total = hat.price * qty;
+function Header({ onCartClick, cartCount }: { onCartClick: () => void; cartCount: number }) {
+  return (
+    <header className="border-b border-ink flex items-center justify-between px-4 h-14 bg-cream">
+      <button
+        aria-label="Clock"
+        className="w-9 h-9 rounded-full border border-pixel flex items-center justify-center bg-cream arcade-bevel"
+        style={{ fontSize: 14 }}
+      >
+        ◷
+      </button>
+      <div className="flex items-center gap-2">
+        <PixelHorse size={4} color="var(--ink)" />
+        <span style={{ fontFamily: "VT323, monospace", fontSize: 28, lineHeight: 1 }} className="mt-1">
+          franky's
+        </span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={onCartClick}
+          aria-label="Cart"
+          className="relative px-3 h-9 border border-ink rounded-btn bg-cream arcade-bevel"
+          style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 1 }}
+        >
+          CART [{cartCount}]
+        </button>
+        <button aria-label="Menu" className="flex flex-col gap-1.5 p-2 rounded-btn border border-pixel arcade-bevel">
+          <span className="block w-5 h-px bg-ink" />
+          <span className="block w-5 h-px bg-ink" />
+          <span className="block w-5 h-px bg-ink" />
+        </button>
+      </div>
+    </header>
+  );
+}
 
-  const submit = (e: React.FormEvent) => {
+function VariantCard({
+  product,
+  onSelect,
+  onAdd,
+}: {
+  product: Product;
+  onSelect: () => void;
+  onAdd: () => void;
+}) {
+  return (
+    <div className="border border-ink rounded-card overflow-hidden flex flex-col bg-cream">
+      <button
+        type="button"
+        onClick={onSelect}
+        className="flex-1 min-h-[180px] flex items-center justify-center p-3 bg-cream"
+        aria-label={`Select ${product.name}`}
+      >
+        <img
+          src={product.image.url}
+          alt={product.image.alt}
+          width={768}
+          height={768}
+          loading="lazy"
+          className="max-h-[160px] w-auto object-contain"
+        />
+      </button>
+      <div
+        className="border-t border-pixel px-3 py-2 flex items-center justify-between"
+        style={{ fontSize: 10 }}
+      >
+        <div className="flex flex-col gap-0.5">
+          <span style={{ fontWeight: 700 }}>{product.name}</span>
+          <span>{formatPrice(product.priceCents, product.currency)}</span>
+        </div>
+        <span
+          className="border border-ink rounded-btn px-2 py-1 arcade-bevel"
+          style={{ fontSize: 9 }}
+        >
+          TRY IN [AR]
+        </span>
+      </div>
+      <button
+        type="button"
+        disabled={!product.inStock}
+        onClick={onAdd}
+        className="border-t border-dashed border-ink py-2 text-center disabled:text-muted disabled:cursor-not-allowed"
+        style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1 }}
+      >
+        {product.inStock ? "ADD TO CART" : "OUT OF STOCK"}
+      </button>
+    </div>
+  );
+}
+
+function CartDrawer({
+  products,
+  onCheckout,
+}: {
+  products: Product[];
+  onCheckout: () => void;
+}) {
+  const cart = useCart();
+  const items = cart.buildView(products);
+  const totals = computeTotals(cart.lines, products);
+
+  if (!cart.isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-40 flex" onClick={cart.close}>
+      <div className="flex-1" style={{ background: "rgba(0,0,0,0.55)" }} />
+      <aside
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md bg-cream border-l border-ink flex flex-col"
+        style={{ fontFamily: "var(--font-arcade)" }}
+      >
+        <div className="marquee-sheen border-b border-ink flex items-center justify-between px-3 h-9">
+          <span style={{ fontSize: 10, fontWeight: 700 }}>YOUR  CART  [{cart.itemCount}]</span>
+          <button onClick={cart.close} aria-label="Close cart" style={{ fontSize: 10, fontWeight: 700 }}>
+            X
+          </button>
+        </div>
+
+        {items.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 p-6" style={{ fontSize: 10 }}>
+            <PixelHorse size={6} color="var(--ink)" />
+            <p>EMPTY  CART  —  INSERT  COIN</p>
+            <button
+              onClick={cart.close}
+              className="bg-ink text-cream py-2 px-4 rounded-btn arcade-bevel border border-ink"
+              style={{ fontSize: 10 }}
+            >
+              KEEP  SHOPPING
+            </button>
+          </div>
+        ) : (
+          <>
+            <ul className="flex-1 overflow-auto p-3 flex flex-col gap-2">
+              {items.map((it) => (
+                <li
+                  key={`${it.productId}-${it.size}`}
+                  className="border border-pixel rounded-btn p-2 flex items-center gap-2 bg-cream arcade-bevel"
+                >
+                  <img
+                    src={it.product.image.url}
+                    alt={it.product.image.alt}
+                    width={56}
+                    height={56}
+                    className="w-14 h-14 object-contain border border-pixel rounded-btn bg-cream"
+                    loading="lazy"
+                  />
+                  <div className="flex-1 flex flex-col gap-1" style={{ fontSize: 10 }}>
+                    <span style={{ fontWeight: 700 }}>{it.product.name}</span>
+                    <span className="text-muted">SIZE {it.size}</span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => cart.updateQty(it.productId, it.size, it.qty - 1)}
+                        className="w-6 h-6 border border-pixel rounded-btn arcade-bevel"
+                      >
+                        −
+                      </button>
+                      <span
+                        className="w-7 text-center"
+                        style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
+                      >
+                        {it.qty}
+                      </span>
+                      <button
+                        onClick={() => cart.updateQty(it.productId, it.size, Math.min(9, it.qty + 1))}
+                        className="w-6 h-6 border border-pixel rounded-btn arcade-bevel"
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={() => cart.removeItem(it.productId, it.size)}
+                        className="ml-auto px-2 h-6 border border-pixel rounded-btn arcade-bevel"
+                        style={{ fontSize: 9 }}
+                      >
+                        REMOVE
+                      </button>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 10, fontWeight: 700 }}>
+                    {formatPrice(it.lineTotalCents)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="border-t border-ink p-3 flex flex-col gap-1.5" style={{ fontSize: 10 }}>
+              <Row label="SUBTOTAL" value={formatPrice(totals.subtotalCents)} />
+              <Row label="SHIPPING" value={formatPrice(totals.shippingCents)} />
+              <div className="border-t border-pixel border-dashed my-1" />
+              <Row label="TOTAL" value={formatPrice(totals.totalCents)} bold />
+              <button
+                onClick={onCheckout}
+                className="mt-2 bg-buy text-cream py-3 rounded-btn arcade-bevel border border-ink"
+                style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2 }}
+              >
+                CHECKOUT
+              </button>
+            </div>
+          </>
+        )}
+      </aside>
+    </div>
+  );
+}
+
+function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+  return (
+    <div className="flex justify-between" style={{ fontWeight: bold ? 700 : 400 }}>
+      <span>{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+function CheckoutModal({
+  products,
+  onClose,
+}: {
+  products: Product[];
+  onClose: () => void;
+}) {
+  const cart = useCart();
+  const items = cart.buildView(products);
+  const totals = computeTotals(cart.lines, products);
+  const [submitting, setSubmitting] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const [customer, setCustomer] = useState<Customer>({
+    name: "",
+    email: "",
+    address: "",
+    city: "",
+    postalCode: "",
+    country: "NL",
+  });
+
+  const set = <K extends keyof Customer>(k: K, v: Customer[K]) =>
+    setCustomer((c) => ({ ...c, [k]: v }));
+
+  const valid =
+    customer.name.trim() &&
+    /.+@.+\..+/.test(customer.email) &&
+    customer.address.trim() &&
+    customer.city.trim() &&
+    customer.postalCode.trim();
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !address.trim()) return;
-    const subject = encodeURIComponent(`FRANKY'S ORDER — ${hat.name}`);
-    const body = encodeURIComponent(
-      [
-        `>> NEW ORDER`,
-        `ITEM: ${hat.name}`,
-        `SIZE: ${size}`,
-        `QTY:  ${qty}`,
-        `TOTAL: $${total}`,
-        `--`,
-        `NAME: ${name}`,
-        `EMAIL: ${email}`,
-        `SHIP TO:`,
-        address,
-      ].join("\n")
-    );
-    window.location.href = `mailto:hello@frankys.arcade?subject=${subject}&body=${body}`;
-    setSubmitted(true);
+    if (!valid || items.length === 0) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const order = await createOrder({ items: cart.lines, customer });
+      setOrderNumber(order.number);
+      cart.clear();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "ORDER FAILED");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -211,23 +463,24 @@ function OrderModal({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-cream border border-ink rounded-card overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg max-h-[90vh] overflow-auto bg-cream border border-ink rounded-card"
         style={{ fontFamily: "var(--font-arcade)" }}
       >
-        <div className="marquee-sheen border-b border-ink flex items-center justify-between px-3 h-8">
-          <span style={{ fontSize: 10, fontWeight: 700 }}>INSERT  COIN  —  ORDER  HAT</span>
+        <div className="marquee-sheen border-b border-ink flex items-center justify-between px-3 h-9 sticky top-0">
+          <span style={{ fontSize: 10, fontWeight: 700 }}>CHECKOUT</span>
           <button onClick={onClose} aria-label="Close" style={{ fontSize: 10, fontWeight: 700 }}>
             X
           </button>
         </div>
 
-        {submitted ? (
-          <div className="p-4 flex flex-col gap-3" style={{ fontSize: 10, lineHeight: 1.6 }}>
-            <div className="checker-bg border border-pixel rounded-btn p-4 text-center" style={{ fontSize: 14 }}>
-              ★ ORDER  SENT ★
+        {orderNumber ? (
+          <div className="p-5 flex flex-col gap-3 text-center" style={{ fontSize: 10, lineHeight: 1.6 }}>
+            <div className="checker-bg border border-ink rounded-btn p-6" style={{ fontSize: 14 }}>
+              ★ ORDER  CONFIRMED ★
             </div>
-            <p>WE OPENED YOUR MAIL APP WITH THE ORDER. SEND IT TO LOCK IT IN.</p>
+            <p style={{ fontSize: 12, fontWeight: 700 }}>{orderNumber}</p>
+            <p className="text-muted">A RECEIPT WILL ARRIVE AT {customer.email.toUpperCase()}</p>
             <button
               onClick={onClose}
               className="bg-ink text-cream py-2 rounded-btn arcade-bevel border border-ink"
@@ -238,118 +491,57 @@ function OrderModal({ onClose }: { onClose: () => void }) {
           </div>
         ) : (
           <form onSubmit={submit} className="p-3 flex flex-col gap-3" style={{ fontSize: 10 }}>
-            <label className="flex flex-col gap-1.5">
-              <span style={{ fontWeight: 700 }}>SELECT HAT</span>
-              <div className="grid grid-cols-1 gap-1">
-                {HATS.map((h) => (
-                  <button
-                    type="button"
-                    key={h.id}
-                    onClick={() => setHatId(h.id)}
-                    className={`flex items-center justify-between border rounded-btn px-2.5 py-2 arcade-bevel ${
-                      hatId === h.id ? "bg-ink text-cream border-ink" : "bg-cream border-pixel"
-                    }`}
-                  >
-                    <span style={{ fontWeight: 700 }}>{h.name}</span>
-                    <span>${h.price}</span>
-                  </button>
-                ))}
-              </div>
-            </label>
-
-            <div className="grid grid-cols-2 gap-2">
-              <label className="flex flex-col gap-1.5">
-                <span style={{ fontWeight: 700 }}>SIZE</span>
-                <div className="flex gap-1">
-                  {hat.sizes.map((sz) => (
-                    <button
-                      type="button"
-                      key={sz}
-                      onClick={() => setSize(sz)}
-                      className={`flex-1 border rounded-btn py-1.5 arcade-bevel ${
-                        size === sz ? "bg-ink text-cream border-ink" : "bg-cream border-pixel"
-                      }`}
+            {items.length === 0 ? (
+              <p className="text-center py-6">CART IS EMPTY</p>
+            ) : (
+              <>
+                <ul className="flex flex-col gap-1">
+                  {items.map((it) => (
+                    <li
+                      key={`${it.productId}-${it.size}`}
+                      className="flex justify-between border border-pixel rounded-btn px-2 py-1.5 arcade-bevel"
                     >
-                      {sz}
-                    </button>
+                      <span>
+                        {it.product.name}  ×{it.qty}  ({it.size})
+                      </span>
+                      <span>{formatPrice(it.lineTotalCents)}</span>
+                    </li>
                   ))}
+                </ul>
+
+                <div className="grid grid-cols-1 gap-2">
+                  <Field label="NAME" value={customer.name} onChange={(v) => set("name", v)} maxLength={80} />
+                  <Field label="EMAIL" type="email" value={customer.email} onChange={(v) => set("email", v)} maxLength={120} />
+                  <Field label="ADDRESS" value={customer.address} onChange={(v) => set("address", v)} maxLength={200} />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field label="CITY" value={customer.city} onChange={(v) => set("city", v)} maxLength={80} />
+                    <Field label="POSTAL" value={customer.postalCode} onChange={(v) => set("postalCode", v)} maxLength={20} />
+                  </div>
+                  <Field label="COUNTRY" value={customer.country} onChange={(v) => set("country", v)} maxLength={2} />
                 </div>
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span style={{ fontWeight: 700 }}>QTY</span>
-                <div className="flex items-center border border-pixel rounded-btn arcade-bevel">
-                  <button
-                    type="button"
-                    onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    className="px-2.5 py-1.5 border-r border-pixel"
-                  >
-                    −
-                  </button>
-                  <span className="flex-1 text-center" style={{ fontFamily: "VT323, monospace", fontSize: 18 }}>
-                    {qty}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setQty((q) => Math.min(9, q + 1))}
-                    className="px-2.5 py-1.5 border-l border-pixel"
-                  >
-                    +
-                  </button>
+
+                <div className="border-t border-pixel border-dashed pt-2 flex flex-col gap-1">
+                  <Row label="SUBTOTAL" value={formatPrice(totals.subtotalCents)} />
+                  <Row label="SHIPPING" value={formatPrice(totals.shippingCents)} />
+                  <Row label="TOTAL" value={formatPrice(totals.totalCents)} bold />
                 </div>
-              </label>
-            </div>
 
-            <label className="flex flex-col gap-1.5">
-              <span style={{ fontWeight: 700 }}>NAME</span>
-              <input
-                required
-                maxLength={80}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="border border-pixel rounded-btn px-2 py-1.5 bg-cream"
-                style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
-              />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span style={{ fontWeight: 700 }}>EMAIL</span>
-              <input
-                required
-                type="email"
-                maxLength={120}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="border border-pixel rounded-btn px-2 py-1.5 bg-cream"
-                style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
-              />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span style={{ fontWeight: 700 }}>SHIP TO</span>
-              <textarea
-                required
-                rows={3}
-                maxLength={400}
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="border border-pixel rounded-btn px-2 py-1.5 bg-cream"
-                style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
-              />
-            </label>
+                {error && (
+                  <p className="border border-ink bg-marquee text-ink p-2 rounded-btn" style={{ fontSize: 10 }}>
+                    ! {error}
+                  </p>
+                )}
 
-            <div
-              className="flex items-center justify-between border-t border-pixel border-dashed pt-2"
-              style={{ fontSize: 10 }}
-            >
-              <span>TOTAL</span>
-              <span style={{ fontFamily: "VT323, monospace", fontSize: 22 }}>${total}</span>
-            </div>
-
-            <button
-              type="submit"
-              className="bg-buy text-cream py-3 rounded-btn arcade-bevel border border-ink"
-              style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2 }}
-            >
-              PRESS  START → SEND  ORDER
-            </button>
+                <button
+                  type="submit"
+                  disabled={!valid || submitting}
+                  className="bg-buy text-cream py-3 rounded-btn arcade-bevel border border-ink disabled:bg-muted disabled:cursor-not-allowed"
+                  style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2 }}
+                >
+                  {submitting ? "SENDING..." : "PLACE  ORDER"}
+                </button>
+              </>
+            )}
           </form>
         )}
       </div>
@@ -357,67 +549,32 @@ function OrderModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function CountdownCard({ label, h, m, s }: { label: string; h: string; m: string; s: string }) {
-  return (
-    <div className="border border-pixel rounded-card bg-cream p-3 flex flex-col gap-2">
-      <div className="flex items-center justify-between" style={{ fontSize: 10 }}>
-        <span style={{ fontWeight: 700 }}>{label}</span>
-        <span className="border border-pixel rounded-btn px-1.5 arcade-bevel" style={{ fontSize: 10 }}>
-          AR
-        </span>
-      </div>
-      <div className="flex items-baseline gap-1.5" style={{ fontFamily: "VT323, monospace" }}>
-        <TimeBox v={h} />
-        <span style={{ fontSize: 28, lineHeight: 1 }}>:</span>
-        <TimeBox v={m} />
-        <span style={{ fontSize: 28, lineHeight: 1 }}>:</span>
-        <TimeBox v={s} />
-      </div>
-      <div className="flex justify-between text-muted-foreground" style={{ fontSize: 10 }}>
-        <span>HRS</span><span>MIN</span><span>SEC</span>
-      </div>
-    </div>
-  );
-}
-
-function TimeBox({ v }: { v: string }) {
-  return (
-    <span
-      className="flex-1 text-center border border-pixel rounded-btn py-1.5 bg-cream arcade-bevel"
-      style={{ fontSize: 28, lineHeight: 1 }}
-    >
-      {v}
-    </span>
-  );
-}
-
-function StatusCard({
+function Field({
   label,
   value,
-  sub,
-  disabled,
+  onChange,
+  type = "text",
+  maxLength,
 }: {
   label: string;
   value: string;
-  sub: string;
-  disabled?: boolean;
+  onChange: (v: string) => void;
+  type?: string;
+  maxLength?: number;
 }) {
   return (
-    <div className="border border-pixel rounded-card bg-cream p-3 flex flex-col gap-2 min-h-[120px]">
-      <div className="flex items-center justify-between" style={{ fontSize: 10 }}>
-        <span style={{ fontWeight: 700 }}>{label}</span>
-        <span
-          className="inline-block"
-          style={{ width: 6, height: 6, background: disabled ? "var(--muted)" : "var(--ink)", animation: "blink 1.2s steps(1) infinite" }}
-        />
-      </div>
-      <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }} className={disabled ? "text-muted-foreground" : ""}>
-        {value}
-      </div>
-      <div className="mt-auto border-t border-pixel border-dashed pt-2 text-muted-foreground" style={{ fontSize: 10 }}>
-        {sub}
-      </div>
-    </div>
+    <label className="flex flex-col gap-1">
+      <span style={{ fontSize: 10, fontWeight: 700 }}>{label}</span>
+      <input
+        required
+        type={type}
+        value={value}
+        maxLength={maxLength}
+        onChange={(e) => onChange(e.target.value)}
+        className="border border-pixel rounded-btn px-2 py-1.5 bg-cream"
+        style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
+      />
+    </label>
   );
 }
 
@@ -454,7 +611,7 @@ function PixelHorse({ size = 8, color = "var(--ink)" }: { size?: number; color?:
               background: c === "#" ? color : "transparent",
             }}
           />
-        ))
+        )),
       )}
     </div>
   );

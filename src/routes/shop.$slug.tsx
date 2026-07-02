@@ -1,0 +1,174 @@
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import { formatPrice, getProductBySlug } from "@/lib/api/shop";
+import { useCart } from "@/lib/cart/CartContext";
+import type { ProductSize } from "@/lib/api/types";
+
+const productQuery = (slug: string) => ({
+  queryKey: ["product", slug],
+  queryFn: async () => {
+    const p = await getProductBySlug(slug);
+    if (!p) throw notFound();
+    return p;
+  },
+});
+
+export const Route = createFileRoute("/shop/$slug")({
+  loader: ({ context, params }) => context.queryClient.ensureQueryData(productQuery(params.slug)),
+  head: ({ loaderData }) => {
+    const p = loaderData;
+    if (!p) return { meta: [{ title: "Cap — Franky's" }] };
+    return {
+      meta: [
+        { title: `${p.name} — Franky's` },
+        { name: "description", content: p.description },
+        { property: "og:title", content: `${p.name} — Franky's` },
+        { property: "og:description", content: p.description },
+        { property: "og:image", content: p.image.url },
+        { name: "twitter:image", content: p.image.url },
+      ],
+    };
+  },
+  notFoundComponent: () => (
+    <div
+      className="flex-1 flex flex-col items-center justify-center gap-3 p-10 text-center"
+      style={{ fontFamily: "var(--font-arcade)" }}
+    >
+      <h1 style={{ fontSize: 18 }}>CAP NOT FOUND</h1>
+      <Link
+        to="/shop"
+        className="bg-ink text-cream px-4 py-2 rounded-btn border border-ink arcade-bevel"
+        style={{ fontSize: 10 }}
+      >
+        BACK TO SHOP
+      </Link>
+    </div>
+  ),
+  component: ProductPage,
+});
+
+function ProductPage() {
+  const { slug } = Route.useParams();
+  const { data: product } = useSuspenseQuery(productQuery(slug));
+  const cart = useCart();
+  const [size, setSize] = useState<ProductSize>(product.sizes[0] ?? "ONE");
+  const [qty, setQty] = useState(1);
+
+  const add = () => {
+    cart.addItem(product.id, size, qty);
+    toast(`ADDED — ${product.name} (${size}) ×${qty}`);
+  };
+
+  return (
+    <div className="flex-1 bg-cream">
+      <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div
+          className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex items-center justify-center p-6"
+        >
+          <div className="bg-cream border border-ink rounded-card p-4 arcade-bevel">
+            <img
+              src={product.image.url}
+              alt={product.image.alt}
+              width={512}
+              height={512}
+              className="max-h-[380px] w-auto object-contain"
+            />
+          </div>
+        </div>
+
+        <div
+          className="flex flex-col gap-4"
+          style={{ fontFamily: "var(--font-arcade)" }}
+        >
+          <div className="flex flex-col gap-1">
+            <Link
+              to="/shop"
+              preload="intent"
+              style={{ fontSize: 9 }}
+              className="text-muted underline underline-offset-4 w-fit"
+            >
+              ← BACK TO SHOP
+            </Link>
+            <h1 style={{ fontSize: 20, letterSpacing: 2 }}>{product.name}</h1>
+            <p style={{ fontSize: 14 }}>{formatPrice(product.priceCents, product.currency)}</p>
+          </div>
+
+          <p
+            className="text-muted"
+            style={{ fontFamily: "VT323, monospace", fontSize: 18, lineHeight: 1.3 }}
+          >
+            {product.description}
+          </p>
+
+          <div className="flex flex-col gap-2">
+            <span style={{ fontSize: 10, letterSpacing: 1 }}>SIZE</span>
+            <div className="flex gap-2">
+              {product.sizes.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSize(s)}
+                  aria-pressed={s === size}
+                  className={`px-3 h-10 rounded-btn border border-ink arcade-bevel ${
+                    s === size ? "bg-ink text-cream" : "bg-cream text-ink"
+                  }`}
+                  style={{ fontSize: 10, minWidth: 44 }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span style={{ fontSize: 10, letterSpacing: 1 }}>QTY</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setQty((v) => Math.max(1, v - 1))}
+                className="w-10 h-10 border border-ink rounded-btn arcade-bevel"
+                aria-label="Decrease quantity"
+              >
+                −
+              </button>
+              <span
+                className="w-10 text-center"
+                style={{ fontFamily: "VT323, monospace", fontSize: 20 }}
+              >
+                {qty}
+              </span>
+              <button
+                onClick={() => setQty((v) => Math.min(9, v + 1))}
+                className="w-10 h-10 border border-ink rounded-btn arcade-bevel"
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            disabled={!product.inStock}
+            onClick={add}
+            className="bg-buy text-cream py-4 rounded-btn border border-ink arcade-bevel disabled:bg-muted disabled:cursor-not-allowed"
+            style={{ fontSize: 14, letterSpacing: 2 }}
+          >
+            {product.inStock ? "ADD TO CART" : "SOLD OUT"}
+          </button>
+
+          <ul
+            className="border border-pixel rounded-card p-3 flex flex-col gap-1"
+            style={{ fontSize: 10 }}
+          >
+            {product.materials.map((m) => (
+              <li key={m}>★ {m}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}

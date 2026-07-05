@@ -123,7 +123,7 @@ function ProductPage() {
                   onClick={() => setSize(s)}
                   aria-pressed={s === size}
                   className={`px-3 h-10 rounded-btn border border-ink arcade-bevel ${
-                    s === size ? "bg-ink text-cream" : "bg-cream text-ink"
+                    s === activeSize ? "bg-ink text-cream" : "bg-cream text-ink"
                   }`}
                   style={{ fontSize: 10, minWidth: 44 }}
                 >

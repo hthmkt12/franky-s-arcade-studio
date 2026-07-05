@@ -14,7 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string
+          product_name: string
+          product_slug: string
+          qty: number
+          size: string
+          unit_price_cents: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id: string
+          product_name: string
+          product_slug: string
+          qty: number
+          size: string
+          unit_price_cents: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string
+          product_name?: string
+          product_slug?: string
+          qty?: number
+          size?: string
+          unit_price_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address: string
+          city: string
+          country: string
+          created_at: string
+          currency: string
+          customer_email: string
+          customer_name: string
+          id: string
+          number: string
+          postal_code: string
+          shipping_cents: number
+          status: string
+          subtotal_cents: number
+          total_cents: number
+        }
+        Insert: {
+          address: string
+          city: string
+          country: string
+          created_at?: string
+          currency?: string
+          customer_email: string
+          customer_name: string
+          id?: string
+          number: string
+          postal_code: string
+          shipping_cents: number
+          status?: string
+          subtotal_cents: number
+          total_cents: number
+        }
+        Update: {
+          address?: string
+          city?: string
+          country?: string
+          created_at?: string
+          currency?: string
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          number?: string
+          postal_code?: string
+          shipping_cents?: number
+          status?: string
+          subtotal_cents?: number
+          total_cents?: number
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          color_hex: string
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          image_alt: string
+          image_key: string
+          in_stock: boolean
+          materials: string[]
+          name: string
+          price_cents: number
+          sizes: string[]
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          color_hex: string
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          image_alt?: string
+          image_key: string
+          in_stock?: boolean
+          materials?: string[]
+          name: string
+          price_cents: number
+          sizes?: string[]
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          color_hex?: string
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          image_alt?: string
+          image_key?: string
+          in_stock?: boolean
+          materials?: string[]
+          name?: string
+          price_cents?: number
+          sizes?: string[]
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

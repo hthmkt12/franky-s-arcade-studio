@@ -1,5 +1,5 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -7,31 +7,12 @@ import { formatPrice, getProductBySlug } from "@/lib/api/shop";
 import { useCart } from "@/lib/cart/CartContext";
 import type { ProductSize } from "@/lib/api/types";
 
-const productQuery = (slug: string) => ({
-  queryKey: ["product", slug],
-  queryFn: async () => {
-    const p = await getProductBySlug(slug);
-    if (!p) throw notFound();
-    return p;
-  },
-});
-
 export const Route = createFileRoute("/shop/$slug")({
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(productQuery(params.slug)),
-  head: ({ loaderData }) => {
-    const p = loaderData;
-    if (!p) return { meta: [{ title: "Cap — Franky's" }] };
-    return {
-      meta: [
-        { title: `${p.name} — Franky's` },
-        { name: "description", content: p.description },
-        { property: "og:title", content: `${p.name} — Franky's` },
-        { property: "og:description", content: p.description },
-        { property: "og:image", content: p.image.url },
-        { name: "twitter:image", content: p.image.url },
-      ],
-    };
-  },
+  head: ({ params }) => ({
+    meta: [
+      { title: `${params.slug.replace(/-/g, " ").toUpperCase()} — Franky's` },
+    ],
+  }),
   notFoundComponent: () => (
     <div
       className="flex-1 flex flex-col items-center justify-center gap-3 p-10 text-center"
@@ -52,14 +33,43 @@ export const Route = createFileRoute("/shop/$slug")({
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const { data: product } = useSuspenseQuery(productQuery(slug));
+  const { data: product, isLoading } = useQuery({
+    queryKey: ["product", slug],
+    queryFn: () => getProductBySlug(slug),
+  });
   const cart = useCart();
-  const [size, setSize] = useState<ProductSize>(product.sizes[0] ?? "ONE");
+  const [size, setSize] = useState<ProductSize>("ONE");
   const [qty, setQty] = useState(1);
 
+  if (isLoading) {
+    return (
+      <div className="flex-1 bg-cream flex items-center justify-center p-10">
+        <div className="border border-ink rounded-card h-64 w-full max-w-4xl checker-bg opacity-40 animate-pulse" />
+      </div>
+    );
+  }
+  if (!product) {
+    return (
+      <div
+        className="flex-1 flex flex-col items-center justify-center gap-3 p-10 text-center"
+        style={{ fontFamily: "var(--font-arcade)" }}
+      >
+        <h1 style={{ fontSize: 18 }}>CAP NOT FOUND</h1>
+        <Link
+          to="/shop"
+          className="bg-ink text-cream px-4 py-2 rounded-btn border border-ink arcade-bevel"
+          style={{ fontSize: 10 }}
+        >
+          BACK TO SHOP
+        </Link>
+      </div>
+    );
+  }
+
+  const activeSize: ProductSize = product.sizes.includes(size) ? size : product.sizes[0] ?? "ONE";
   const add = () => {
-    cart.addItem(product.id, size, qty);
-    toast(`ADDED — ${product.name} (${size}) ×${qty}`);
+    cart.addItem(product.id, activeSize, qty);
+    toast(`ADDED — ${product.name} (${activeSize}) ×${qty}`);
   };
 
   return (
@@ -113,7 +123,7 @@ function ProductPage() {
                   onClick={() => setSize(s)}
                   aria-pressed={s === size}
                   className={`px-3 h-10 rounded-btn border border-ink arcade-bevel ${
-                    s === size ? "bg-ink text-cream" : "bg-cream text-ink"
+                    s === activeSize ? "bg-ink text-cream" : "bg-cream text-ink"
                   }`}
                   style={{ fontSize: 10, minWidth: 44 }}
                 >

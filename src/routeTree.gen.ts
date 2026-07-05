@@ -16,6 +16,8 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
+import { Route as ApiProductsRouteImport } from './routes/api/products'
+import { Route as ApiOrdersRouteImport } from './routes/api/orders'
 import { Route as CheckoutSuccessIdRouteImport } from './routes/checkout.success.$id'
 
 const ShopRoute = ShopRouteImport.update({
@@ -53,6 +55,16 @@ const ShopSlugRoute = ShopSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ShopRoute,
 } as any)
+const ApiProductsRoute = ApiProductsRouteImport.update({
+  id: '/api/products',
+  path: '/api/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOrdersRoute = ApiOrdersRouteImport.update({
+  id: '/api/orders',
+  path: '/api/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckoutSuccessIdRoute = CheckoutSuccessIdRouteImport.update({
   id: '/success/$id',
   path: '/success/$id',
@@ -66,6 +78,8 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/shop': typeof ShopRouteWithChildren
+  '/api/orders': typeof ApiOrdersRoute
+  '/api/products': typeof ApiProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/checkout/success/$id': typeof CheckoutSuccessIdRoute
 }
@@ -76,6 +90,8 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/shop': typeof ShopRouteWithChildren
+  '/api/orders': typeof ApiOrdersRoute
+  '/api/products': typeof ApiProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/checkout/success/$id': typeof CheckoutSuccessIdRoute
 }
@@ -87,6 +103,8 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/shop': typeof ShopRouteWithChildren
+  '/api/orders': typeof ApiOrdersRoute
+  '/api/products': typeof ApiProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/checkout/success/$id': typeof CheckoutSuccessIdRoute
 }
@@ -99,6 +117,8 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/shop'
+    | '/api/orders'
+    | '/api/products'
     | '/shop/$slug'
     | '/checkout/success/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +129,8 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/shop'
+    | '/api/orders'
+    | '/api/products'
     | '/shop/$slug'
     | '/checkout/success/$id'
   id:
@@ -119,6 +141,8 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/shop'
+    | '/api/orders'
+    | '/api/products'
     | '/shop/$slug'
     | '/checkout/success/$id'
   fileRoutesById: FileRoutesById
@@ -130,6 +154,8 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   ShopRoute: typeof ShopRouteWithChildren
+  ApiOrdersRoute: typeof ApiOrdersRoute
+  ApiProductsRoute: typeof ApiProductsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -183,6 +209,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopSlugRouteImport
       parentRoute: typeof ShopRoute
     }
+    '/api/products': {
+      id: '/api/products'
+      path: '/api/products'
+      fullPath: '/api/products'
+      preLoaderRoute: typeof ApiProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/orders': {
+      id: '/api/orders'
+      path: '/api/orders'
+      fullPath: '/api/orders'
+      preLoaderRoute: typeof ApiOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/checkout/success/$id': {
       id: '/checkout/success/$id'
       path: '/success/$id'
@@ -222,7 +262,19 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   ShopRoute: ShopRouteWithChildren,
+  ApiOrdersRoute: ApiOrdersRoute,
+  ApiProductsRoute: ApiProductsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

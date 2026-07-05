@@ -38,12 +38,38 @@ function ProductPage() {
     queryFn: () => getProductBySlug(slug),
   });
   const cart = useCart();
-  const [size, setSize] = useState<ProductSize>(product.sizes[0] ?? "ONE");
+  const [size, setSize] = useState<ProductSize>("ONE");
   const [qty, setQty] = useState(1);
 
+  if (isLoading) {
+    return (
+      <div className="flex-1 bg-cream flex items-center justify-center p-10">
+        <div className="border border-ink rounded-card h-64 w-full max-w-4xl checker-bg opacity-40 animate-pulse" />
+      </div>
+    );
+  }
+  if (!product) {
+    return (
+      <div
+        className="flex-1 flex flex-col items-center justify-center gap-3 p-10 text-center"
+        style={{ fontFamily: "var(--font-arcade)" }}
+      >
+        <h1 style={{ fontSize: 18 }}>CAP NOT FOUND</h1>
+        <Link
+          to="/shop"
+          className="bg-ink text-cream px-4 py-2 rounded-btn border border-ink arcade-bevel"
+          style={{ fontSize: 10 }}
+        >
+          BACK TO SHOP
+        </Link>
+      </div>
+    );
+  }
+
+  const activeSize: ProductSize = product.sizes.includes(size) ? size : product.sizes[0] ?? "ONE";
   const add = () => {
-    cart.addItem(product.id, size, qty);
-    toast(`ADDED — ${product.name} (${size}) ×${qty}`);
+    cart.addItem(product.id, activeSize, qty);
+    toast(`ADDED — ${product.name} (${activeSize}) ×${qty}`);
   };
 
   return (

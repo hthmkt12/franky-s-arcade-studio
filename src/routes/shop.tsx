@@ -19,8 +19,6 @@ export const Route = createFileRoute("/shop")({
       },
     ],
   }),
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData({ queryKey: ["products"], queryFn: getProducts }),
   component: ShopPage,
 });
 

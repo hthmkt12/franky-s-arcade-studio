@@ -1,5 +1,5 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -7,31 +7,12 @@ import { formatPrice, getProductBySlug } from "@/lib/api/shop";
 import { useCart } from "@/lib/cart/CartContext";
 import type { ProductSize } from "@/lib/api/types";
 
-const productQuery = (slug: string) => ({
-  queryKey: ["product", slug],
-  queryFn: async () => {
-    const p = await getProductBySlug(slug);
-    if (!p) throw notFound();
-    return p;
-  },
-});
-
 export const Route = createFileRoute("/shop/$slug")({
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(productQuery(params.slug)),
-  head: ({ loaderData }) => {
-    const p = loaderData;
-    if (!p) return { meta: [{ title: "Cap — Franky's" }] };
-    return {
-      meta: [
-        { title: `${p.name} — Franky's` },
-        { name: "description", content: p.description },
-        { property: "og:title", content: `${p.name} — Franky's` },
-        { property: "og:description", content: p.description },
-        { property: "og:image", content: p.image.url },
-        { name: "twitter:image", content: p.image.url },
-      ],
-    };
-  },
+  head: ({ params }) => ({
+    meta: [
+      { title: `${params.slug.replace(/-/g, " ").toUpperCase()} — Franky's` },
+    ],
+  }),
   notFoundComponent: () => (
     <div
       className="flex-1 flex flex-col items-center justify-center gap-3 p-10 text-center"
@@ -52,7 +33,10 @@ export const Route = createFileRoute("/shop/$slug")({
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const { data: product } = useSuspenseQuery(productQuery(slug));
+  const { data: product, isLoading } = useQuery({
+    queryKey: ["product", slug],
+    queryFn: () => getProductBySlug(slug),
+  });
   const cart = useCart();
   const [size, setSize] = useState<ProductSize>(product.sizes[0] ?? "ONE");
   const [qty, setQty] = useState(1);

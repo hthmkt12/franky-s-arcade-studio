@@ -77,9 +77,49 @@
   background-color: var(--cream);
 }
 
+/* 3D perspective warp floor — checker tilted like arcade cabinet */
+@utility checker-warp {
+  position: relative;
+  overflow: hidden;
+  perspective: 480px;
+  perspective-origin: 50% 30%;
+  background-color: var(--cream);
+}
+@utility checker-warp-floor {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  transform: rotateX(58deg) scale(1.6);
+  background-color: var(--cream);
+  background-image:
+    linear-gradient(var(--ink) 2px, transparent 2px),
+    linear-gradient(90deg, var(--ink) 2px, transparent 2px),
+    linear-gradient(45deg, var(--ink) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--ink) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--ink) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--ink) 75%);
+  background-size: 48px 48px, 48px 48px, 48px 48px, 48px 48px, 48px 48px, 48px 48px;
+  background-position: 0 0, 0 0, 0 0, 0 24px, 24px -24px, -24px 0;
+  animation: warp-scroll 6s linear infinite;
+  pointer-events: none;
+  will-change: background-position;
+}
+@utility checker-warp-fade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--cream) 0%, transparent 30%, transparent 70%, var(--cream) 100%);
+}
+
+@keyframes warp-scroll {
+  from { background-position: 0 0, 0 0, 0 0, 0 24px, 24px -24px, -24px 0; }
+  to   { background-position: 0 48px, 0 48px, 0 48px, 0 72px, 24px 24px, -24px 48px; }
+}
+
 @utility marquee-sheen {
   background-image: linear-gradient(180deg, #ffb84d 0%, var(--marquee) 50%, #d8861a 100%);
 }
+
 
 @keyframes marquee {
   from { transform: translateX(0); }

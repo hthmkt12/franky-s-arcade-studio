@@ -30,8 +30,11 @@ function LandingPage() {
   return (
     <div className="flex-1 flex flex-col">
       {/* HERO */}
-      <section className="border-b border-ink checker-bg">
-        <div className="max-w-6xl mx-auto px-4 py-10 md:py-16 flex flex-col items-center gap-6 text-center">
+      <section className="border-b border-ink checker-warp">
+        <div className="checker-warp-floor" aria-hidden />
+        <div className="checker-warp-fade" aria-hidden />
+        <div className="relative max-w-6xl mx-auto px-4 py-10 md:py-16 flex flex-col items-center gap-6 text-center">
+
           <div className="bg-cream border border-ink rounded-card p-6 md:p-10 flex flex-col items-center gap-5 arcade-bevel">
             <PixelHorse size={12} />
             <h1

@@ -3,9 +3,11 @@ import { toast } from "sonner";
 
 import { formatPrice } from "@/lib/api/shop";
 import { useCart } from "@/lib/cart/CartContext";
+import { openArModal } from "@/components/frankys/ArModal";
 import type { Product } from "@/lib/api/types";
 
 export function VariantCard({ product }: { product: Product }) {
+
   const cart = useCart();
   const defaultSize = product.sizes[0] ?? "ONE";
 
@@ -40,12 +42,15 @@ export function VariantCard({ product }: { product: Product }) {
           <span style={{ fontWeight: 700 }}>{product.name}</span>
           <span>{formatPrice(product.priceCents, product.currency)}</span>
         </div>
-        <span
-          className="border border-ink rounded-btn px-2 py-1 arcade-bevel"
+        <button
+          type="button"
+          onClick={() => openArModal({ name: product.name, image: product.image.url })}
+          className="border border-ink rounded-btn px-2 py-1 arcade-bevel hover:bg-marquee transition-colors"
           style={{ fontSize: 9 }}
         >
           TRY IN [AR]
-        </span>
+        </button>
+
       </div>
       <button
         type="button"

@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { PixelHorse } from "@/components/frankys/PixelHorse";
+import { ViewModeToggle, type ViewMode } from "@/components/frankys/ViewModeToggle";
 import { formatPrice, getProducts } from "@/lib/api/shop";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,6 +29,8 @@ export const Route = createFileRoute("/")({
 function LandingPage() {
   const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
   const featured = products?.filter((p) => p.inStock).slice(0, 3) ?? [];
+  const [viewMode, setViewMode] = useState<ViewMode>("3D");
+
 
   return (
     <div className="flex-1 flex flex-col">

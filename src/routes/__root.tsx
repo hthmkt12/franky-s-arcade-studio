@@ -17,6 +17,8 @@ import { Header } from "../components/frankys/Header";
 import { TopMarquee, BottomMarquee } from "../components/frankys/Marquee";
 import { CartDrawer } from "../components/frankys/CartDrawer";
 import { PixelHorse } from "../components/frankys/PixelHorse";
+import { ArModal } from "../components/frankys/ArModal";
+
 
 function NotFoundComponent() {
   return (
@@ -130,6 +132,8 @@ function RootComponent() {
           </main>
           <BottomMarquee />
           <CartDrawer />
+          <ArModal />
+
           <Toaster
             position="bottom-center"
             toastOptions={{

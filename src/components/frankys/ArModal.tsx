@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { PixelHorse } from "./PixelHorse";
 
 type ArDetail = { name?: string; image?: string };
+type Phase = "idle" | "init" | "scan" | "done";
 
 export function openArModal(detail: ArDetail = {}) {
   window.dispatchEvent(new CustomEvent<ArDetail>("frankys:open-ar", { detail }));
@@ -11,11 +12,13 @@ export function openArModal(detail: ArDetail = {}) {
 export function ArModal() {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<ArDetail>({});
+  const [phase, setPhase] = useState<Phase>("idle");
 
   useEffect(() => {
     const handler = (e: Event) => {
       const ce = e as CustomEvent<ArDetail>;
       setDetail(ce.detail ?? {});
+      setPhase("idle");
       setOpen(true);
     };
     window.addEventListener("frankys:open-ar", handler);
@@ -35,7 +38,25 @@ export function ArModal() {
     };
   }, [open]);
 
+  useEffect(() => {
+    if (phase === "init") {
+      const t1 = setTimeout(() => setPhase("scan"), 1500);
+      return () => clearTimeout(t1);
+    }
+    if (phase === "scan") {
+      const t2 = setTimeout(() => setPhase("done"), 2000);
+      return () => clearTimeout(t2);
+    }
+  }, [phase]);
+
+  const handleClose = () => {
+    setOpen(false);
+    setPhase("idle");
+  };
+
   if (!open) return null;
+
+  const variantName = detail.name ? detail.name.toUpperCase() : "AR PREVIEW";
 
   return (
     <div
@@ -44,7 +65,7 @@ export function ArModal() {
       aria-label="Try in AR"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
       style={{ background: "rgba(0,0,0,0.7)", fontFamily: "var(--font-arcade)" }}
-      onClick={() => setOpen(false)}
+      onClick={handleClose}
     >
       <div
         className="relative w-full max-w-md bg-cream border-2 border-ink rounded-card arcade-bevel animate-scale-in"
@@ -57,7 +78,7 @@ export function ArModal() {
           <span>◉ AR VIEWER — BETA</span>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={handleClose}
             aria-label="Close"
             className="w-7 h-7 border border-ink rounded-btn arcade-bevel hover:bg-ink hover:text-cream transition-colors"
             style={{ fontSize: 10 }}
@@ -84,22 +105,81 @@ export function ArModal() {
         </div>
 
         <div className="p-4 flex flex-col gap-3 text-center">
-          <p style={{ fontSize: 11, letterSpacing: 1 }}>
-            {detail.name ? detail.name.toUpperCase() : "AR PREVIEW"}
+          <p className="font-bold" style={{ fontSize: 13, letterSpacing: 2 }}>
+            {variantName}
           </p>
-          <p
-            className="text-muted"
-            style={{ fontFamily: "VT323, monospace", fontSize: 18, lineHeight: 1.3 }}
-          >
-            Point your phone at your head. Scan begins...{" "}
-            <span style={{ animation: "blink 1s steps(1) infinite" }}>▊</span>
-          </p>
+
+          {phase === "idle" && (
+            <>
+              <div className="flex flex-col gap-1.5 text-left bg-cream border border-ink rounded-card p-3 arcade-bevel">
+                <p style={{ fontSize: 9, letterSpacing: 1, marginBottom: 2 }}>
+                  HOW TO TRY ON:
+                </p>
+                <p style={{ fontSize: 10, letterSpacing: 1 }}>
+                  1. ALLOW CAMERA ACCESS
+                </p>
+                <p style={{ fontSize: 10, letterSpacing: 1 }}>
+                  2. POINT CAMERA AT YOUR HEAD
+                </p>
+                <p style={{ fontSize: 10, letterSpacing: 1 }}>
+                  3. KEEP STILL & TAP START
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPhase("init")}
+                className="w-full py-3 rounded-btn border-2 border-ink arcade-bevel transition-colors hover:brightness-110"
+                style={{
+                  fontSize: 11,
+                  letterSpacing: 2,
+                  background: "var(--marquee)",
+                  color: "var(--ink)",
+                }}
+              >
+                START AR TRY-ON
+              </button>
+            </>
+          )}
+
+          {phase === "init" && (
+            <p
+              className="text-muted"
+              style={{ fontFamily: "VT323, monospace", fontSize: 18, lineHeight: 1.3 }}
+            >
+              INITIALIZING CAMERA...{" "}
+              <span style={{ animation: "blink 1s steps(1) infinite" }}>▊</span>
+            </p>
+          )}
+
+          {phase === "scan" && (
+            <p
+              className="text-muted"
+              style={{ fontFamily: "VT323, monospace", fontSize: 18, lineHeight: 1.3 }}
+            >
+              SCANNING FACE MESH...{" "}
+              <span style={{ animation: "blink 1s steps(1) infinite" }}>▊</span>
+            </p>
+          )}
+
+          {phase === "done" && (
+            <>
+              <p
+                style={{ fontFamily: "VT323, monospace", fontSize: 18, lineHeight: 1.3 }}
+              >
+                CAP MAPPED TO FACE MESH
+              </p>
+              <p className="text-muted" style={{ fontSize: 9, letterSpacing: 1 }}>
+                DRAG TO ROTATE · PINCH TO ZOOM
+              </p>
+            </>
+          )}
+
           <p className="text-muted" style={{ fontSize: 9, letterSpacing: 1 }}>
             AR TRY-ON COMING SOON — INSERT COIN TO CONTINUE
           </p>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={handleClose}
             className="bg-ink text-cream py-3 rounded-btn border border-ink arcade-bevel"
             style={{ fontSize: 11, letterSpacing: 2 }}
           >

@@ -70,8 +70,16 @@ export function ArModal() {
     }
     if (phase === "idle") {
       setSnapped(false);
+      setAnchorLocked(false);
     }
   }, [phase]);
+
+  // Flip anchor to "locked" after the snap transition finishes
+  useEffect(() => {
+    if (!snapped) return;
+    const t = setTimeout(() => setAnchorLocked(true), 480);
+    return () => clearTimeout(t);
+  }, [snapped]);
 
   // Auto-cycle hint after done, so users see both affordances
   useEffect(() => {

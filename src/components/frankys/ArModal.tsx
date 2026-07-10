@@ -87,13 +87,40 @@ export function ArModal() {
   const clampZoom = (z: number) => Math.max(0.6, Math.min(1.8, z));
   const clampRot = (r: number) => Math.max(-60, Math.min(60, r));
 
+  const updateReticleFromEvent = (e: React.PointerEvent) => {
+    const el = stageRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setReticlePos({
+      x: Math.max(24, Math.min(rect.width - 24, e.clientX - rect.left)),
+      y: Math.max(24, Math.min(rect.height - 24, e.clientY - rect.top)),
+    });
+  };
+
+  const onStageClick = (e: React.MouseEvent) => {
+    if (phase !== "idle") return;
+    const el = stageRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setReticlePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    setPhase("init");
+  };
+
   const onPointerDown = (e: React.PointerEvent) => {
+    if (phase === "idle") {
+      updateReticleFromEvent(e);
+      return;
+    }
     if (phase !== "done") return;
     (e.target as Element).setPointerCapture?.(e.pointerId);
     dragState.current = { startX: e.clientX, startRot: rotation };
     setHint(null);
   };
   const onPointerMove = (e: React.PointerEvent) => {
+    if (phase === "idle") {
+      updateReticleFromEvent(e);
+      return;
+    }
     if (!dragState.current) return;
     const dx = e.clientX - dragState.current.startX;
     setRotation(clampRot(dragState.current.startRot + dx * 0.4));

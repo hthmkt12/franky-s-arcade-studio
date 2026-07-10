@@ -59,8 +59,15 @@ export function ArModal() {
       return () => clearTimeout(t1);
     }
     if (phase === "scan") {
-      const t2 = setTimeout(() => setPhase("done"), 1800);
+      const t2 = setTimeout(() => {
+        setPhase("done");
+        // snap after brief settle so users see the transition
+        setTimeout(() => setSnapped(true), 60);
+      }, 1800);
       return () => clearTimeout(t2);
+    }
+    if (phase === "idle") {
+      setSnapped(false);
     }
   }, [phase]);
 

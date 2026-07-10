@@ -32,6 +32,8 @@ export function ArModal() {
       setRotation(0);
       setZoom(1);
       setHint("drag");
+      setReticlePos(null);
+      setSnapped(false);
       setOpen(true);
     };
     window.addEventListener("frankys:open-ar", handler);

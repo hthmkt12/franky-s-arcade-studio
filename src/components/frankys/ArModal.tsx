@@ -18,6 +18,9 @@ export function ArModal() {
   const [rotation, setRotation] = useState(0); // deg, Y-axis feel
   const [zoom, setZoom] = useState(1); // 0.6 – 1.8
   const [hint, setHint] = useState<"drag" | "pinch" | null>("drag");
+  const [reticlePos, setReticlePos] = useState<{ x: number; y: number } | null>(null);
+  const [snapped, setSnapped] = useState(false);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<{ startX: number; startRot: number } | null>(null);
   const pinchState = useRef<{ startDist: number; startZoom: number } | null>(null);
 
@@ -29,6 +32,8 @@ export function ArModal() {
       setRotation(0);
       setZoom(1);
       setHint("drag");
+      setReticlePos(null);
+      setSnapped(false);
       setOpen(true);
     };
     window.addEventListener("frankys:open-ar", handler);
@@ -54,8 +59,15 @@ export function ArModal() {
       return () => clearTimeout(t1);
     }
     if (phase === "scan") {
-      const t2 = setTimeout(() => setPhase("done"), 1800);
+      const t2 = setTimeout(() => {
+        setPhase("done");
+        // snap after brief settle so users see the transition
+        setTimeout(() => setSnapped(true), 60);
+      }, 1800);
       return () => clearTimeout(t2);
+    }
+    if (phase === "idle") {
+      setSnapped(false);
     }
   }, [phase]);
 
@@ -75,13 +87,40 @@ export function ArModal() {
   const clampZoom = (z: number) => Math.max(0.6, Math.min(1.8, z));
   const clampRot = (r: number) => Math.max(-60, Math.min(60, r));
 
+  const updateReticleFromEvent = (e: React.PointerEvent) => {
+    const el = stageRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setReticlePos({
+      x: Math.max(24, Math.min(rect.width - 24, e.clientX - rect.left)),
+      y: Math.max(24, Math.min(rect.height - 24, e.clientY - rect.top)),
+    });
+  };
+
+  const onStageClick = (e: React.MouseEvent) => {
+    if (phase !== "idle") return;
+    const el = stageRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setReticlePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    setPhase("init");
+  };
+
   const onPointerDown = (e: React.PointerEvent) => {
+    if (phase === "idle") {
+      updateReticleFromEvent(e);
+      return;
+    }
     if (phase !== "done") return;
     (e.target as Element).setPointerCapture?.(e.pointerId);
     dragState.current = { startX: e.clientX, startRot: rotation };
     setHint(null);
   };
   const onPointerMove = (e: React.PointerEvent) => {
+    if (phase === "idle") {
+      updateReticleFromEvent(e);
+      return;
+    }
     if (!dragState.current) return;
     const dx = e.clientX - dragState.current.startX;
     setRotation(clampRot(dragState.current.startRot + dx * 0.4));
@@ -126,6 +165,11 @@ export function ArModal() {
       ? `perspective(600px) rotateY(${rotation}deg) scale(${zoom})`
       : "none";
 
+  // Face anchor sits at the forehead of the silhouette (percent of stage)
+  const FACE_ANCHOR = { xPct: 50, yPct: 38 };
+  const showFace = phase !== "idle";
+  const showReticle = phase === "idle" && reticlePos !== null;
+
   return (
     <div
       role="dialog"
@@ -156,8 +200,13 @@ export function ArModal() {
         </div>
 
         <div
-          className="checker-bg border-b-2 border-ink relative flex items-center justify-center min-h-[240px] p-6 overflow-hidden select-none"
-          style={{ touchAction: phase === "done" ? "none" : "auto", cursor: phase === "done" ? (dragState.current ? "grabbing" : "grab") : "default" }}
+          ref={stageRef}
+          className="checker-bg border-b-2 border-ink relative flex items-center justify-center min-h-[260px] p-6 overflow-hidden select-none"
+          style={{
+            touchAction: phase === "done" ? "none" : "auto",
+            cursor: phase === "idle" ? "crosshair" : phase === "done" ? (dragState.current ? "grabbing" : "grab") : "default",
+          }}
+          onClick={onStageClick}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
@@ -167,19 +216,73 @@ export function ArModal() {
           onTouchEnd={onTouchEnd}
           onWheel={onWheel}
         >
-          {/* Idle: tap-to-place reticle replacing the START button */}
+          {/* Face anchor silhouette (visible from scan onward) */}
+          {showFace && (
+            <svg
+              viewBox="0 0 100 120"
+              className="absolute pointer-events-none"
+              style={{
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -42%)",
+                width: 160,
+                height: 192,
+                opacity: phase === "done" ? 0.55 : 0.85,
+                transition: "opacity 300ms ease-out",
+              }}
+              aria-hidden
+            >
+              {/* Head silhouette */}
+              <ellipse
+                cx="50" cy="55" rx="28" ry="34"
+                fill="none" stroke="var(--ink)" strokeWidth="1.2"
+                strokeDasharray={phase === "done" ? "0" : "3 3"}
+              />
+              {/* Face mesh grid */}
+              <g stroke="var(--ink)" strokeWidth="0.4" opacity="0.55">
+                <path d="M28 45 Q50 40 72 45" fill="none" />
+                <path d="M26 60 Q50 58 74 60" fill="none" />
+                <path d="M30 75 Q50 78 70 75" fill="none" />
+                <path d="M50 22 L50 88" fill="none" />
+                <path d="M38 25 L38 85" fill="none" />
+                <path d="M62 25 L62 85" fill="none" />
+              </g>
+              {/* Forehead anchor crosshair */}
+              <g stroke="var(--marquee)" strokeWidth="1.4" opacity={phase === "done" ? 1 : 0.9}>
+                <circle cx={FACE_ANCHOR.xPct} cy={FACE_ANCHOR.yPct} r="3" fill="none" />
+                <line x1={FACE_ANCHOR.xPct - 6} y1={FACE_ANCHOR.yPct} x2={FACE_ANCHOR.xPct - 3} y2={FACE_ANCHOR.yPct} />
+                <line x1={FACE_ANCHOR.xPct + 3} y1={FACE_ANCHOR.yPct} x2={FACE_ANCHOR.xPct + 6} y2={FACE_ANCHOR.yPct} />
+                <line x1={FACE_ANCHOR.xPct} y1={FACE_ANCHOR.yPct - 6} x2={FACE_ANCHOR.xPct} y2={FACE_ANCHOR.yPct - 3} />
+                <line x1={FACE_ANCHOR.xPct} y1={FACE_ANCHOR.yPct + 3} x2={FACE_ANCHOR.xPct} y2={FACE_ANCHOR.yPct + 6} />
+              </g>
+            </svg>
+          )}
+
+          {/* Idle: floating reticle follows the pointer */}
           {phase === "idle" && (
-            <button
-              type="button"
-              onClick={() => setPhase("init")}
-              aria-label="Tap to place cap"
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 group"
-              style={{ fontFamily: "var(--font-arcade)" }}
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 pointer-events-none">
+              <span
+                className="bg-cream border border-ink rounded-btn px-2 py-1 arcade-bevel"
+                style={{ fontSize: 9, letterSpacing: 2 }}
+              >
+                TAP TO PLACE CAP
+              </span>
+            </div>
+          )}
+          {showReticle && reticlePos && (
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                left: reticlePos.x,
+                top: reticlePos.y,
+                transform: "translate(-50%, -50%)",
+              }}
+              aria-hidden
             >
               <div
-                className="relative w-24 h-24 rounded-full border-2 border-ink flex items-center justify-center"
+                className="relative w-20 h-20 rounded-full border-2 border-ink flex items-center justify-center"
                 style={{
-                  background: "rgba(250,162,31,0.15)",
+                  background: "rgba(250,162,31,0.18)",
                   animation: "blink 1.2s steps(1) infinite",
                 }}
               >
@@ -187,12 +290,9 @@ export function ArModal() {
                   className="absolute inset-2 rounded-full border border-ink"
                   style={{ borderStyle: "dashed" }}
                 />
-                <span style={{ fontSize: 22 }}>◎</span>
+                <span style={{ fontSize: 18 }}>◎</span>
               </div>
-              <span style={{ fontSize: 10, letterSpacing: 2 }}>
-                TAP TO PLACE CAP
-              </span>
-            </button>
+            </div>
           )}
 
           {/* Scanning overlay lines during init/scan */}
@@ -206,43 +306,51 @@ export function ArModal() {
                   opacity: 0.7,
                 }}
               />
+              {/* Locking reticle animates toward face anchor */}
+              <div
+                className="absolute w-16 h-16 rounded-full border-2 border-marquee"
+                style={{
+                  left: `${FACE_ANCHOR.xPct}%`,
+                  top: `${FACE_ANCHOR.yPct}%`,
+                  transform: "translate(-50%, -50%)",
+                  animation: "blink 0.6s steps(1) infinite",
+                }}
+              />
             </div>
           )}
 
-          {/* Cap preview (interactive in done phase) */}
-          {detail.image ? (
+          {/* Cap — snaps to face anchor on done */}
+          {phase !== "idle" && (
             <div
-              className="bg-cream border border-ink rounded-card p-3 arcade-bevel pointer-events-none"
+              className="absolute pointer-events-none"
               style={{
-                transform: capTransform,
+                left: phase === "done" ? `${FACE_ANCHOR.xPct}%` : (reticlePos ? reticlePos.x : "50%"),
+                top: phase === "done" ? `${FACE_ANCHOR.yPct}%` : (reticlePos ? reticlePos.y : "50%"),
+                transform: `translate(-50%, -85%) ${
+                  phase === "done" && snapped ? capTransform : "scale(1.15)"
+                }`,
+                opacity: phase === "done" ? 1 : 0.5,
                 transition: dragState.current || pinchState.current
                   ? "none"
-                  : "transform 200ms ease-out",
-                opacity: phase === "idle" ? 0.35 : 1,
+                  : "left 420ms cubic-bezier(0.22,1,0.36,1), top 420ms cubic-bezier(0.22,1,0.36,1), transform 420ms cubic-bezier(0.22,1,0.36,1), opacity 300ms ease-out",
+                filter: phase === "done" && snapped ? "drop-shadow(4px 4px 0 rgba(0,0,0,0.35))" : "none",
               }}
             >
-              <img
-                src={detail.image}
-                alt={detail.name ?? "Cap preview"}
-                width={220}
-                height={220}
-                className="max-h-[180px] w-auto object-contain"
-                style={{ filter: "drop-shadow(4px 4px 0 rgba(0,0,0,0.35))" }}
-                draggable={false}
-              />
-            </div>
-          ) : (
-            <div
-              className="pointer-events-none"
-              style={{
-                transform: capTransform,
-                transition: "transform 200ms ease-out",
-                opacity: phase === "idle" ? 0.35 : 1,
-              }}
-            >
-              <PixelHorse size={10} />
+              {detail.image ? (
+                <img
+                  src={detail.image}
+                  alt={detail.name ?? "Cap preview"}
+                  width={220}
+                  height={220}
+                  className="max-h-[150px] w-auto object-contain"
+                  draggable={false}
+                />
+              ) : (
+                <PixelHorse size={8} />
+              )}
             </div>
           )}
+
 
           {/* Micro-interaction hint chips (done phase) */}
           {phase === "done" && hint && (

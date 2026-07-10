@@ -35,6 +35,7 @@ export function ArModal() {
       setHint("drag");
       setReticlePos(null);
       setSnapped(false);
+      setAnchorLocked(false);
       setOpen(true);
     };
     window.addEventListener("frankys:open-ar", handler);

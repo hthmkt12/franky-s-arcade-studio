@@ -18,6 +18,9 @@ export function ArModal() {
   const [rotation, setRotation] = useState(0); // deg, Y-axis feel
   const [zoom, setZoom] = useState(1); // 0.6 – 1.8
   const [hint, setHint] = useState<"drag" | "pinch" | null>("drag");
+  const [reticlePos, setReticlePos] = useState<{ x: number; y: number } | null>(null);
+  const [snapped, setSnapped] = useState(false);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<{ startX: number; startRot: number } | null>(null);
   const pinchState = useRef<{ startDist: number; startZoom: number } | null>(null);
 

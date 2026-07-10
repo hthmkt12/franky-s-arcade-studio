@@ -209,6 +209,77 @@ export function ArModal() {
           </button>
         </div>
 
+        {/* AR status timeline */}
+        {(() => {
+          const steps = [
+            { key: "init", label: "INIT" },
+            { key: "scan", label: "SCAN" },
+            { key: "placed", label: "PLACED" },
+            { key: "anchor", label: "ANCHOR" },
+          ] as const;
+          const activeIdx =
+            phase === "idle" ? -1 :
+            phase === "init" ? 0 :
+            phase === "scan" ? 1 :
+            !snapped ? 2 :
+            !anchorLocked ? 3 : 3;
+          const statusLabel =
+            phase === "idle" ? "AWAITING TAP" :
+            phase === "init" ? "INITIALIZING…" :
+            phase === "scan" ? "SCANNING FACE MESH…" :
+            !snapped ? "CAP PLACED" :
+            !anchorLocked ? "ANCHORING…" : "ANCHOR LOCKED";
+          return (
+            <div className="border-b-2 border-ink px-3 py-2 flex items-center gap-2 bg-cream" style={{ fontSize: 9, letterSpacing: 1 }}>
+              <span
+                className="inline-block w-2 h-2 rounded-full"
+                style={{
+                  background: anchorLocked ? "var(--buy)" : phase === "idle" ? "var(--muted)" : "var(--marquee)",
+                  animation: phase !== "idle" && !anchorLocked ? "blink 0.8s steps(1) infinite" : "none",
+                }}
+                aria-hidden
+              />
+              <div className="flex items-center gap-1 flex-1 min-w-0">
+                {steps.map((s, i) => {
+                  const done = i < activeIdx || (i === 3 && anchorLocked);
+                  const active = i === activeIdx && !(i === 3 && anchorLocked);
+                  return (
+                    <div key={s.key} className="flex items-center gap-1 flex-1 min-w-0">
+                      <span
+                        style={{
+                          color: done || active ? "var(--ink)" : "var(--muted)",
+                          fontWeight: active ? 700 : 400,
+                          opacity: done && !active ? 0.7 : 1,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {done && !active ? "▣" : active ? "▶" : "□"} {s.label}
+                      </span>
+                      {i < steps.length - 1 && (
+                        <span
+                          className="flex-1 h-[2px]"
+                          style={{
+                            background: done ? "var(--ink)" : "var(--pixel)",
+                            transition: "background 200ms ease-out",
+                          }}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <span
+                aria-live="polite"
+                style={{ fontFamily: "VT323, monospace", fontSize: 13, letterSpacing: 1, whiteSpace: "nowrap" }}
+              >
+                {statusLabel}
+              </span>
+            </div>
+          );
+        })()}
+
+
+
         <div
           ref={stageRef}
           className="checker-bg border-b-2 border-ink relative flex items-center justify-center min-h-[260px] p-6 overflow-hidden select-none"

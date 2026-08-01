@@ -616,6 +616,43 @@ export function ArModal() {
             </>
           )}
 
+          {phase === "error" && (
+            <>
+              <div className="flex flex-col gap-1.5 text-left bg-cream border border-ink rounded-card p-3 arcade-bevel">
+                <p style={{ fontSize: 9, letterSpacing: 1, marginBottom: 2 }}>
+                  HOW TO GRANT CAMERA ACCESS:
+                </p>
+                {errorCopy.steps.map((s) => (
+                  <p key={s} style={{ fontSize: 10, letterSpacing: 1, lineHeight: 1.5 }}>
+                    {s}
+                  </p>
+                ))}
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReticlePos(null);
+                    setPhase("init");
+                  }}
+                  className="px-3 py-2 rounded-btn border border-ink arcade-bevel text-cream"
+                  style={{ fontSize: 10, letterSpacing: 1, background: "var(--marquee)" }}
+                >
+                  RETRY CAMERA
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPhase("idle")}
+                  className="px-3 py-2 rounded-btn border border-ink arcade-bevel bg-cream hover:bg-ink hover:text-cream transition-colors"
+                  style={{ fontSize: 10, letterSpacing: 1 }}
+                >
+                  BACK TO 3D
+                </button>
+              </div>
+            </>
+          )}
+
+
           <p className="text-muted" style={{ fontSize: 9, letterSpacing: 1 }}>
             AR TRY-ON COMING SOON — INSERT COIN TO CONTINUE
           </p>

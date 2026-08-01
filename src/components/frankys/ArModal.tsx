@@ -3,7 +3,51 @@ import { useEffect, useRef, useState } from "react";
 import { PixelHorse } from "./PixelHorse";
 
 type ArDetail = { name?: string; image?: string };
-type Phase = "idle" | "init" | "scan" | "done";
+type Phase = "idle" | "init" | "scan" | "done" | "error";
+type ErrorKind = "denied" | "notfound" | "unsupported" | "insecure" | "unknown";
+
+const ERROR_COPY: Record<ErrorKind, { title: string; steps: string[] }> = {
+  denied: {
+    title: "CAMERA ACCESS DENIED",
+    steps: [
+      "1. CLICK THE 🔒 / CAMERA ICON IN THE ADDRESS BAR",
+      "2. SET CAMERA TO \"ALLOW\" FOR THIS SITE",
+      "3. RELOAD THE PAGE, THEN PRESS RETRY",
+    ],
+  },
+  notfound: {
+    title: "NO CAMERA DETECTED",
+    steps: [
+      "1. CONNECT A WEBCAM OR USE A PHONE",
+      "2. CLOSE OTHER APPS USING THE CAMERA",
+      "3. PRESS RETRY",
+    ],
+  },
+  unsupported: {
+    title: "AR NOT SUPPORTED HERE",
+    steps: [
+      "1. THIS BROWSER HAS NO CAMERA API",
+      "2. TRY CHROME / SAFARI ON MOBILE",
+      "3. OR CONTINUE IN 3D MODE",
+    ],
+  },
+  insecure: {
+    title: "INSECURE CONNECTION",
+    steps: [
+      "1. CAMERA NEEDS HTTPS",
+      "2. OPEN THE SITE OVER HTTPS",
+      "3. PRESS RETRY",
+    ],
+  },
+  unknown: {
+    title: "AR FAILED TO START",
+    steps: [
+      "1. CLOSE OTHER APPS USING THE CAMERA",
+      "2. RELOAD THE PAGE",
+      "3. PRESS RETRY",
+    ],
+  },
+};
 
 export function openArModal(detail: ArDetail = {}) {
   window.dispatchEvent(new CustomEvent<ArDetail>("frankys:open-ar", { detail }));

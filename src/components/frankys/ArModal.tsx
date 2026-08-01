@@ -102,8 +102,34 @@ export function ArModal() {
 
   useEffect(() => {
     if (phase === "init") {
-      const t1 = setTimeout(() => setPhase("scan"), 1400);
-      return () => clearTimeout(t1);
+      let cancelled = false;
+      const fail = (kind: ErrorKind) => {
+        if (cancelled) return;
+        setErrorKind(kind);
+        setPhase("error");
+      };
+      const t1 = setTimeout(async () => {
+        if (cancelled) return;
+        const md = typeof navigator !== "undefined" ? navigator.mediaDevices : undefined;
+        if (!md?.getUserMedia) {
+          fail(typeof window !== "undefined" && !window.isSecureContext ? "insecure" : "unsupported");
+          return;
+        }
+        try {
+          const stream = await md.getUserMedia({ video: { facingMode: "user" } });
+          stream.getTracks().forEach((t) => t.stop());
+          if (!cancelled) setPhase("scan");
+        } catch (err) {
+          const name = (err as { name?: string } | null)?.name ?? "";
+          if (name === "NotAllowedError" || name === "SecurityError") fail("denied");
+          else if (name === "NotFoundError" || name === "DevicesNotFoundError") fail("notfound");
+          else fail("unknown");
+        }
+      }, 900);
+      return () => {
+        cancelled = true;
+        clearTimeout(t1);
+      };
     }
     if (phase === "scan") {
       const t2 = setTimeout(() => {

@@ -65,6 +65,7 @@ export function ArModal() {
   const [reticlePos, setReticlePos] = useState<{ x: number; y: number } | null>(null);
   const [snapped, setSnapped] = useState(false);
   const [anchorLocked, setAnchorLocked] = useState(false);
+  const [errorKind, setErrorKind] = useState<ErrorKind>("unknown");
   const stageRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<{ startX: number; startRot: number } | null>(null);
   const pinchState = useRef<{ startDist: number; startZoom: number } | null>(null);

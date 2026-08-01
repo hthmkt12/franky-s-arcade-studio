@@ -248,8 +248,9 @@ export function ArModal() {
 
   // Face anchor sits at the forehead of the silhouette (percent of stage)
   const FACE_ANCHOR = { xPct: 50, yPct: 38 };
-  const showFace = phase !== "idle";
+  const showFace = phase === "scan" || phase === "done";
   const showReticle = phase === "idle" && reticlePos !== null;
+  const errorCopy = ERROR_COPY[errorKind];
 
   return (
     <div

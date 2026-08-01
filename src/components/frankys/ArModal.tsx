@@ -3,7 +3,51 @@ import { useEffect, useRef, useState } from "react";
 import { PixelHorse } from "./PixelHorse";
 
 type ArDetail = { name?: string; image?: string };
-type Phase = "idle" | "init" | "scan" | "done";
+type Phase = "idle" | "init" | "scan" | "done" | "error";
+type ErrorKind = "denied" | "notfound" | "unsupported" | "insecure" | "unknown";
+
+const ERROR_COPY: Record<ErrorKind, { title: string; steps: string[] }> = {
+  denied: {
+    title: "CAMERA ACCESS DENIED",
+    steps: [
+      "1. CLICK THE 🔒 / CAMERA ICON IN THE ADDRESS BAR",
+      "2. SET CAMERA TO \"ALLOW\" FOR THIS SITE",
+      "3. RELOAD THE PAGE, THEN PRESS RETRY",
+    ],
+  },
+  notfound: {
+    title: "NO CAMERA DETECTED",
+    steps: [
+      "1. CONNECT A WEBCAM OR USE A PHONE",
+      "2. CLOSE OTHER APPS USING THE CAMERA",
+      "3. PRESS RETRY",
+    ],
+  },
+  unsupported: {
+    title: "AR NOT SUPPORTED HERE",
+    steps: [
+      "1. THIS BROWSER HAS NO CAMERA API",
+      "2. TRY CHROME / SAFARI ON MOBILE",
+      "3. OR CONTINUE IN 3D MODE",
+    ],
+  },
+  insecure: {
+    title: "INSECURE CONNECTION",
+    steps: [
+      "1. CAMERA NEEDS HTTPS",
+      "2. OPEN THE SITE OVER HTTPS",
+      "3. PRESS RETRY",
+    ],
+  },
+  unknown: {
+    title: "AR FAILED TO START",
+    steps: [
+      "1. CLOSE OTHER APPS USING THE CAMERA",
+      "2. RELOAD THE PAGE",
+      "3. PRESS RETRY",
+    ],
+  },
+};
 
 export function openArModal(detail: ArDetail = {}) {
   window.dispatchEvent(new CustomEvent<ArDetail>("frankys:open-ar", { detail }));
@@ -21,6 +65,7 @@ export function ArModal() {
   const [reticlePos, setReticlePos] = useState<{ x: number; y: number } | null>(null);
   const [snapped, setSnapped] = useState(false);
   const [anchorLocked, setAnchorLocked] = useState(false);
+  const [errorKind, setErrorKind] = useState<ErrorKind>("unknown");
   const stageRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<{ startX: number; startRot: number } | null>(null);
   const pinchState = useRef<{ startDist: number; startZoom: number } | null>(null);
@@ -57,8 +102,34 @@ export function ArModal() {
 
   useEffect(() => {
     if (phase === "init") {
-      const t1 = setTimeout(() => setPhase("scan"), 1400);
-      return () => clearTimeout(t1);
+      let cancelled = false;
+      const fail = (kind: ErrorKind) => {
+        if (cancelled) return;
+        setErrorKind(kind);
+        setPhase("error");
+      };
+      const t1 = setTimeout(async () => {
+        if (cancelled) return;
+        const md = typeof navigator !== "undefined" ? navigator.mediaDevices : undefined;
+        if (!md?.getUserMedia) {
+          fail(typeof window !== "undefined" && !window.isSecureContext ? "insecure" : "unsupported");
+          return;
+        }
+        try {
+          const stream = await md.getUserMedia({ video: { facingMode: "user" } });
+          stream.getTracks().forEach((t) => t.stop());
+          if (!cancelled) setPhase("scan");
+        } catch (err) {
+          const name = (err as { name?: string } | null)?.name ?? "";
+          if (name === "NotAllowedError" || name === "SecurityError") fail("denied");
+          else if (name === "NotFoundError" || name === "DevicesNotFoundError") fail("notfound");
+          else fail("unknown");
+        }
+      }, 900);
+      return () => {
+        cancelled = true;
+        clearTimeout(t1);
+      };
     }
     if (phase === "scan") {
       const t2 = setTimeout(() => {
@@ -177,8 +248,9 @@ export function ArModal() {
 
   // Face anchor sits at the forehead of the silhouette (percent of stage)
   const FACE_ANCHOR = { xPct: 50, yPct: 38 };
-  const showFace = phase !== "idle";
+  const showFace = phase === "scan" || phase === "done";
   const showReticle = phase === "idle" && reticlePos !== null;
+  const errorCopy = ERROR_COPY[errorKind];
 
   return (
     <div
@@ -217,13 +289,15 @@ export function ArModal() {
             { key: "placed", label: "PLACED" },
             { key: "anchor", label: "ANCHOR" },
           ] as const;
+          const isError = phase === "error";
           const activeIdx =
             phase === "idle" ? -1 :
-            phase === "init" ? 0 :
+            phase === "init" || isError ? 0 :
             phase === "scan" ? 1 :
             !snapped ? 2 :
             !anchorLocked ? 3 : 3;
           const statusLabel =
+            isError ? "AR ERROR" :
             phase === "idle" ? "AWAITING TAP" :
             phase === "init" ? "INITIALIZING…" :
             phase === "scan" ? "SCANNING FACE MESH…" :
@@ -234,11 +308,12 @@ export function ArModal() {
               <span
                 className="inline-block w-2 h-2 rounded-full"
                 style={{
-                  background: anchorLocked ? "var(--buy)" : phase === "idle" ? "var(--muted)" : "var(--marquee)",
-                  animation: phase !== "idle" && !anchorLocked ? "blink 0.8s steps(1) infinite" : "none",
+                  background: isError ? "var(--ink)" : anchorLocked ? "var(--buy)" : phase === "idle" ? "var(--muted)" : "var(--marquee)",
+                  animation: !isError && phase !== "idle" && !anchorLocked ? "blink 0.8s steps(1) infinite" : "none",
                 }}
                 aria-hidden
               />
+
               <div className="flex items-center gap-1 flex-1 min-w-0">
                 {steps.map((s, i) => {
                   const done = i < activeIdx || (i === 3 && anchorLocked);
@@ -400,8 +475,29 @@ export function ArModal() {
             </div>
           )}
 
+          {/* Error overlay */}
+          {phase === "error" && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center bg-cream/90">
+              <div
+                className="w-16 h-16 border-2 border-ink rounded-card flex items-center justify-center arcade-bevel"
+                style={{ fontSize: 24 }}
+                aria-hidden
+              >
+                ⚠
+              </div>
+              <p style={{ fontSize: 11, letterSpacing: 2 }}>{errorCopy.title}</p>
+              <p
+                className="text-muted"
+                style={{ fontFamily: "VT323, monospace", fontSize: 16, letterSpacing: 1 }}
+              >
+                CAMERA FEED UNAVAILABLE — CODE {errorKind.toUpperCase()}
+              </p>
+            </div>
+          )}
+
           {/* Cap — snaps to face anchor on done */}
-          {phase !== "idle" && (
+          {(phase === "init" || phase === "scan" || phase === "done") && (
+
             <div
               className="absolute pointer-events-none"
               style={{
@@ -519,6 +615,43 @@ export function ArModal() {
               </div>
             </>
           )}
+
+          {phase === "error" && (
+            <>
+              <div className="flex flex-col gap-1.5 text-left bg-cream border border-ink rounded-card p-3 arcade-bevel">
+                <p style={{ fontSize: 9, letterSpacing: 1, marginBottom: 2 }}>
+                  HOW TO GRANT CAMERA ACCESS:
+                </p>
+                {errorCopy.steps.map((s) => (
+                  <p key={s} style={{ fontSize: 10, letterSpacing: 1, lineHeight: 1.5 }}>
+                    {s}
+                  </p>
+                ))}
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReticlePos(null);
+                    setPhase("init");
+                  }}
+                  className="px-3 py-2 rounded-btn border border-ink arcade-bevel text-cream"
+                  style={{ fontSize: 10, letterSpacing: 1, background: "var(--marquee)" }}
+                >
+                  RETRY CAMERA
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPhase("idle")}
+                  className="px-3 py-2 rounded-btn border border-ink arcade-bevel bg-cream hover:bg-ink hover:text-cream transition-colors"
+                  style={{ fontSize: 10, letterSpacing: 1 }}
+                >
+                  BACK TO 3D
+                </button>
+              </div>
+            </>
+          )}
+
 
           <p className="text-muted" style={{ fontSize: 9, letterSpacing: 1 }}>
             AR TRY-ON COMING SOON — INSERT COIN TO CONTINUE

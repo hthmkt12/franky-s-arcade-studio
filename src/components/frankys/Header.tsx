@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useCart } from "@/lib/cart/CartContext";
 
@@ -15,6 +15,8 @@ const NAV = [
 export function Header() {
   const cart = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
     <header className="border-b border-ink bg-cream relative z-30">
@@ -71,7 +73,7 @@ export function Header() {
             className="relative px-3 h-9 border border-ink rounded-btn bg-cream arcade-bevel"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 1 }}
           >
-            CART [{cart.itemCount}]
+            CART [{mounted ? cart.itemCount : 0}]
           </button>
         </div>
       </div>

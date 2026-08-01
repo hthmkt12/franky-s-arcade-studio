@@ -475,8 +475,29 @@ export function ArModal() {
             </div>
           )}
 
+          {/* Error overlay */}
+          {phase === "error" && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center bg-cream/90">
+              <div
+                className="w-16 h-16 border-2 border-ink rounded-card flex items-center justify-center arcade-bevel"
+                style={{ fontSize: 24 }}
+                aria-hidden
+              >
+                ⚠
+              </div>
+              <p style={{ fontSize: 11, letterSpacing: 2 }}>{errorCopy.title}</p>
+              <p
+                className="text-muted"
+                style={{ fontFamily: "VT323, monospace", fontSize: 16, letterSpacing: 1 }}
+              >
+                CAMERA FEED UNAVAILABLE — CODE {errorKind.toUpperCase()}
+              </p>
+            </div>
+          )}
+
           {/* Cap — snaps to face anchor on done */}
-          {phase !== "idle" && (
+          {(phase === "init" || phase === "scan" || phase === "done") && (
+
             <div
               className="absolute pointer-events-none"
               style={{

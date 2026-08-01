@@ -289,13 +289,15 @@ export function ArModal() {
             { key: "placed", label: "PLACED" },
             { key: "anchor", label: "ANCHOR" },
           ] as const;
+          const isError = phase === "error";
           const activeIdx =
             phase === "idle" ? -1 :
-            phase === "init" ? 0 :
+            phase === "init" || isError ? 0 :
             phase === "scan" ? 1 :
             !snapped ? 2 :
             !anchorLocked ? 3 : 3;
           const statusLabel =
+            isError ? "AR ERROR" :
             phase === "idle" ? "AWAITING TAP" :
             phase === "init" ? "INITIALIZING…" :
             phase === "scan" ? "SCANNING FACE MESH…" :
@@ -306,11 +308,12 @@ export function ArModal() {
               <span
                 className="inline-block w-2 h-2 rounded-full"
                 style={{
-                  background: anchorLocked ? "var(--buy)" : phase === "idle" ? "var(--muted)" : "var(--marquee)",
-                  animation: phase !== "idle" && !anchorLocked ? "blink 0.8s steps(1) infinite" : "none",
+                  background: isError ? "var(--ink)" : anchorLocked ? "var(--buy)" : phase === "idle" ? "var(--muted)" : "var(--marquee)",
+                  animation: !isError && phase !== "idle" && !anchorLocked ? "blink 0.8s steps(1) infinite" : "none",
                 }}
                 aria-hidden
               />
+
               <div className="flex items-center gap-1 flex-1 min-w-0">
                 {steps.map((s, i) => {
                   const done = i < activeIdx || (i === 3 && anchorLocked);

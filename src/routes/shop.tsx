@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
+import { ErrorState } from "@/components/frankys/ErrorState";
 import { VariantCard } from "@/components/frankys/VariantCard";
+
 import { getProducts } from "@/lib/api/shop";
 
 export const Route = createFileRoute("/shop")({

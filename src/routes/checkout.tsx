@@ -33,7 +33,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function CheckoutPage() {
   const navigate = useNavigate();
   const cart = useCart();
-  const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+  const {
+    data: products,
+    isPending: productsPending,
+    isError: productsError,
+    refetch,
+  } = useQuery({ queryKey: ["products"], queryFn: getProducts });
   const [customer, setCustomer] = useState<Customer>(EMPTY);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -44,6 +49,7 @@ function CheckoutPage() {
     [cart.lines, products],
   );
   const items = products ? cart.buildView(products) : [];
+
 
   const errors = useMemo(() => {
     const e: Partial<Record<keyof Customer, string>> = {};

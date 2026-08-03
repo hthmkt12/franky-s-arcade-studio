@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
+import { ErrorState } from "@/components/frankys/ErrorState";
 import { VariantCard } from "@/components/frankys/VariantCard";
+
 import { getProducts } from "@/lib/api/shop";
 
 export const Route = createFileRoute("/shop")({
@@ -23,7 +25,12 @@ export const Route = createFileRoute("/shop")({
 });
 
 function ShopPage() {
-  const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+  const {
+    data: products,
+    isError,
+    isPending,
+    refetch,
+  } = useQuery({ queryKey: ["products"], queryFn: getProducts });
 
   return (
     <div className="flex-1 bg-cream">
@@ -36,12 +43,18 @@ function ShopPage() {
             className="text-muted"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 10 }}
           >
-            {products ? `${products.length} CAPS` : "LOADING..."}
+            {products ? `${products.length} CAPS` : isError ? "OFFLINE" : "LOADING..."}
           </span>
         </header>
 
-        {!products ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        {isError ? (
+          <ErrorState message="COULD NOT LOAD THE CATALOG." onRetry={() => void refetch()} />
+        ) : isPending ? (
+          <div
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+            aria-busy="true"
+            aria-live="polite"
+          >
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
@@ -50,6 +63,7 @@ function ShopPage() {
             ))}
           </div>
         ) : products.length === 0 ? (
+
           <p
             className="border border-ink rounded-card p-6 text-center"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 12 }}

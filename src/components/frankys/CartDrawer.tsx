@@ -4,16 +4,23 @@ import { computeTotals, formatPrice, getProducts } from "@/lib/api/shop";
 import { useCart } from "@/lib/cart/CartContext";
 import { useQuery } from "@tanstack/react-query";
 
+import { ErrorState } from "./ErrorState";
 import { PixelHorse } from "./PixelHorse";
 
 export function CartDrawer() {
   const cart = useCart();
-  const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+  const {
+    data: products,
+    isError,
+    isPending,
+    refetch,
+  } = useQuery({ queryKey: ["products"], queryFn: getProducts });
 
-  if (!cart.isOpen || !products) return null;
+  if (!cart.isOpen) return null;
 
-  const items = cart.buildView(products);
-  const totals = computeTotals(cart.lines, products);
+  const items = products ? cart.buildView(products) : [];
+  const totals = products ? computeTotals(cart.lines, products) : null;
+
 
   return (
     <div className="fixed inset-0 z-40 flex" onClick={cart.close}>
@@ -34,7 +41,29 @@ export function CartDrawer() {
           </button>
         </div>
 
-        {items.length === 0 ? (
+        {isError ? (
+          <div className="flex-1 flex items-center justify-center p-4">
+            <ErrorState
+              compact
+              message="COULD NOT LOAD YOUR CART ITEMS."
+              onRetry={() => void refetch()}
+            />
+          </div>
+        ) : isPending ? (
+          <div
+            className="flex-1 flex flex-col gap-2 p-3"
+            aria-busy="true"
+            aria-live="polite"
+          >
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="border border-pixel rounded-btn h-20 checker-bg opacity-40 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+
           <div
             className="flex-1 flex flex-col items-center justify-center gap-3 p-6"
             style={{ fontSize: 10 }}
@@ -112,10 +141,11 @@ export function CartDrawer() {
               className="border-t border-ink p-3 flex flex-col gap-1.5"
               style={{ fontSize: 10 }}
             >
-              <Row label="SUBTOTAL" value={formatPrice(totals.subtotalCents)} />
-              <Row label="SHIPPING" value={formatPrice(totals.shippingCents)} />
+              <Row label="SUBTOTAL" value={formatPrice(totals?.subtotalCents ?? 0)} />
+              <Row label="SHIPPING" value={formatPrice(totals?.shippingCents ?? 0)} />
               <div className="border-t border-pixel border-dashed my-1" />
-              <Row label="TOTAL" value={formatPrice(totals.totalCents)} bold />
+              <Row label="TOTAL" value={formatPrice(totals?.totalCents ?? 0)} bold />
+
               <Link
                 to="/checkout"
                 onClick={cart.close}

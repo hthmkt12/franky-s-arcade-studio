@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { ErrorState } from "@/components/frankys/ErrorState";
 import { computeTotals, createOrder, formatPrice, getProducts } from "@/lib/api/shop";
+
 import { useCart } from "@/lib/cart/CartContext";
 import type { Customer } from "@/lib/api/types";
 
@@ -33,7 +35,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function CheckoutPage() {
   const navigate = useNavigate();
   const cart = useCart();
-  const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+  const {
+    data: products,
+    isPending: productsPending,
+    isError: productsError,
+    refetch,
+  } = useQuery({ queryKey: ["products"], queryFn: getProducts });
   const [customer, setCustomer] = useState<Customer>(EMPTY);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -44,6 +51,7 @@ function CheckoutPage() {
     [cart.lines, products],
   );
   const items = products ? cart.buildView(products) : [];
+
 
   const errors = useMemo(() => {
     const e: Partial<Record<keyof Customer, string>> = {};
@@ -77,10 +85,6 @@ function CheckoutPage() {
     try {
       const order = await createOrder({ items: cart.lines, customer });
       cart.clear();
-      // stash briefly for the success page
-      if (typeof window !== "undefined") {
-        window.sessionStorage.setItem(`frankys.order.${order.id}`, JSON.stringify(order));
-      }
       toast(`ORDER PLACED — ${order.number}`);
       navigate({ to: "/checkout/success/$id", params: { id: order.id } });
     } catch (err) {
@@ -89,7 +93,27 @@ function CheckoutPage() {
     }
   };
 
+  if (productsError) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-10">
+        <ErrorState
+          message="COULD NOT LOAD CHECKOUT DATA."
+          onRetry={() => void refetch()}
+        />
+      </div>
+    );
+  }
+
+  if (productsPending) {
+    return (
+      <div className="flex-1 p-10 max-w-4xl mx-auto w-full" aria-busy="true" aria-live="polite">
+        <div className="border border-ink rounded-card h-80 checker-bg opacity-40 animate-pulse" />
+      </div>
+    );
+  }
+
   if (items.length === 0) {
+
     return (
       <div
         className="flex-1 flex flex-col items-center justify-center gap-4 p-10 text-center"

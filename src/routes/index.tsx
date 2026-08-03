@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { ErrorState } from "@/components/frankys/ErrorState";
 import { PixelHorse } from "@/components/frankys/PixelHorse";
+
 import { ViewModeToggle, type ViewMode } from "@/components/frankys/ViewModeToggle";
 import { formatPrice, getProducts } from "@/lib/api/shop";
 
@@ -27,8 +29,13 @@ export const Route = createFileRoute("/")({
 });
 
 function LandingPage() {
-  const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+  const {
+    data: products,
+    isError,
+    refetch,
+  } = useQuery({ queryKey: ["products"], queryFn: getProducts });
   const featured = products?.filter((p) => p.inStock).slice(0, 3) ?? [];
+
   const [viewMode, setViewMode] = useState<ViewMode>("3D");
 
 
@@ -100,7 +107,10 @@ function LandingPage() {
               SEE ALL →
             </Link>
           </div>
-          {!products ? (
+          {isError ? (
+            <ErrorState message="COULD NOT LOAD FEATURED CAPS." onRetry={() => void refetch()} />
+          ) : !products ? (
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[0, 1, 2].map((i) => (
                 <div

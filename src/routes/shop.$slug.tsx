@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ErrorState } from "@/components/frankys/ErrorState";
 import { formatPrice, getProductBySlug } from "@/lib/api/shop";
+
 import { useCart } from "@/lib/cart/CartContext";
 import type { ProductSize } from "@/lib/api/types";
 
@@ -33,7 +35,12 @@ export const Route = createFileRoute("/shop/$slug")({
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const { data: product, isLoading } = useQuery({
+  const {
+    data: product,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["product", slug],
     queryFn: () => getProductBySlug(slug),
   });
@@ -41,6 +48,13 @@ function ProductPage() {
   const [size, setSize] = useState<ProductSize>("ONE");
   const [qty, setQty] = useState(1);
 
+  if (isError) {
+    return (
+      <div className="flex-1 bg-cream flex items-center justify-center p-10">
+        <ErrorState message="COULD NOT LOAD THIS CAP." onRetry={() => void refetch()} />
+      </div>
+    );
+  }
   if (isLoading) {
     return (
       <div className="flex-1 bg-cream flex items-center justify-center p-10">
@@ -48,6 +62,7 @@ function ProductPage() {
       </div>
     );
   }
+
   if (!product) {
     return (
       <div

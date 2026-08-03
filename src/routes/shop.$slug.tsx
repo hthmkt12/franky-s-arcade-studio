@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ErrorState } from "@/components/frankys/ErrorState";
 import { formatPrice, getProductBySlug } from "@/lib/api/shop";
+
 import { useCart } from "@/lib/cart/CartContext";
 import type { ProductSize } from "@/lib/api/types";
 

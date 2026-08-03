@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { ErrorState } from "@/components/frankys/ErrorState";
 import { PixelHorse } from "@/components/frankys/PixelHorse";
+
 import { ViewModeToggle, type ViewMode } from "@/components/frankys/ViewModeToggle";
 import { formatPrice, getProducts } from "@/lib/api/shop";
 

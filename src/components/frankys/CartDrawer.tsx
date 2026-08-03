@@ -41,7 +41,29 @@ export function CartDrawer() {
           </button>
         </div>
 
-        {items.length === 0 ? (
+        {isError ? (
+          <div className="flex-1 flex items-center justify-center p-4">
+            <ErrorState
+              compact
+              message="COULD NOT LOAD YOUR CART ITEMS."
+              onRetry={() => void refetch()}
+            />
+          </div>
+        ) : isPending ? (
+          <div
+            className="flex-1 flex flex-col gap-2 p-3"
+            aria-busy="true"
+            aria-live="polite"
+          >
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="border border-pixel rounded-btn h-20 checker-bg opacity-40 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+
           <div
             className="flex-1 flex flex-col items-center justify-center gap-3 p-6"
             style={{ fontSize: 10 }}

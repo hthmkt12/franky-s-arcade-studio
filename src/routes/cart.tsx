@@ -19,7 +19,12 @@ export const Route = createFileRoute("/cart")({
 
 function CartPage() {
   const cart = useCart();
-  const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+  const {
+    data: products,
+    isError,
+    isPending,
+    refetch,
+  } = useQuery({ queryKey: ["products"], queryFn: getProducts });
   const items = products ? cart.buildView(products) : [];
   const totals = products ? computeTotals(cart.lines, products) : null;
 
@@ -33,7 +38,19 @@ function CartPage() {
           ★ YOUR CART
         </h1>
 
-        {items.length === 0 ? (
+        {isError ? (
+          <ErrorState message="COULD NOT LOAD YOUR CART." onRetry={() => void refetch()} />
+        ) : isPending ? (
+          <div className="flex flex-col gap-2" aria-busy="true" aria-live="polite">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div
+                key={i}
+                className="border border-ink rounded-card h-24 checker-bg opacity-40 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+
           <div
             className="border border-ink rounded-card p-10 flex flex-col items-center gap-4 checker-bg"
           >

@@ -27,8 +27,13 @@ export const Route = createFileRoute("/")({
 });
 
 function LandingPage() {
-  const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+  const {
+    data: products,
+    isError,
+    refetch,
+  } = useQuery({ queryKey: ["products"], queryFn: getProducts });
   const featured = products?.filter((p) => p.inStock).slice(0, 3) ?? [];
+
   const [viewMode, setViewMode] = useState<ViewMode>("3D");
 
 

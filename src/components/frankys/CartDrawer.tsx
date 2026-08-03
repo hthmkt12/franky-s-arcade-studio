@@ -4,16 +4,23 @@ import { computeTotals, formatPrice, getProducts } from "@/lib/api/shop";
 import { useCart } from "@/lib/cart/CartContext";
 import { useQuery } from "@tanstack/react-query";
 
+import { ErrorState } from "./ErrorState";
 import { PixelHorse } from "./PixelHorse";
 
 export function CartDrawer() {
   const cart = useCart();
-  const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+  const {
+    data: products,
+    isError,
+    isPending,
+    refetch,
+  } = useQuery({ queryKey: ["products"], queryFn: getProducts });
 
-  if (!cart.isOpen || !products) return null;
+  if (!cart.isOpen) return null;
 
-  const items = cart.buildView(products);
-  const totals = computeTotals(cart.lines, products);
+  const items = products ? cart.buildView(products) : [];
+  const totals = products ? computeTotals(cart.lines, products) : null;
+
 
   return (
     <div className="fixed inset-0 z-40 flex" onClick={cart.close}>

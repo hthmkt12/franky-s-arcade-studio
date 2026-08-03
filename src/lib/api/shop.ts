@@ -49,6 +49,11 @@ export async function createOrder(draft: OrderDraft): Promise<Order> {
   });
 }
 
+export async function getOrder(id: string): Promise<Order> {
+  return apiFetch<Order>(`/orders/${id}`);
+}
+
+
 export function formatPrice(cents: number, currency: "EUR" | "USD" = "EUR"): string {
   const symbol = currency === "EUR" ? "€" : "$";
   return `${symbol}${(cents / 100).toFixed(0)}`;

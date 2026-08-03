@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
+import { ErrorState } from "@/components/frankys/ErrorState";
 import { PixelHorse } from "@/components/frankys/PixelHorse";
+
 import { computeTotals, formatPrice, getProducts } from "@/lib/api/shop";
 import { useCart } from "@/lib/cart/CartContext";
 

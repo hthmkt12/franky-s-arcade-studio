@@ -72,7 +72,7 @@ export const Route = createFileRoute("/api/orders")({
 
         if (prodErr) {
           console.error("[api/orders] product lookup failed", prodErr);
-          return json({ code: "read_failed", message: prodErr.message }, 500);
+          return json({ code: "read_failed", message: "Could not read catalog" }, 500);
         }
         if (!products || products.length !== productIds.length) {
           return json({ code: "unknown_product", message: "Unknown product in cart" }, 400);
@@ -94,48 +94,9 @@ export const Route = createFileRoute("/api/orders")({
         const totalCents = subtotalCents + shippingCents;
         const currency = products[0].currency as Order["currency"];
 
-        // Retry a few times in case the random number collides.
-        let inserted: { id: string; number: string; created_at: string } | null = null;
-        let insertErr: unknown = null;
-        for (let attempt = 0; attempt < 5 && !inserted; attempt++) {
-          const number = generateOrderNumber();
-          const { data, error } = await supabaseAdmin
-            .from("orders")
-            .insert({
-              number,
-              customer_name: draft.customer.name,
-              customer_email: draft.customer.email,
-              address: draft.customer.address,
-              city: draft.customer.city,
-              postal_code: draft.customer.postalCode,
-              country: draft.customer.country,
-              subtotal_cents: subtotalCents,
-              shipping_cents: shippingCents,
-              total_cents: totalCents,
-              currency,
-              status: "pending",
-            })
-            .select("id, number, created_at")
-            .single();
-          if (!error && data) {
-            inserted = data;
-          } else if (error?.code === "23505") {
-            insertErr = error;
-            continue; // number collision → retry
-          } else {
-            insertErr = error;
-            break;
-          }
-        }
-        if (!inserted) {
-          console.error("[api/orders] insert failed", insertErr);
-          return json({ code: "insert_failed", message: "Could not create order" }, 500);
-        }
-
         const itemsPayload = draft.items.map((line) => {
           const p = productById.get(line.productId)!;
           return {
-            order_id: inserted!.id,
             product_id: p.id,
             product_slug: p.slug,
             product_name: p.name,
@@ -144,17 +105,27 @@ export const Route = createFileRoute("/api/orders")({
             unit_price_cents: p.price_cents,
           };
         });
-        const { error: itemsErr } = await supabaseAdmin.from("order_items").insert(itemsPayload);
-        if (itemsErr) {
-          console.error("[api/orders] item insert failed", itemsErr);
-          // Best-effort cleanup so we don't leave a total without lines.
-          await supabaseAdmin.from("orders").delete().eq("id", inserted.id);
-          return json({ code: "insert_failed", message: itemsErr.message }, 500);
+
+        // Single DB transaction: order + items, or nothing at all.
+        const { data: created, error: rpcErr } = await supabaseAdmin
+          .rpc("create_order_tx", {
+            p_customer: draft.customer,
+            p_subtotal_cents: subtotalCents,
+            p_shipping_cents: shippingCents,
+            p_total_cents: totalCents,
+            p_currency: currency,
+            p_items: itemsPayload,
+          })
+          .single();
+
+        if (rpcErr || !created) {
+          console.error("[api/orders] create_order_tx failed", rpcErr);
+          return json({ code: "insert_failed", message: "Could not create order" }, 500);
         }
 
         const order: Order = {
-          id: inserted.id,
-          number: inserted.number,
+          id: created.id,
+          number: created.number,
           items: draft.items,
           customer: draft.customer,
           subtotalCents,
@@ -162,9 +133,10 @@ export const Route = createFileRoute("/api/orders")({
           totalCents,
           currency,
           status: "pending",
-          createdAt: inserted.created_at,
+          createdAt: created.created_at,
         };
         return json(order, 201);
+
       },
     },
   },

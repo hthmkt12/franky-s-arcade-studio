@@ -83,10 +83,6 @@ function CheckoutPage() {
     try {
       const order = await createOrder({ items: cart.lines, customer });
       cart.clear();
-      // stash briefly for the success page
-      if (typeof window !== "undefined") {
-        window.sessionStorage.setItem(`frankys.order.${order.id}`, JSON.stringify(order));
-      }
       toast(`ORDER PLACED — ${order.number}`);
       navigate({ to: "/checkout/success/$id", params: { id: order.id } });
     } catch (err) {
@@ -95,7 +91,27 @@ function CheckoutPage() {
     }
   };
 
+  if (productsError) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-10">
+        <ErrorState
+          message="COULD NOT LOAD CHECKOUT DATA."
+          onRetry={() => void refetch()}
+        />
+      </div>
+    );
+  }
+
+  if (productsPending) {
+    return (
+      <div className="flex-1 p-10 max-w-4xl mx-auto w-full" aria-busy="true" aria-live="polite">
+        <div className="border border-ink rounded-card h-80 checker-bg opacity-40 animate-pulse" />
+      </div>
+    );
+  }
+
   if (items.length === 0) {
+
     return (
       <div
         className="flex-1 flex flex-col items-center justify-center gap-4 p-10 text-center"

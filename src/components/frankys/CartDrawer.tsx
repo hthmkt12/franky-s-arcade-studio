@@ -141,10 +141,11 @@ export function CartDrawer() {
               className="border-t border-ink p-3 flex flex-col gap-1.5"
               style={{ fontSize: 10 }}
             >
-              <Row label="SUBTOTAL" value={formatPrice(totals.subtotalCents)} />
-              <Row label="SHIPPING" value={formatPrice(totals.shippingCents)} />
+              <Row label="SUBTOTAL" value={formatPrice(totals?.subtotalCents ?? 0)} />
+              <Row label="SHIPPING" value={formatPrice(totals?.shippingCents ?? 0)} />
               <div className="border-t border-pixel border-dashed my-1" />
-              <Row label="TOTAL" value={formatPrice(totals.totalCents)} bold />
+              <Row label="TOTAL" value={formatPrice(totals?.totalCents ?? 0)} bold />
+
               <Link
                 to="/checkout"
                 onClick={cart.close}

@@ -107,7 +107,10 @@ function LandingPage() {
               SEE ALL →
             </Link>
           </div>
-          {!products ? (
+          {isError ? (
+            <ErrorState message="COULD NOT LOAD FEATURED CAPS." onRetry={() => void refetch()} />
+          ) : !products ? (
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[0, 1, 2].map((i) => (
                 <div

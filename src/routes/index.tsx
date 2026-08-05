@@ -23,8 +23,12 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Handmade merino wool caps. Cream paper, pixel rules, one warm orange call.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://frankys.lovable.app/" }],
   }),
+
   component: LandingPage,
 });
 

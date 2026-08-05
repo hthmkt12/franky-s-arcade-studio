@@ -15,8 +15,12 @@ export const Route = createFileRoute("/about")({
         property: "og:description",
         content: "An arcade-shop for handmade merino wool caps made in Portugal.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://frankys.lovable.app/about" }],
   }),
+
   component: AboutPage,
 });
 

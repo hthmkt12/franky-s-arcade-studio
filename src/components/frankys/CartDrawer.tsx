@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 
 import { computeTotals, formatPrice, getProducts } from "@/lib/api/shop";
 import { useCart } from "@/lib/cart/CartContext";
@@ -9,12 +10,38 @@ import { PixelHorse } from "./PixelHorse";
 
 export function CartDrawer() {
   const cart = useCart();
+  const panelRef = useRef<HTMLElement | null>(null);
   const {
     data: products,
     isError,
     isPending,
     refetch,
   } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+
+  // Escape closes; focus moves into the drawer so keyboard users are not stranded.
+  useEffect(() => {
+    if (!cart.isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") cart.close();
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const nodes = panelRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (nodes.length === 0) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    panelRef.current?.querySelector<HTMLElement>("button")?.focus();
+    return () => document.removeEventListener("keydown", onKey);
+  }, [cart.isOpen, cart.close]);
 
   if (!cart.isOpen) return null;
 
@@ -26,10 +53,15 @@ export function CartDrawer() {
     <div className="fixed inset-0 z-40 flex" onClick={cart.close}>
       <div className="flex-1" style={{ background: "rgba(0,0,0,0.55)" }} />
       <aside
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Your cart"
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-md bg-cream border-l border-ink flex flex-col"
         style={{ fontFamily: "var(--font-arcade)" }}
       >
+
         <div className="marquee-sheen border-b border-ink flex items-center justify-between px-3 h-9">
           <span style={{ fontSize: 10, fontWeight: 700 }}>YOUR CART [{cart.itemCount}]</span>
           <button

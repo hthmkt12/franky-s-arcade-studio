@@ -21,6 +21,8 @@ function rowToProduct(row: ProductRow): Product {
     currency: row.currency as Product["currency"],
     sizes: (row.sizes ?? []) as ProductSize[],
     inStock: row.in_stock,
+    stockQty: row.stock_qty,
+
     description: row.description ?? "",
     materials: row.materials ?? [],
     // Assets are bundled on the client. The API returns an opaque key;

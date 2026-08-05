@@ -51,7 +51,7 @@ export const Route = createFileRoute("/api/products")({
         const { data, error } = await supabase
           .from("products")
           .select(
-            "id, slug, name, color_hex, price_cents, currency, sizes, in_stock, description, materials, image_key, image_alt, sort_order, created_at",
+            "id, slug, name, color_hex, price_cents, currency, sizes, in_stock, stock_qty, description, materials, image_key, image_alt, sort_order, created_at",
           )
           .order("sort_order", { ascending: true });
 

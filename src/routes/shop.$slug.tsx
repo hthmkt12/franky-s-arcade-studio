@@ -10,11 +10,23 @@ import { useCart } from "@/lib/cart/CartContext";
 import type { ProductSize } from "@/lib/api/types";
 
 export const Route = createFileRoute("/shop/$slug")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `${params.slug.replace(/-/g, " ").toUpperCase()} — Franky's` },
-    ],
-  }),
+  head: ({ params }) => {
+    const name = params.slug.replace(/-/g, " ").toUpperCase();
+    const title = `${name} — Franky's Handmade Wool Cap`;
+    const description = `${name}: a handmade merino wool cap from Franky's, knit in Portugal. Flat shipping, arcade-shop energy.`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "product" },
+        { name: "twitter:card", content: "summary" },
+      ],
+      links: [{ rel: "canonical", href: `https://frankys.lovable.app/shop/${params.slug}` }],
+    };
+  },
+
   notFoundComponent: () => (
     <div
       className="flex-1 flex flex-col items-center justify-center gap-3 p-10 text-center"

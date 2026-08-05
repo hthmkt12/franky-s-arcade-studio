@@ -16,7 +16,11 @@ export const Route = createFileRoute("/checkout")({
       { name: "description", content: "Ship your Franky's cap. Guest checkout." },
       { property: "og:title", content: "Checkout — Franky's" },
       { property: "og:description", content: "Guest checkout for handmade wool caps." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
+
   }),
   component: CheckoutPage,
 });

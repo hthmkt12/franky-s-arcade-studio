@@ -14,7 +14,11 @@ export const Route = createFileRoute("/cart")({
       { name: "description", content: "Review the caps in your cart." },
       { property: "og:title", content: "Cart — Franky's" },
       { property: "og:description", content: "Review the caps in your cart." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, follow" },
     ],
+
   }),
   component: CartPage,
 });

@@ -12,7 +12,11 @@ export const Route = createFileRoute("/checkout/success/$id")({
       { name: "description", content: "Your Franky's order is in the queue." },
       { property: "og:title", content: "Order Confirmed — Franky's" },
       { property: "og:description", content: "Your Franky's order is in the queue." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
+
   }),
   component: SuccessPage,
 });

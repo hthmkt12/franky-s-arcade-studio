@@ -132,6 +132,7 @@ export type Database = {
           sizes: string[]
           slug: string
           sort_order: number
+          stock_qty: number
         }
         Insert: {
           color_hex: string
@@ -148,6 +149,7 @@ export type Database = {
           sizes?: string[]
           slug: string
           sort_order?: number
+          stock_qty?: number
         }
         Update: {
           color_hex?: string
@@ -164,6 +166,7 @@ export type Database = {
           sizes?: string[]
           slug?: string
           sort_order?: number
+          stock_qty?: number
         }
         Relationships: []
       }

@@ -19,6 +19,9 @@ export interface Product {
   currency: Currency;
   sizes: ProductSize[];
   inStock: boolean;
+  /** Remaining units. 0 = sold out; <= 5 shows a low-stock warning. */
+  stockQty: number;
+
   description: string;
   materials: string[];
   image: ProductImage;

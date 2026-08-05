@@ -196,6 +196,13 @@ function ProductPage() {
             {product.inStock ? "ADD TO CART" : "SOLD OUT"}
           </button>
 
+          {product.inStock && product.stockQty <= 5 && (
+            <p className="text-muted text-center" style={{ fontSize: 10, letterSpacing: 1 }}>
+              LOW STOCK — ONLY {product.stockQty} LEFT
+            </p>
+          )}
+
+
           <ul
             className="border border-pixel rounded-card p-3 flex flex-col gap-1"
             style={{ fontSize: 10 }}

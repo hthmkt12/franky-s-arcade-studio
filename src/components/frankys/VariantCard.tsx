@@ -41,7 +41,13 @@ export function VariantCard({ product }: { product: Product }) {
         <div className="flex flex-col gap-0.5">
           <span style={{ fontWeight: 700 }}>{product.name}</span>
           <span>{formatPrice(product.priceCents, product.currency)}</span>
+          {product.inStock && product.stockQty <= 5 && (
+            <span className="text-muted" style={{ fontSize: 8 }}>
+              ONLY {product.stockQty} LEFT
+            </span>
+          )}
         </div>
+
         <button
           type="button"
           onClick={() => openArModal({ name: product.name, image: product.image.url })}

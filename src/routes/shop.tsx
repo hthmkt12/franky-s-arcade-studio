@@ -19,8 +19,12 @@ export const Route = createFileRoute("/shop")({
         property: "og:description",
         content: "Browse every Franky's cap: black, ochre, green, navy, red.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://frankys.lovable.app/shop" }],
   }),
+
   component: ShopPage,
 });
 

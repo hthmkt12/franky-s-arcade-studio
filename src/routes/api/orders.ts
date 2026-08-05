@@ -120,8 +120,21 @@ export const Route = createFileRoute("/api/orders")({
 
         if (rpcErr || !created) {
           console.error("[api/orders] create_order_tx failed", rpcErr);
+          // The RPC reserves stock atomically and raises `out_of_stock:<name>`
+          // when someone else took the last unit mid-checkout.
+          const oversell = rpcErr?.message?.match(/out_of_stock:(.*)/);
+          if (oversell) {
+            return json(
+              {
+                code: "out_of_stock",
+                message: `${oversell[1].trim()} just sold out — remove it to continue`,
+              },
+              409,
+            );
+          }
           return json({ code: "insert_failed", message: "Could not create order" }, 500);
         }
+
 
         const order: Order = {
           id: created.id,

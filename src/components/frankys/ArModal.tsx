@@ -66,6 +66,7 @@ export function ArModal() {
   const [snapped, setSnapped] = useState(false);
   const [anchorLocked, setAnchorLocked] = useState(false);
   const [errorKind, setErrorKind] = useState<ErrorKind>("unknown");
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<{ startX: number; startRot: number } | null>(null);
   const pinchState = useRef<{ startDist: number; startZoom: number } | null>(null);
@@ -89,16 +90,45 @@ export function ArModal() {
 
   useEffect(() => {
     if (!open) return;
+    const prevFocus = document.activeElement as HTMLElement | null;
+    const panel = panelRef.current;
+    const focusables = () =>
+      Array.from(
+        panel?.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((el) => !el.hasAttribute("disabled"));
+
+    focusables()[0]?.focus();
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && (active === first || !panel?.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      prevFocus?.focus?.();
     };
   }, [open]);
+
 
   useEffect(() => {
     if (phase === "init") {
@@ -262,6 +292,7 @@ export function ArModal() {
       onClick={handleClose}
     >
       <div
+        ref={panelRef}
         className="relative w-full max-w-md bg-cream border-2 border-ink rounded-card arcade-bevel animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >

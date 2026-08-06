@@ -7,7 +7,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 const SITE = "https://frankys.lovable.app";
 
-export const Route = createFileRoute("/sitemap/xml" as never)({
+export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {

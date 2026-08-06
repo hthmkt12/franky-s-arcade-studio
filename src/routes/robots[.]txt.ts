@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 const SITE = "https://frankys.lovable.app";
 
-export const Route = createFileRoute("/robots/txt")({
+export const Route = createFileRoute("/robots/txt" as never)({
   server: {
     handlers: {
       GET: () =>

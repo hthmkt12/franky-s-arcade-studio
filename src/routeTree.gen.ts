@@ -14,6 +14,7 @@ import { Route as ShopRouteImport } from './routes/shop'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
@@ -46,6 +47,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const CartRoute = CartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/about'
+    | '/auth'
     | '/cart'
     | '/checkout'
     | '/robots.txt'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/about'
+    | '/auth'
     | '/cart'
     | '/checkout'
     | '/robots.txt'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/about'
+    | '/auth'
     | '/cart'
     | '/checkout'
     | '/robots.txt'
@@ -187,6 +199,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   AboutRoute: typeof AboutRoute
+  AuthRoute: typeof AuthRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
@@ -231,6 +244,13 @@ declare module '@tanstack/react-router' {
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -330,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   AboutRoute: AboutRoute,
+  AuthRoute: AuthRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,

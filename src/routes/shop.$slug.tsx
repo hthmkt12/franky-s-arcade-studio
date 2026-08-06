@@ -99,9 +99,33 @@ function ProductPage() {
     toast(`ADDED — ${product.name} (${activeSize}) ×${qty}`);
   };
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    color: product.colorHex,
+    material: product.materials.join(", "),
+    brand: { "@type": "Brand", name: "Franky's" },
+    offers: {
+      "@type": "Offer",
+      price: (product.priceCents / 100).toFixed(2),
+      priceCurrency: product.currency,
+      availability: product.inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      url: `https://frankys.lovable.app/shop/${product.slug}`,
+    },
+  };
+
   return (
     <div className="flex-1 bg-cream">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+
         <div
           className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex items-center justify-center p-6"
         >

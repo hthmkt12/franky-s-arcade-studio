@@ -66,6 +66,7 @@ export function ArModal() {
   const [snapped, setSnapped] = useState(false);
   const [anchorLocked, setAnchorLocked] = useState(false);
   const [errorKind, setErrorKind] = useState<ErrorKind>("unknown");
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<{ startX: number; startRot: number } | null>(null);
   const pinchState = useRef<{ startDist: number; startZoom: number } | null>(null);
@@ -291,6 +292,7 @@ export function ArModal() {
       onClick={handleClose}
     >
       <div
+        ref={panelRef}
         className="relative w-full max-w-md bg-cream border-2 border-ink rounded-card arcade-bevel animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >

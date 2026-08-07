@@ -128,7 +128,7 @@ function ProductPage() {
       <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-5">
 
         <div
-          className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex items-center justify-center p-6"
+          className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex flex-col items-center justify-center gap-3 p-6 md:sticky md:top-20 self-start"
         >
           <div className="bg-cream border border-ink rounded-card p-4 arcade-bevel">
             <img
@@ -139,7 +139,17 @@ function ProductPage() {
               className="max-h-[380px] w-auto object-contain"
             />
           </div>
+          <button
+            type="button"
+            onClick={() => openArModal({ name: product.name, image: product.image.url })}
+            className="bg-cream border border-ink rounded-btn px-3 py-2 arcade-bevel hover:bg-marquee transition-colors"
+            style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 2 }}
+            aria-label={`Try ${product.name} in AR`}
+          >
+            TRY IN [AR]
+          </button>
         </div>
+
 
         <div
           className="flex flex-col gap-4"

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
+import { openArModal } from "@/components/frankys/ArModal";
 import { formatPrice, getProductBySlug } from "@/lib/api/shop";
 
 import { useCart } from "@/lib/cart/CartContext";
@@ -127,7 +128,7 @@ function ProductPage() {
       <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-5">
 
         <div
-          className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex items-center justify-center p-6"
+          className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex flex-col items-center justify-center gap-3 p-6 md:sticky md:top-20 self-start"
         >
           <div className="bg-cream border border-ink rounded-card p-4 arcade-bevel">
             <img
@@ -138,7 +139,17 @@ function ProductPage() {
               className="max-h-[380px] w-auto object-contain"
             />
           </div>
+          <button
+            type="button"
+            onClick={() => openArModal({ name: product.name, image: product.image.url })}
+            className="bg-cream border border-ink rounded-btn px-3 py-2 arcade-bevel hover:bg-marquee transition-colors"
+            style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 2 }}
+            aria-label={`Try ${product.name} in AR`}
+          >
+            TRY IN [AR]
+          </button>
         </div>
+
 
         <div
           className="flex flex-col gap-4"
@@ -237,6 +248,31 @@ function ProductPage() {
           </ul>
         </div>
       </div>
+
+      {/* Mobile sticky buy bar */}
+      <div
+        className="md:hidden sticky bottom-0 z-20 border-t-2 border-ink bg-cream px-4 py-2 flex items-center gap-3"
+        style={{ fontFamily: "var(--font-arcade)" }}
+      >
+        <div className="flex flex-col min-w-0">
+          <span className="truncate" style={{ fontSize: 10 }}>
+            {product.name}
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 700 }}>
+            {formatPrice(product.priceCents * qty, product.currency)}
+          </span>
+        </div>
+        <button
+          type="button"
+          disabled={!product.inStock}
+          onClick={add}
+          className="flex-1 bg-buy text-cream py-3 rounded-btn border border-ink arcade-bevel disabled:bg-muted disabled:cursor-not-allowed"
+          style={{ fontSize: 11, letterSpacing: 2 }}
+        >
+          {product.inStock ? `ADD ${activeSize}` : "SOLD OUT"}
+        </button>
+      </div>
     </div>
+
   );
 }

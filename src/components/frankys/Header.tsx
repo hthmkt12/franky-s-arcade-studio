@@ -19,18 +19,20 @@ export function Header() {
   useEffect(() => setMounted(true), []);
 
   return (
-    <header className="border-b border-ink bg-cream relative z-30">
-      <div className="flex items-center justify-between px-4 h-14">
+    <header className="border-b border-ink bg-cream sticky top-0 z-30">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] md:flex items-center justify-between gap-2 px-4 h-14">
         <button
           type="button"
-          aria-label="Menu"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
-          className="flex flex-col gap-1.5 p-2 rounded-btn border border-pixel arcade-bevel md:hidden"
+          className="flex flex-col items-center justify-center gap-1.5 w-11 h-11 rounded-btn border border-pixel arcade-bevel md:hidden shrink-0"
         >
           <span className="block w-5 h-px bg-ink" />
           <span className="block w-5 h-px bg-ink" />
           <span className="block w-5 h-px bg-ink" />
         </button>
+
 
         <nav
           className="hidden md:flex items-center gap-3"
@@ -52,30 +54,31 @@ export function Header() {
 
         <Link
           to="/"
-          className="flex items-center gap-2"
+          className="flex items-center justify-center md:justify-start gap-2 min-w-0"
           aria-label="Franky's home"
           preload="intent"
         >
           <PixelHorse size={4} color="var(--ink)" />
           <span
             style={{ fontFamily: "VT323, monospace", fontSize: 28, lineHeight: 1 }}
-            className="mt-1"
+            className="mt-1 truncate"
           >
             franky's
           </span>
         </Link>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={cart.toggle}
-            aria-label="Open cart"
-            className="relative px-3 h-9 border border-ink rounded-btn bg-cream arcade-bevel"
+            aria-label={`Open cart, ${mounted ? cart.itemCount : 0} items`}
+            className="relative px-3 h-11 md:h-9 border border-ink rounded-btn bg-cream arcade-bevel hover:bg-ink hover:text-cream transition-colors"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 1 }}
           >
-            CART [{mounted ? cart.itemCount : 0}]
+            <span aria-live="polite">CART [{mounted ? cart.itemCount : 0}]</span>
           </button>
         </div>
+
       </div>
 
       {menuOpen && (

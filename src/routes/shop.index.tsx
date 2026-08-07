@@ -6,7 +6,7 @@ import { VariantCard } from "@/components/frankys/VariantCard";
 
 import { getProducts } from "@/lib/api/shop";
 
-export const Route = createFileRoute("/shop")({
+export const Route = createFileRoute("/shop/")({
   head: () => ({
     meta: [
       { title: "Shop — Franky's Wool Caps" },

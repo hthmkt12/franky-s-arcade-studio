@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
+import { openArModal } from "@/components/frankys/ArModal";
 import { formatPrice, getProductBySlug } from "@/lib/api/shop";
 
 import { useCart } from "@/lib/cart/CartContext";

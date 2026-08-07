@@ -66,8 +66,11 @@ export function ArModal() {
   const [snapped, setSnapped] = useState(false);
   const [anchorLocked, setAnchorLocked] = useState(false);
   const [errorKind, setErrorKind] = useState<ErrorKind>("unknown");
+  const [camReady, setCamReady] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const dragState = useRef<{ startX: number; startRot: number } | null>(null);
   const pinchState = useRef<{ startDist: number; startZoom: number } | null>(null);
 

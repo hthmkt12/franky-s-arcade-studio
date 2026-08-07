@@ -439,6 +439,19 @@ export function ArModal() {
           onTouchEnd={onTouchEnd}
           onWheel={onWheel}
         >
+          {/* Live camera feed */}
+          {camReady && (phase === "scan" || phase === "done") && (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ transform: "scaleX(-1)", filter: "grayscale(0.25) contrast(1.05)" }}
+              aria-hidden
+            />
+          )}
+
           {/* Face anchor silhouette (visible from scan onward) */}
           {showFace && (
             <svg

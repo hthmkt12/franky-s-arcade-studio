@@ -135,3 +135,38 @@
   0% { transform: translateY(0); }
   100% { transform: translateY(240px); }
 }
+
+/* Arcade focus ring — visible for keyboard users on every interactive element */
+@layer base {
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--marquee);
+    outline-offset: 2px;
+    border-radius: var(--radius-btn);
+  }
+  ::selection {
+    background: var(--marquee);
+    color: var(--ink);
+  }
+}
+
+/* Comfortable tap targets on touch screens */
+@media (pointer: coarse) {
+  button,
+  a[href],
+  [role="button"] {
+    min-height: 44px;
+  }
+}
+
+/* Respect reduced-motion: kill the arcade loops, keep the layout */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

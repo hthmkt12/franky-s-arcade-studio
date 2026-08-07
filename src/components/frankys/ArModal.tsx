@@ -133,35 +133,52 @@ export function ArModal() {
   }, [open]);
 
 
+  // Stop the live camera stream
+  const stopCamera = () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setCamReady(false);
+  };
+
   useEffect(() => {
     if (phase === "init") {
       let cancelled = false;
       const fail = (kind: ErrorKind) => {
         if (cancelled) return;
+        stopCamera();
         setErrorKind(kind);
         setPhase("error");
       };
-      const t1 = setTimeout(async () => {
-        if (cancelled) return;
+      const run = async () => {
         const md = typeof navigator !== "undefined" ? navigator.mediaDevices : undefined;
         if (!md?.getUserMedia) {
           fail(typeof window !== "undefined" && !window.isSecureContext ? "insecure" : "unsupported");
           return;
         }
         try {
-          const stream = await md.getUserMedia({ video: { facingMode: "user" } });
-          stream.getTracks().forEach((t) => t.stop());
-          if (!cancelled) setPhase("scan");
+          const stream = await md.getUserMedia({
+            video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+            audio: false,
+          });
+          if (cancelled) {
+            stream.getTracks().forEach((t) => t.stop());
+            return;
+          }
+          streamRef.current = stream;
+          setCamReady(true);
+          setPhase("scan");
         } catch (err) {
           const name = (err as { name?: string } | null)?.name ?? "";
           if (name === "NotAllowedError" || name === "SecurityError") fail("denied");
           else if (name === "NotFoundError" || name === "DevicesNotFoundError") fail("notfound");
+          else if (name === "NotReadableError" || name === "TrackStartError") fail("unknown");
           else fail("unknown");
         }
-      }, 900);
+      };
+      void run();
       return () => {
         cancelled = true;
-        clearTimeout(t1);
       };
     }
     if (phase === "scan") {
@@ -175,8 +192,24 @@ export function ArModal() {
     if (phase === "idle") {
       setSnapped(false);
       setAnchorLocked(false);
+      stopCamera();
     }
   }, [phase]);
+
+  // Bind the live stream to the <video> element whenever both exist
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !streamRef.current) return;
+    if (v.srcObject !== streamRef.current) v.srcObject = streamRef.current;
+    v.play().catch(() => {});
+  }, [camReady, phase]);
+
+  // Always release the camera when the modal closes / unmounts
+  useEffect(() => {
+    if (!open) stopCamera();
+    return () => stopCamera();
+  }, [open]);
+
 
   // Flip anchor to "locked" after the snap transition finishes
   useEffect(() => {

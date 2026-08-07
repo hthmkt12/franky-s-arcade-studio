@@ -19,18 +19,20 @@ export function Header() {
   useEffect(() => setMounted(true), []);
 
   return (
-    <header className="border-b border-ink bg-cream relative z-30">
-      <div className="flex items-center justify-between px-4 h-14">
+    <header className="border-b border-ink bg-cream sticky top-0 z-30">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] md:flex items-center justify-between gap-2 px-4 h-14">
         <button
           type="button"
-          aria-label="Menu"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
-          className="flex flex-col gap-1.5 p-2 rounded-btn border border-pixel arcade-bevel md:hidden"
+          className="flex flex-col items-center justify-center gap-1.5 w-11 h-11 rounded-btn border border-pixel arcade-bevel md:hidden shrink-0"
         >
           <span className="block w-5 h-px bg-ink" />
           <span className="block w-5 h-px bg-ink" />
           <span className="block w-5 h-px bg-ink" />
         </button>
+
 
         <nav
           className="hidden md:flex items-center gap-3"

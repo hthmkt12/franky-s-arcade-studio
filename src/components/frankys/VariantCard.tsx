@@ -17,12 +17,12 @@ export function VariantCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="border border-ink rounded-card overflow-hidden flex flex-col bg-cream">
+    <div className="border border-ink rounded-card overflow-hidden flex flex-col bg-cream transition-transform duration-200 hover:-translate-y-0.5">
       <Link
         to="/shop/$slug"
         params={{ slug: product.slug }}
         preload="intent"
-        className="flex-1 min-h-[180px] flex items-center justify-center p-3 bg-cream"
+        className="flex-1 min-h-[180px] flex items-center justify-center p-3 bg-cream group"
         aria-label={`View ${product.name}`}
       >
         <img
@@ -31,15 +31,17 @@ export function VariantCard({ product }: { product: Product }) {
           width={512}
           height={512}
           loading="lazy"
-          className="max-h-[160px] w-auto object-contain"
+          className="max-h-[160px] w-auto object-contain transition-transform duration-200 group-hover:scale-105"
         />
       </Link>
       <div
-        className="border-t border-pixel px-3 py-2 flex items-center justify-between"
+        className="border-t border-pixel px-3 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
         style={{ fontSize: 10 }}
       >
-        <div className="flex flex-col gap-0.5">
-          <span style={{ fontWeight: 700 }}>{product.name}</span>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span style={{ fontWeight: 700 }} className="truncate">
+            {product.name}
+          </span>
           <span>{formatPrice(product.priceCents, product.currency)}</span>
           {product.inStock && product.stockQty <= 5 && (
             <span className="text-muted" style={{ fontSize: 8 }}>
@@ -51,13 +53,15 @@ export function VariantCard({ product }: { product: Product }) {
         <button
           type="button"
           onClick={() => openArModal({ name: product.name, image: product.image.url })}
-          className="border border-ink rounded-btn px-2 py-1 arcade-bevel hover:bg-marquee transition-colors"
+          className="border border-ink rounded-btn px-2 py-1 arcade-bevel hover:bg-marquee transition-colors shrink-0"
           style={{ fontSize: 9 }}
+          aria-label={`Try ${product.name} in AR`}
         >
           TRY IN [AR]
         </button>
 
       </div>
+
       <button
         type="button"
         disabled={!product.inStock}

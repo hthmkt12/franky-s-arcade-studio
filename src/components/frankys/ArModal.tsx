@@ -734,7 +734,7 @@ export function ArModal() {
 
 
           <p className="text-muted" style={{ fontSize: 9, letterSpacing: 1 }}>
-            AR TRY-ON COMING SOON — INSERT COIN TO CONTINUE
+            {camReady ? "LIVE CAMERA — CAP OVERLAY IS AN APPROXIMATION" : "AR TRY-ON BETA — CAMERA REQUIRED"}
           </p>
           <button
             type="button"

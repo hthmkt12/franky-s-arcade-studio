@@ -125,20 +125,21 @@ function ShopPage() {
               />
             ))}
           </div>
-        ) : products.length === 0 ? (
+        ) : visible.length === 0 ? (
 
           <p
             className="border border-ink rounded-card p-6 text-center"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 12 }}
           >
-            NO CAPS AVAILABLE. CHECK BACK SOON.
+            {inStockOnly ? "NO CAPS IN STOCK RIGHT NOW." : "NO CAPS AVAILABLE. CHECK BACK SOON."}
           </p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {products.map((p) => (
+            {visible.map((p) => (
               <VariantCard key={p.id} product={p} />
             ))}
           </div>
+
         )}
       </div>
     </div>

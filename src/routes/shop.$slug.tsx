@@ -249,6 +249,10 @@ function ProductPage() {
         </div>
       </div>
 
+      <MoreCaps slug={product.slug} />
+
+
+
       {/* Mobile sticky buy bar */}
       <div
         className="md:hidden sticky bottom-0 z-20 border-t-2 border-ink bg-cream px-4 py-2 flex items-center gap-3"

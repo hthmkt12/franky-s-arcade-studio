@@ -262,6 +262,8 @@ function Field({
   error,
   type = "text",
   maxLength,
+  autoComplete,
+  inputMode,
 }: {
   label: string;
   value: string;
@@ -270,6 +272,8 @@ function Field({
   error?: string;
   type?: string;
   maxLength?: number;
+  autoComplete?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }) {
   return (
     <label className="flex flex-col gap-1">
@@ -281,6 +285,8 @@ function Field({
         type={type}
         value={value}
         maxLength={maxLength}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
         className={`border rounded-btn px-3 py-2 bg-cream ${

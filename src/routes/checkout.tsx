@@ -153,6 +153,7 @@ function CheckoutPage() {
             error={touched.name ? errors.name : undefined}
             onBlur={() => setTouched((t) => ({ ...t, name: true }))}
             maxLength={80}
+            autoComplete="name"
           />
           <Field
             label="EMAIL"
@@ -162,6 +163,8 @@ function CheckoutPage() {
             error={touched.email ? errors.email : undefined}
             onBlur={() => setTouched((t) => ({ ...t, email: true }))}
             maxLength={120}
+            autoComplete="email"
+            inputMode="email"
           />
           <Field
             label="ADDRESS"
@@ -170,6 +173,7 @@ function CheckoutPage() {
             error={touched.address ? errors.address : undefined}
             onBlur={() => setTouched((t) => ({ ...t, address: true }))}
             maxLength={200}
+            autoComplete="street-address"
           />
           <div className="grid grid-cols-2 gap-3">
             <Field
@@ -179,6 +183,7 @@ function CheckoutPage() {
               error={touched.city ? errors.city : undefined}
               onBlur={() => setTouched((t) => ({ ...t, city: true }))}
               maxLength={80}
+              autoComplete="address-level2"
             />
             <Field
               label="POSTAL"
@@ -187,6 +192,7 @@ function CheckoutPage() {
               error={touched.postalCode ? errors.postalCode : undefined}
               onBlur={() => setTouched((t) => ({ ...t, postalCode: true }))}
               maxLength={20}
+              autoComplete="postal-code"
             />
           </div>
           <Field
@@ -196,6 +202,7 @@ function CheckoutPage() {
             error={touched.country ? errors.country : undefined}
             onBlur={() => setTouched((t) => ({ ...t, country: true }))}
             maxLength={2}
+            autoComplete="country"
           />
 
           {error && (

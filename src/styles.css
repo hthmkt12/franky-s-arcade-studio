@@ -7,6 +7,8 @@
 @theme inline {
   --radius-btn: 6px;
   --radius-card: 12px;
+  --radius-pill: 9999px;
+
   --color-background: var(--cream);
   --color-foreground: var(--ink);
   --color-cream: var(--cream);

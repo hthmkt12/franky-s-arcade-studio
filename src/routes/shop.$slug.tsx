@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { openArModal } from "@/components/frankys/ArModal";
-import { formatPrice, getProductBySlug } from "@/lib/api/shop";
+import { formatPrice, getProductBySlug, getProducts } from "@/lib/api/shop";
 
 import { useCart } from "@/lib/cart/CartContext";
 import type { ProductSize } from "@/lib/api/types";
@@ -249,6 +249,10 @@ function ProductPage() {
         </div>
       </div>
 
+      <MoreCaps slug={product.slug} />
+
+
+
       {/* Mobile sticky buy bar */}
       <div
         className="md:hidden sticky bottom-0 z-20 border-t-2 border-ink bg-cream px-4 py-2 flex items-center gap-3"
@@ -274,5 +278,48 @@ function ProductPage() {
       </div>
     </div>
 
+  );
+}
+
+function MoreCaps({ slug }: { slug: string }) {
+  const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+  const others = (products ?? []).filter((p) => p.slug !== slug).slice(0, 4);
+  if (others.length === 0) return null;
+
+  return (
+    <section
+      className="max-w-6xl mx-auto w-full px-4 pb-10 flex flex-col gap-3"
+      style={{ fontFamily: "var(--font-arcade)" }}
+    >
+      <h2 className="border-b border-ink pb-2" style={{ fontSize: 14, letterSpacing: 2 }}>
+        ★ MORE CAPS
+      </h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {others.map((p) => (
+          <Link
+            key={p.id}
+            to="/shop/$slug"
+            params={{ slug: p.slug }}
+            preload="intent"
+            className="border border-ink rounded-card overflow-hidden bg-cream arcade-bevel transition-transform hover:-translate-y-0.5"
+          >
+            <img
+              src={p.image.url}
+              alt={p.image.alt}
+              loading="lazy"
+              className="w-full aspect-square object-cover border-b border-ink"
+            />
+            <div className="p-2 flex items-center justify-between gap-2">
+              <span className="truncate" style={{ fontSize: 9 }}>
+                {p.name}
+              </span>
+              <span style={{ fontSize: 9, fontWeight: 700 }}>
+                {formatPrice(p.priceCents, p.currency)}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }

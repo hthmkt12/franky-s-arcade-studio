@@ -131,7 +131,7 @@ function LandingPage() {
                   to="/shop/$slug"
                   params={{ slug: p.slug }}
                   preload="intent"
-                  className="border border-ink rounded-card overflow-hidden bg-cream flex flex-col arcade-bevel"
+                  className="border border-ink rounded-card overflow-hidden bg-cream flex flex-col arcade-bevel transition-transform duration-200 hover:-translate-y-0.5"
                 >
                   <div className="flex-1 min-h-[180px] flex items-center justify-center p-4">
                     <img

@@ -304,8 +304,8 @@ function MoreCaps({ slug }: { slug: string }) {
             className="border border-ink rounded-card overflow-hidden bg-cream arcade-bevel transition-transform hover:-translate-y-0.5"
           >
             <img
-              src={p.imageUrl}
-              alt={p.name}
+              src={p.image.url}
+              alt={p.image.alt}
               loading="lazy"
               className="w-full aspect-square object-cover border-b border-ink"
             />

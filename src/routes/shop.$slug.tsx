@@ -280,3 +280,46 @@ function ProductPage() {
 
   );
 }
+
+function MoreCaps({ slug }: { slug: string }) {
+  const { data: products } = useQuery({ queryKey: ["products"], queryFn: getProducts });
+  const others = (products ?? []).filter((p) => p.slug !== slug).slice(0, 4);
+  if (others.length === 0) return null;
+
+  return (
+    <section
+      className="max-w-6xl mx-auto w-full px-4 pb-10 flex flex-col gap-3"
+      style={{ fontFamily: "var(--font-arcade)" }}
+    >
+      <h2 className="border-b border-ink pb-2" style={{ fontSize: 14, letterSpacing: 2 }}>
+        ★ MORE CAPS
+      </h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {others.map((p) => (
+          <Link
+            key={p.id}
+            to="/shop/$slug"
+            params={{ slug: p.slug }}
+            preload="intent"
+            className="border border-ink rounded-card overflow-hidden bg-cream arcade-bevel transition-transform hover:-translate-y-0.5"
+          >
+            <img
+              src={p.imageUrl}
+              alt={p.name}
+              loading="lazy"
+              className="w-full aspect-square object-cover border-b border-ink"
+            />
+            <div className="p-2 flex items-center justify-between gap-2">
+              <span className="truncate" style={{ fontSize: 9 }}>
+                {p.name}
+              </span>
+              <span style={{ fontSize: 9, fontWeight: 700 }}>
+                {formatPrice(p.priceCents, p.currency)}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}

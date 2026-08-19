@@ -68,6 +68,7 @@ export type Database = {
       orders: {
         Row: {
           address: string
+          carrier: string | null
           city: string
           country: string
           created_at: string
@@ -77,13 +78,16 @@ export type Database = {
           id: string
           number: string
           postal_code: string
+          shipped_at: string | null
           shipping_cents: number
           status: string
           subtotal_cents: number
           total_cents: number
+          tracking_number: string | null
         }
         Insert: {
           address: string
+          carrier?: string | null
           city: string
           country: string
           created_at?: string
@@ -93,13 +97,16 @@ export type Database = {
           id?: string
           number: string
           postal_code: string
+          shipped_at?: string | null
           shipping_cents: number
           status?: string
           subtotal_cents: number
           total_cents: number
+          tracking_number?: string | null
         }
         Update: {
           address?: string
+          carrier?: string | null
           city?: string
           country?: string
           created_at?: string
@@ -109,10 +116,12 @@ export type Database = {
           id?: string
           number?: string
           postal_code?: string
+          shipped_at?: string | null
           shipping_cents?: number
           status?: string
           subtotal_cents?: number
           total_cents?: number
+          tracking_number?: string | null
         }
         Relationships: []
       }

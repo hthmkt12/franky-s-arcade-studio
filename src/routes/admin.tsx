@@ -158,6 +158,7 @@ function OrdersPanel() {
   const qc = useQueryClient();
   const fetchOrders = useServerFn(listOrders);
   const setStatus = useServerFn(updateOrderStatus);
+  const [shippingForm, setShippingForm] = useState<{ id: string; trackingNumber: string; carrier: string } | null>(null);
 
   const ordersQuery = useQuery({
     queryKey: ["admin", "orders"],
@@ -165,13 +166,23 @@ function OrdersPanel() {
   });
 
   const statusMutation = useMutation({
-    mutationFn: (v: { id: string; status: (typeof STATUSES)[number] }) => setStatus({ data: v }),
+    mutationFn: (v: { id: string; status: (typeof STATUSES)[number]; trackingNumber?: string; carrier?: string }) =>
+      setStatus({ data: v }),
     onSuccess: () => {
       toast.success("ORDER UPDATED");
+      setShippingForm(null);
       void qc.invalidateQueries({ queryKey: ["admin", "orders"] });
     },
     onError: (e) => toast.error((e as Error).message.toUpperCase()),
   });
+
+  const handleStatusClick = (orderId: string, currentStatus: string, targetStatus: (typeof STATUSES)[number]) => {
+    if (targetStatus === "shipped") {
+      setShippingForm({ id: orderId, trackingNumber: "", carrier: "CTT Express" });
+    } else {
+      statusMutation.mutate({ id: orderId, status: targetStatus });
+    }
+  };
 
   return (
     <section className="flex flex-col gap-2" style={{ fontFamily: "var(--font-arcade)" }}>
@@ -206,6 +217,14 @@ function OrdersPanel() {
                 {o.customerName} · {o.customerEmail} · {o.city}, {o.country} ·{" "}
                 {new Date(o.createdAt).toLocaleString()}
               </div>
+
+              {o.trackingNumber && (
+                <div className="bg-ink text-cream p-2 rounded-btn flex items-center justify-between text-xs">
+                  <span>TRACKING [{o.carrier ?? "CARRIER"}]: {o.trackingNumber}</span>
+                  <span className="text-buy font-bold">DISPATCHED</span>
+                </div>
+              )}
+
               <ul style={{ fontFamily: "VT323, monospace", fontSize: 16 }}>
                 {o.items.map((i) => (
                   <li key={i.id}>
@@ -213,21 +232,70 @@ function OrdersPanel() {
                   </li>
                 ))}
               </ul>
-              <div className="flex gap-1 flex-wrap">
-                {STATUSES.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => statusMutation.mutate({ id: o.id, status: s })}
-                    disabled={statusMutation.isPending || o.status === s}
-                    className={`px-2 py-1.5 rounded-pill border arcade-bevel ${
-                      o.status === s ? "bg-ink text-cream border-ink" : "border-pixel"
-                    }`}
-                    style={{ fontSize: 9, letterSpacing: 1 }}
-                  >
-                    {s.toUpperCase()}
-                  </button>
-                ))}
-              </div>
+
+              {shippingForm?.id === o.id ? (
+                <div className="border-2 border-dashed border-ink p-3 rounded-card bg-white flex flex-col gap-2">
+                  <span style={{ fontSize: 9, letterSpacing: 1, fontWeight: 700 }}>ENTER SHIPMENT DETAILS</span>
+                  <div className="flex gap-2 flex-wrap">
+                    <input
+                      type="text"
+                      placeholder="CARRIER (e.g. CTT / DHL)"
+                      value={shippingForm.carrier}
+                      onChange={(e) => setShippingForm({ ...shippingForm, carrier: e.target.value })}
+                      className="border border-pixel rounded-btn px-2 py-1 bg-cream flex-1 text-xs"
+                      style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="TRACKING NUMBER"
+                      value={shippingForm.trackingNumber}
+                      onChange={(e) => setShippingForm({ ...shippingForm, trackingNumber: e.target.value })}
+                      className="border border-pixel rounded-btn px-2 py-1 bg-cream flex-1 text-xs"
+                      style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
+                    />
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShippingForm(null)}
+                      className="px-3 py-1 border border-pixel rounded-btn text-xs"
+                    >
+                      CANCEL
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        statusMutation.mutate({
+                          id: o.id,
+                          status: "shipped",
+                          carrier: shippingForm.carrier,
+                          trackingNumber: shippingForm.trackingNumber,
+                        })
+                      }
+                      disabled={statusMutation.isPending || !shippingForm.trackingNumber.trim()}
+                      className="bg-buy text-cream px-3 py-1 border border-ink rounded-btn text-xs arcade-bevel disabled:opacity-50"
+                    >
+                      {statusMutation.isPending ? "SAVING..." : "DISPATCH & NOTIFY"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-1 flex-wrap">
+                  {STATUSES.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => handleStatusClick(o.id, o.status, s)}
+                      disabled={statusMutation.isPending || o.status === s}
+                      className={`px-2 py-1.5 rounded-pill border arcade-bevel ${
+                        o.status === s ? "bg-ink text-cream border-ink" : "border-pixel"
+                      }`}
+                      style={{ fontSize: 9, letterSpacing: 1 }}
+                    >
+                      {s.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              )}
             </li>
           ))}
         </ul>

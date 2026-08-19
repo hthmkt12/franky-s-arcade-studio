@@ -42,14 +42,44 @@ export const Route = createFileRoute("/api/webhooks/stripe" as unknown as "/api/
 
           if (orderId) {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-            const { error } = await supabaseAdmin
+            const { data: updatedOrder, error } = await supabaseAdmin
               .from("orders")
               .update({ status: "paid" })
-              .eq("id", orderId);
+              .eq("id", orderId)
+              .select("*, order_items(*)")
+              .single();
 
             if (error) {
               console.error("[api/webhooks/stripe] DB update error", error);
               return json({ code: "update_failed" }, 500);
+            }
+
+            // Dispatch confirmation email upon successful payment
+            if (updatedOrder) {
+              const { signOrderToken } = await import("@/lib/server-crypto");
+              const { sendOrderConfirmationEmail } = await import("@/lib/email.server");
+              const guestToken = signOrderToken(updatedOrder.id, updatedOrder.customer_email);
+              const origin = new URL(request.url).origin;
+              const trackingUrl = `${origin}/checkout/success/${updatedOrder.id}?token=${guestToken}`;
+
+              const currencySym = updatedOrder.currency === "EUR" ? "€" : "$";
+              void sendOrderConfirmationEmail({
+                to: updatedOrder.customer_email,
+                customerName: updatedOrder.customer_name,
+                orderNumber: updatedOrder.number,
+                orderId: updatedOrder.id,
+                guestToken,
+                items: (updatedOrder.order_items ?? []).map((it: { product_name: string; size: string; qty: number; unit_price_cents: number }) => ({
+                  name: it.product_name,
+                  size: it.size,
+                  qty: it.qty,
+                  price: `${currencySym}${(it.unit_price_cents / 100).toFixed(0)}`,
+                })),
+                subtotal: `${currencySym}${(updatedOrder.subtotal_cents / 100).toFixed(0)}`,
+                shipping: `${currencySym}${(updatedOrder.shipping_cents / 100).toFixed(0)}`,
+                total: `${currencySym}${(updatedOrder.total_cents / 100).toFixed(0)}`,
+                trackingUrl,
+              });
             }
           }
         }

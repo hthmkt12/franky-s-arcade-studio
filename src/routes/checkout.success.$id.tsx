@@ -79,6 +79,12 @@ function SuccessPage() {
               <Row label="SHIPPING" value={formatPrice(order.shippingCents, order.currency)} />
               <Row label="TOTAL" value={formatPrice(order.totalCents, order.currency)} bold />
               <Row label="STATUS" value={order.status.toUpperCase()} />
+              {order.carrier && <Row label="CARRIER" value={order.carrier.toUpperCase()} />}
+              {order.trackingNumber && (
+                <div className="bg-black text-orange-400 p-2 rounded-btn font-bold text-center mt-1 border border-ink">
+                  TRACKING: {order.trackingNumber}
+                </div>
+              )}
             </div>
             <div className="flex gap-2 mt-2">
               <Link

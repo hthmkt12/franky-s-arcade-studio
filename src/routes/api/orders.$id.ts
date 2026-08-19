@@ -31,7 +31,7 @@ export const Route = createFileRoute("/api/orders/$id")({
         const { data: row, error } = await supabaseAdmin
           .from("orders")
           .select(
-            "id, number, customer_name, customer_email, address, city, postal_code, country, subtotal_cents, shipping_cents, total_cents, currency, status, created_at",
+            "id, number, customer_name, customer_email, address, city, postal_code, country, subtotal_cents, shipping_cents, total_cents, currency, status, created_at, tracking_number, carrier, shipped_at",
           )
           .eq("id", id)
           .maybeSingle();
@@ -100,6 +100,9 @@ export const Route = createFileRoute("/api/orders/$id")({
           currency: row.currency as Order["currency"],
           status: row.status as Order["status"],
           createdAt: row.created_at,
+          trackingNumber: row.tracking_number ?? null,
+          carrier: row.carrier ?? null,
+          shippedAt: row.shipped_at ?? null,
         };
         return json(order);
       },

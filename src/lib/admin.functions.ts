@@ -70,6 +70,9 @@ export const listOrders = createServerFn({ method: "GET" })
       customerEmail: o.customer_email,
       city: o.city,
       country: o.country,
+      trackingNumber: o.tracking_number ?? null,
+      carrier: o.carrier ?? null,
+      shippedAt: o.shipped_at ?? null,
       items: (items ?? [])
         .filter((i) => i.order_id === o.id)
         .map((i) => ({
@@ -84,16 +87,51 @@ export const listOrders = createServerFn({ method: "GET" })
 
 export const updateOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ id: z.string().uuid(), status: StatusSchema }))
+  .inputValidator(
+    z.object({
+      id: z.string().uuid(),
+      status: StatusSchema,
+      trackingNumber: z.string().optional(),
+      carrier: z.string().optional(),
+    }),
+  )
   .handler(async ({ context, data }) => {
+    const updatePayload: Record<string, unknown> = { status: data.status };
+    if (data.status === "shipped") {
+      updatePayload.tracking_number = data.trackingNumber ?? null;
+      updatePayload.carrier = data.carrier ?? "CTT Express";
+      updatePayload.shipped_at = new Date().toISOString();
+    }
+
     const { data: row, error } = await context.supabase
       .from("orders")
-      .update({ status: data.status })
+      .update(updatePayload)
       .eq("id", data.id)
-      .select("id, status")
+      .select("id, number, status, customer_name, customer_email, tracking_number, carrier")
       .maybeSingle();
+
     if (error) throw new Error("Could not update order");
     if (!row) throw new Error("Order not found or not permitted");
+
+    // Dispatch shipped email when order is marked shipped and tracking is present
+    if (data.status === "shipped" && row.tracking_number && row.customer_email) {
+      import("@/lib/email.server").then(({ sendOrderShippedEmail }) => {
+        const { signOrderToken } = require("@/lib/server-crypto");
+        const guestToken = signOrderToken(row.id, row.customer_email);
+        const origin = process.env.VITE_APP_URL || "https://frankys.lovable.app";
+        const trackingUrl = `${origin}/checkout/success/${row.id}?token=${guestToken}`;
+
+        void sendOrderShippedEmail({
+          to: row.customer_email,
+          customerName: row.customer_name,
+          orderNumber: row.number,
+          trackingNumber: row.tracking_number!,
+          carrier: row.carrier || "CTT Express",
+          trackingUrl,
+        });
+      }).catch((err) => console.error("[Admin Order Dispatch Error]", err));
+    }
+
     return row;
   });
 

@@ -77,8 +77,16 @@ function CheckoutPage() {
   const totals = useMemo(() => {
     if (!products) return null;
     const base = computeTotals(cart.lines, products);
-    if (appliedPromo === "COIN10") {
+    if (appliedPromo === "COIN10" || appliedPromo === "KONAMI") {
       const discount = Math.round(base.subtotalCents * 0.1);
+      return {
+        ...base,
+        discountCents: discount,
+        totalCents: Math.max(0, base.totalCents - discount),
+      };
+    }
+    if (appliedPromo === "RUNNER15") {
+      const discount = Math.round(base.subtotalCents * 0.15);
       return {
         ...base,
         discountCents: discount,

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { PixelHorse } from "@/components/frankys/PixelHorse";
 import { Cap3DViewer } from "@/components/frankys/Cap3DViewer";
+import { PixelRunnerModal } from "@/components/frankys/PixelRunnerModal";
 import { arcadeAudio } from "@/lib/audio/arcade-audio";
 
 import { ViewModeToggle, type ViewMode } from "@/components/frankys/ViewModeToggle";
@@ -45,6 +46,46 @@ function LandingPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>("3D");
   const [coinInserted, setCoinInserted] = useState(false);
+  const [runnerOpen, setRunnerOpen] = useState(false);
+
+  // Konami Code sequence detection
+  useEffect(() => {
+    const konamiSequence = [
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowLeft",
+      "ArrowRight",
+      "KeyB",
+      "KeyA",
+    ];
+    let currentIndex = 0;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const targetKey = konamiSequence[currentIndex];
+      if (e.code === targetKey || e.key === targetKey) {
+        currentIndex++;
+        if (currentIndex === konamiSequence.length) {
+          currentIndex = 0;
+          arcadeAudio.playKonamiFanfare();
+          toast.success("★ 30 LIVES GRANTED! KONAMI SECRET CODE ACTIVATED: 'KONAMI' FOR 10% OFF ★", {
+            duration: 6000,
+          });
+          try {
+            localStorage.setItem("frankys.promo.code", "KONAMI");
+          } catch {}
+        }
+      } else {
+        currentIndex = 0;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleInsertCoin = () => {
     arcadeAudio.playCoin();
@@ -76,17 +117,32 @@ function LandingPage() {
             )}
 
             <div className="flex flex-col items-center gap-2">
-              <button
-                type="button"
-                onClick={handleInsertCoin}
-                className={`px-4 py-2 rounded-pill border border-ink arcade-bevel flex items-center gap-2 cursor-pointer transition-all duration-300 ${
-                  coinInserted ? "bg-buy text-cream animate-pulse" : "bg-marquee text-ink hover:scale-105"
-                }`}
-                style={{ fontFamily: "var(--font-arcade)", fontSize: 11, letterSpacing: 2 }}
-              >
-                <span>🪙</span>
-                <span>{coinInserted ? "COIN INSERTED: 1-UP!" : "INSERT COIN [CLICK]"}</span>
-              </button>
+              <div className="flex gap-2 flex-wrap justify-center">
+                <button
+                  type="button"
+                  onClick={handleInsertCoin}
+                  className={`px-4 py-2 rounded-pill border border-ink arcade-bevel flex items-center gap-2 cursor-pointer transition-all duration-300 ${
+                    coinInserted ? "bg-buy text-cream animate-pulse" : "bg-marquee text-ink hover:scale-105"
+                  }`}
+                  style={{ fontFamily: "var(--font-arcade)", fontSize: 11, letterSpacing: 2 }}
+                >
+                  <span>🪙</span>
+                  <span>{coinInserted ? "COIN INSERTED: 1-UP!" : "INSERT COIN [CLICK]"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    arcadeAudio.playBeep(480);
+                    setRunnerOpen(true);
+                  }}
+                  className="px-4 py-2 rounded-pill border border-ink bg-cream hover:bg-ink hover:text-cream arcade-bevel flex items-center gap-2 cursor-pointer transition-all duration-300"
+                  style={{ fontFamily: "var(--font-arcade)", fontSize: 11, letterSpacing: 2 }}
+                >
+                  <span>🎮</span>
+                  <span>PLAY RUNNER</span>
+                </button>
+              </div>
             </div>
 
             <h1
@@ -211,6 +267,8 @@ function LandingPage() {
           ))}
         </div>
       </section>
+      {/* PIXEL RUNNER MODAL */}
+      <PixelRunnerModal isOpen={runnerOpen} onClose={() => setRunnerOpen(false)} />
     </div>
   );
 }

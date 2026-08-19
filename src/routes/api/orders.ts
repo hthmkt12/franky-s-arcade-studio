@@ -88,8 +88,13 @@ export const Route = createFileRoute("/api/orders")({
           subtotalCents += p.price_cents * line.qty;
         }
         let discountCents = 0;
-        if (draft.promoCode && (draft.promoCode.toUpperCase() === "COIN10" || draft.promoCode.toUpperCase() === "KONAMI")) {
-          discountCents = Math.round(subtotalCents * 0.1);
+        if (draft.promoCode) {
+          const code = draft.promoCode.toUpperCase();
+          if (code === "COIN10" || code === "KONAMI") {
+            discountCents = Math.round(subtotalCents * 0.1);
+          } else if (code === "RUNNER15") {
+            discountCents = Math.round(subtotalCents * 0.15);
+          }
         }
 
         const shippingCents = subtotalCents > 0 ? SHIPPING_FLAT_CENTS : 0;

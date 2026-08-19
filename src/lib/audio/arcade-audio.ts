@@ -152,6 +152,88 @@ class ArcadeAudioEngine {
       // Ignore
     }
   }
+
+  public playKonamiFanfare() {
+    if (this.isMuted) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const notes = [
+        { f: 659.25, d: 0.12 }, // E5
+        { f: 659.25, d: 0.12 }, // E5
+        { f: 659.25, d: 0.12 }, // E5
+        { f: 523.25, d: 0.12 }, // C5
+        { f: 659.25, d: 0.15 }, // E5
+        { f: 783.99, d: 0.3 },  // G5
+        { f: 392.00, d: 0.35 }, // G4
+      ];
+      let t = now;
+      notes.forEach((note) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(note.f, t);
+
+        gain.gain.setValueAtTime(0.14, t);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + note.d);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + note.d);
+        t += note.d + 0.03;
+      });
+    } catch {}
+  }
+
+  public playJump() {
+    if (this.isMuted) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.15);
+    } catch {}
+  }
+
+  public playHit() {
+    if (this.isMuted) return;
+    const ctx = this.initCtx();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.linearRampToValueAtTime(60, now + 0.2);
+
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    } catch {}
+  }
 }
 
 export const arcadeAudio = new ArcadeAudioEngine();

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { openArModal } from "@/components/frankys/ArModal";
+import { Cap3DViewer } from "@/components/frankys/Cap3DViewer";
 import { formatPrice, getProductBySlug, getProducts } from "@/lib/api/shop";
 
 import { useCart } from "@/lib/cart/CartContext";
@@ -60,6 +61,7 @@ function ProductPage() {
   const cart = useCart();
   const [size, setSize] = useState<ProductSize>("ONE");
   const [qty, setQty] = useState(1);
+  const [view3D, setView3D] = useState(false);
 
   if (isError) {
     return (
@@ -130,24 +132,43 @@ function ProductPage() {
         <div
           className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex flex-col items-center justify-center gap-3 p-6 md:sticky md:top-20 self-start"
         >
-          <div className="bg-cream border border-ink rounded-card p-4 arcade-bevel">
-            <img
-              src={product.image.url}
-              alt={product.image.alt}
-              width={512}
-              height={512}
-              className="max-h-[380px] w-auto object-contain"
-            />
+          <div className="bg-cream border border-ink rounded-card p-4 arcade-bevel w-full flex items-center justify-center min-h-[320px]">
+            {view3D ? (
+              <Cap3DViewer colorHex={product.colorHex} className="h-[300px]" />
+            ) : (
+              <img
+                src={product.image.url}
+                alt={product.image.alt}
+                width={512}
+                height={512}
+                className="max-h-[380px] w-auto object-contain"
+              />
+            )}
           </div>
-          <button
-            type="button"
-            onClick={() => openArModal({ name: product.name, image: product.image.url })}
-            className="bg-cream border border-ink rounded-btn px-3 py-2 arcade-bevel hover:bg-marquee transition-colors"
-            style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 2 }}
-            aria-label={`Try ${product.name} in AR`}
-          >
-            TRY IN [AR]
-          </button>
+          
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setView3D((v) => !v)}
+              className={`border border-ink rounded-btn px-3 py-2 arcade-bevel transition-colors ${
+                view3D ? "bg-ink text-cream" : "bg-cream text-ink hover:bg-marquee"
+              }`}
+              style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 2 }}
+              aria-label="Toggle 3D View"
+            >
+              {view3D ? "2D PHOTO" : "3D MODEL [360°]"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => openArModal({ name: product.name, image: product.image.url })}
+              className="bg-cream border border-ink rounded-btn px-3 py-2 arcade-bevel hover:bg-marquee transition-colors"
+              style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 2 }}
+              aria-label={`Try ${product.name} in AR`}
+            >
+              TRY IN [AR]
+            </button>
+          </div>
         </div>
 
 

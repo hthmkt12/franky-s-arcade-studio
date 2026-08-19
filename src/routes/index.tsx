@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { PixelHorse } from "@/components/frankys/PixelHorse";
+import { Cap3DViewer } from "@/components/frankys/Cap3DViewer";
 import { arcadeAudio } from "@/lib/audio/arcade-audio";
 
 import { ViewModeToggle, type ViewMode } from "@/components/frankys/ViewModeToggle";
@@ -65,9 +66,14 @@ function LandingPage() {
         <div className="checker-warp-fade" aria-hidden />
         <div className="relative max-w-6xl mx-auto px-4 py-10 md:py-16 flex flex-col items-center gap-6 text-center">
 
-          <div className="bg-cream border border-ink rounded-card p-6 md:p-10 flex flex-col items-center gap-5 arcade-bevel">
+          <div className="bg-cream border border-ink rounded-card p-6 md:p-10 flex flex-col items-center gap-5 arcade-bevel max-w-xl w-full">
             <ViewModeToggle mode={viewMode} onChange={setViewMode} productName="FRANKY'S CAP" />
-            <PixelHorse size={12} />
+            
+            {viewMode === "3D" ? (
+              <Cap3DViewer colorHex="#faa21f" />
+            ) : (
+              <PixelHorse size={12} />
+            )}
 
             <div className="flex flex-col items-center gap-2">
               <button

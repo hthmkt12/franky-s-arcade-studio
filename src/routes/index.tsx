@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { PixelHorse } from "@/components/frankys/PixelHorse";
+import { arcadeAudio } from "@/lib/audio/arcade-audio";
 
 import { ViewModeToggle, type ViewMode } from "@/components/frankys/ViewModeToggle";
 import { formatPrice, getProducts } from "@/lib/api/shop";
@@ -41,6 +43,18 @@ function LandingPage() {
   const featured = products?.filter((p) => p.inStock).slice(0, 3) ?? [];
 
   const [viewMode, setViewMode] = useState<ViewMode>("3D");
+  const [coinInserted, setCoinInserted] = useState(false);
+
+  const handleInsertCoin = () => {
+    arcadeAudio.playCoin();
+    setCoinInserted(true);
+    toast.success("1-UP! CHEAT CODE UNLOCKED: 'COIN10' FOR 10% OFF", {
+      duration: 5000,
+    });
+    try {
+      localStorage.setItem("frankys.promo.code", "COIN10");
+    } catch {}
+  };
 
 
   return (
@@ -55,6 +69,20 @@ function LandingPage() {
             <ViewModeToggle mode={viewMode} onChange={setViewMode} productName="FRANKY'S CAP" />
             <PixelHorse size={12} />
 
+            <div className="flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={handleInsertCoin}
+                className={`px-4 py-2 rounded-pill border border-ink arcade-bevel flex items-center gap-2 cursor-pointer transition-all duration-300 ${
+                  coinInserted ? "bg-buy text-cream animate-pulse" : "bg-marquee text-ink hover:scale-105"
+                }`}
+                style={{ fontFamily: "var(--font-arcade)", fontSize: 11, letterSpacing: 2 }}
+              >
+                <span>🪙</span>
+                <span>{coinInserted ? "COIN INSERTED: 1-UP!" : "INSERT COIN [CLICK]"}</span>
+              </button>
+            </div>
+
             <h1
               style={{
                 fontFamily: "var(--font-arcade)",
@@ -63,8 +91,6 @@ function LandingPage() {
                 lineHeight: 1.2,
               }}
             >
-              INSERT COIN
-              <br />
               PRESS START
             </h1>
             <p
@@ -77,6 +103,7 @@ function LandingPage() {
               <Link
                 to="/shop"
                 preload="intent"
+                onClick={() => arcadeAudio.playBeep(440)}
                 className="bg-buy text-cream px-6 py-3 rounded-btn border border-ink arcade-bevel"
                 style={{ fontFamily: "var(--font-arcade)", fontSize: 12, letterSpacing: 2 }}
               >
@@ -85,6 +112,7 @@ function LandingPage() {
               <Link
                 to="/about"
                 preload="intent"
+                onClick={() => arcadeAudio.playBeep(520)}
                 className="bg-cream text-ink px-6 py-3 rounded-btn border border-ink arcade-bevel"
                 style={{ fontFamily: "var(--font-arcade)", fontSize: 12, letterSpacing: 2 }}
               >

@@ -50,6 +50,7 @@ export interface Customer {
 export interface OrderDraft {
   items: CartLine[];
   customer: Customer;
+  promoCode?: string;
 }
 
 export interface Order {
@@ -63,6 +64,7 @@ export interface Order {
   currency: Currency;
   status: "pending" | "paid" | "shipped" | "cancelled";
   createdAt: string;
+  guestToken?: string;
 }
 
 export interface ApiError {

@@ -39,12 +39,12 @@
 }
 
 :root {
-  /* Franky's tokens — verbatim from refero spec */
+  /* Franky's tokens — updated with accessible WCAG AA contrast */
   --cream: #f3e5df;
   --ink: #000000;
   --carbon: #151515;
   --charcoal: #333333;
-  --muted: #737373;
+  --muted: #525252;
   --pixel: #e5e7eb;
   --marquee: #faa21f;
   --buy: #128e44;
@@ -59,7 +59,7 @@
   body {
     background-color: var(--cream);
     color: var(--ink);
-    font-family: var(--font-arcade);
+    font-family: "VT323", monospace;
   }
 }
 

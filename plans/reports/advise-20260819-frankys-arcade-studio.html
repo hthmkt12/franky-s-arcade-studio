@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technical Advisory Report: Franky's Arcade Studio Evolution</title>
+  <style>
+    :root {
+      --bg-dark: #0a0c14;
+      --bg-card: #121526;
+      --bg-card-hover: #181d33;
+      --bg-surface: #1e2238;
+      --neon-cyan: #00f0ff;
+      --neon-magenta: #ff007f;
+      --neon-yellow: #ffe600;
+      --neon-green: #39ff14;
+      --neon-red: #ff3366;
+      --text-main: #f0f4fc;
+      --text-muted: #94a3b8;
+      --border-color: #2e3650;
+      --font-pixel: "Courier New", Courier, monospace;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding: 24px 16px 60px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* CRT scanline effect */
+    body::before {
+      content: " ";
+      display: block;
+      position: fixed;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      z-index: 999;
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header Banner */
+    .arcade-header {
+      background: linear-gradient(135deg, #181b30 0%, #0d0f1a 100%);
+      border: 3px solid var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.15);
+      border-radius: 8px;
+      padding: 28px 24px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .arcade-header::after {
+      content: "STAGE 01 // READY";
+      position: absolute;
+      top: 14px;
+      right: 20px;
+      font-family: var(--font-pixel);
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--neon-yellow);
+      letter-spacing: 2px;
+      background: rgba(0,0,0,0.6);
+      padding: 4px 10px;
+      border: 1px dashed var(--neon-yellow);
+    }
+
+    .title-tag {
+      font-family: var(--font-pixel);
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--neon-magenta);
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+      display: inline-block;
+      text-shadow: 0 0 8px rgba(255, 0, 127, 0.6);
+    }
+
+    .title-main {
+      font-family: var(--font-pixel);
+      font-size: clamp(20px, 4vw, 32px);
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      text-shadow: 2px 2px 0px #ff007f, -2px -2px 0px #00f0ff;
+    }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13px;
+      font-family: var(--font-pixel);
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+
+    .meta-item span {
+      color: var(--neon-cyan);
+      font-weight: bold;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(57, 255, 20, 0.15);
+      border: 1px solid var(--neon-green);
+      color: var(--neon-green);
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+    }
+
+    /* Interactive Audio Demo Toolbar */
+    .audio-toolbar {
+      background: var(--bg-card);
+      border: 2px solid var(--neon-magenta);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
+    }
+
+    .audio-title {
+      font-family: var(--font-pixel);
+      font-size: 13px;
+      color: var(--neon-yellow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .audio-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .retro-btn {
+      font-family: var(--font-pixel);
+      font-size: 12px;
+      font-weight: bold;
+      background: #000000;
+      color: var(--text-main);
+      border: 2px solid var(--neon-cyan);
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 2px 2px 0px var(--neon-cyan);
+    }
+
+    .retro-btn:hover {
+      background: var(--neon-cyan);
+      color: #000;
+      box-shadow: 0 0 10px var(--neon-cyan);
+      transform: translate(-1px, -1px);
+    }
+
+    .retro-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: none;
+    }
+
+    .retro-btn.coin-btn {
+      border-color: var(--neon-yellow);
+      box-shadow: 2px 2px 0px var(--neon-yellow);
+      color: var(--neon-yellow);
+    }
+    .retro-btn.coin-btn:hover {
+      background: var(--neon-yellow);
+      color: #000;
+    }
+
+    .retro-btn.magenta-btn {
+      border-color: var(--neon-magenta);
+      box-shadow: 2px 2px 0px var(--neon-magenta);
+      color: var(--neon-magenta);
+    }
+    .retro-btn.magenta-btn:hover {
+      background: var(--neon-magenta);
+      color: #000;
+    }
+
+    /* Section Cards */
+    .section-block {
+      margin-bottom: 36px;
+    }
+
+    .section-title {
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      color: var(--neon-cyan);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .section-title::before {
+      content: "▶";
+      color: var(--neon-magenta);
+      font-size: 14px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .card.highlight {
+      border: 2px solid #3b82f6;
+      background: linear-gradient(180deg, rgba(59, 130, 246, 0.08) 0%, rgba(18, 21, 38, 0.95) 100%);
+    }
+
+    /* Verdict Card */
+    .verdict-box {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #cbd5e1;
+    }
+
+    .verdict-highlight {
+      color: #ffffff;
+      font-weight: 600;
+      background: rgba(0, 240, 255, 0.1);
+      padding: 2px 6px;
+      border-left: 3px solid var(--neon-cyan);
+      display: inline-block;
+      margin: 8px 0;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    /* DOs and DON'Ts */
+    .do-card {
+      background: rgba(57, 255, 20, 0.03);
+      border: 2px solid #22c55e;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .do-header {
+      font-family: var(--font-pixel);
+      font-size: 15px;
+      color: var(--neon-green);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+      padding-bottom: 10px;
+    }
+
+    .dont-card {
+      background: rgba(255, 51, 102, 0.03);
+      border: 2px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .dont-header {
+      font-family: var(--font-pixel);
+      font-size: 15px;
+      color: var(--neon-red);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(239, 68, 68, 0.3);
+      padding-bottom: 10px;
+    }
+
+    .action-item {
+      margin-bottom: 14px;
+      padding-left: 20px;
+      position: relative;
+      font-size: 14px;
+      color: #e2e8f0;
+    }
+
+    .do-card .action-item::before {
+      content: "✔";
+      position: absolute;
+      left: 0;
+      color: var(--neon-green);
+      font-weight: bold;
+    }
+
+    .dont-card .action-item::before {
+      content: "✖";
+      position: absolute;
+      left: 0;
+      color: var(--neon-red);
+      font-weight: bold;
+    }
+
+    .action-item strong {
+      color: #ffffff;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* Architecture Flow Diagram */
+    .diagram-container {
+      background: #0d101d;
+      border: 2px solid #334155;
+      border-radius: 8px;
+      padding: 24px 16px;
+      overflow-x: auto;
+    }
+
+    .flow-steps {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 800px;
+      padding: 10px 0;
+    }
+
+    .flow-step {
+      flex: 1;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-top: 3px solid var(--neon-cyan);
+      border-radius: 6px;
+      padding: 14px 12px;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-step.secure {
+      border-top-color: var(--neon-green);
+    }
+    .flow-step.stripe {
+      border-top-color: #6366f1;
+    }
+    .flow-step.supabase {
+      border-top-color: #10b981;
+    }
+
+    .step-num {
+      font-family: var(--font-pixel);
+      font-size: 10px;
+      color: var(--neon-yellow);
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .step-title {
+      font-weight: bold;
+      font-size: 13px;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .step-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .flow-arrow {
+      color: var(--neon-cyan);
+      font-family: var(--font-pixel);
+      font-size: 16px;
+      font-weight: bold;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: translateX(0); }
+      50% { opacity: 1; transform: translateX(3px); }
+    }
+
+    /* Checklist & Metrics */
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .check-item {
+      background: var(--bg-surface);
+      border: 1px solid #2d3748;
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .check-item:hover {
+      border-color: var(--neon-cyan);
+    }
+
+    .check-item.completed {
+      border-color: var(--neon-green);
+      background: rgba(57, 255, 20, 0.05);
+    }
+
+    .check-box {
+      font-family: var(--font-pixel);
+      font-size: 14px;
+      color: var(--neon-cyan);
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    .check-item.completed .check-box {
+      color: var(--neon-green);
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 18px;
+      text-align: center;
+      position: relative;
+    }
+
+    .metric-val {
+      font-family: var(--font-pixel);
+      font-size: 26px;
+      font-weight: bold;
+      color: var(--neon-yellow);
+      margin: 8px 0;
+      text-shadow: 0 0 10px rgba(255, 230, 0, 0.3);
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Modal / Easter egg toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #000;
+      border: 2px solid var(--neon-yellow);
+      color: var(--neon-yellow);
+      font-family: var(--font-pixel);
+      font-size: 12px;
+      padding: 12px 20px;
+      border-radius: 4px;
+      box-shadow: 0 0 20px rgba(255, 230, 0, 0.4);
+      z-index: 1000;
+      display: none;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .arcade-header {
+        padding: 20px 16px;
+      }
+      .audio-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Arcade Main Header -->
+    <header class="arcade-header">
+      <div class="title-tag">★ SYSTEM ADVISORY REPORT // VER 2026.08.19 ★</div>
+      <h1 class="title-main">Franky's Arcade Studio Evolution</h1>
+      <div class="meta-bar">
+        <div class="meta-item">TARGET: <span>frankys-arcade-studio</span></div>
+        <div class="meta-item">DATE: <span>2026-08-19</span></div>
+        <div class="meta-item">STATUS: <span class="status-badge">● READY TO IMPLEMENT</span></div>
+        <div class="meta-item">STACK: <span>TanStack Start + React 19 + Supabase</span></div>
+      </div>
+    </header>
+
+    <!-- Web Audio Synthesizer Live Demo Toolbar -->
+    <div class="audio-toolbar">
+      <div class="audio-title">
+        <span>🕹️</span>
+        <span>SYNTH PREVIEW (0 KB Web Audio Engine):</span>
+      </div>
+      <div class="audio-buttons">
+        <button class="retro-btn coin-btn" onclick="playArcadeSound('coin')">🪙 INSERT COIN</button>
+        <button class="retro-btn" onclick="playArcadeSound('beep')">👾 CLICK BEEP</button>
+        <button class="retro-btn magenta-btn" onclick="playArcadeSound('cart')">🛒 ADD TO CART</button>
+        <button class="retro-btn" onclick="playArcadeSound('fanfare')">🏆 WIN FANFARE</button>
+      </div>
+    </div>
+
+    <!-- Section 1: Verdict -->
+    <section class="section-block">
+      <h2 class="section-title">1. Executive Verdict</h2>
+      <div class="card highlight">
+        <div class="verdict-box">
+          <p>
+            Franky's Arcade Studio sở hữu visual identity độc đáo (<strong>retro arcade-skate 1990s</strong>) và nền tảng công nghệ cực kỳ hiện đại (<strong>TanStack Start + Supabase + React 19</strong>). Tuy nhiên, hiện tại dự án đang ở trạng thái <strong>nửa vời</strong>: giao diện rất ấn tượng nhưng luồng thương mại điện tử chưa thể thu tiền thật (thiếu Stripe, thiếu webhook), bảo mật lộ dữ liệu PII khách qua order ID, và tính "Arcade" mới chỉ dừng ở đồ họa tĩnh (thiếu âm thanh và tương tác vật lý).
+          </p>
+          <div class="verdict-highlight">
+            Định hướng: <strong>Cân bằng Thực dụng (E-Commerce Checkout + Arcade Immersion)</strong>. Hoàn thiện vận hành thanh toán thực tế đồng thời kích hoạt linh hồn game 8-bit bằng native Web Audio API (0 KB audio assets).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Scope & Goals vs Non-Goals -->
+    <section class="section-block">
+      <h2 class="section-title">2. Scope Definition: Goals vs Non-Goals</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="color: var(--neon-cyan); font-family: var(--font-pixel); font-size: 14px; margin-bottom: 14px;">🎯 CORE GOALS (MỤC TIÊU CỐT LÕI)</h3>
+          <ul style="list-style: none; font-size: 13.5px;">
+            <li style="margin-bottom: 10px;"><strong>1. Stripe Payment Flow:</strong> Stripe Checkout / Payment Intents (EUR/USD) + Webhook tự động update Supabase order từ <code>pending</code> ➔ <code>paid</code>.</li>
+            <li style="margin-bottom: 10px;"><strong>2. PII & HMAC Token:</strong> Khóa <code>GET /api/orders/$id</code> bằng HMAC Guest Access Token, triệt tiêu nguy cơ quét UUID đánh cắp thông tin khách.</li>
+            <li style="margin-bottom: 10px;"><strong>3. WCAG AA & Polish:</strong> Phân tách font (<code>Press Start 2P</code> cho title/button, font đọc cho paragraph), sửa contrast <code>#737373</code>, touch target 44px.</li>
+            <li style="margin-bottom: 10px;"><strong>4. Chiptune Engine:</strong> Web Audio 8-bit Synthesizer (coin, click, cart, fanfare) + Sound Mute toggle trên Header + Easter egg Coin Slot.</li>
+          </ul>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--border-color);">
+          <h3 style="color: var(--text-muted); font-family: var(--font-pixel); font-size: 14px; margin-bottom: 14px;">🚫 NON-GOALS (NGOÀI PHẠM VI)</h3>
+          <ul style="list-style: none; font-size: 13.5px; color: var(--text-muted);">
+            <li style="margin-bottom: 10px;"><strong>• Không dựng 3D WebGL Mesh nặng:</strong> Giữ nguyên AR/3D 2D projection hiện tại để bảo toàn bundle size siêu nhẹ.</li>
+            <li style="margin-bottom: 10px;"><strong>• Không làm Authentication / Account:</strong> Giữ Guest Checkout nhanh gọn "Insert Coin & Go" để tối ưu tỷ lệ chuyển đổi.</li>
+            <li style="margin-bottom: 10px;"><strong>• Không xây mini-game độc lập:</strong> Chỉ tập trung tương tác Coin Drop & Easter egg voucher ngay trên trang bán hàng.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture Flow Diagram -->
+    <section class="section-block">
+      <h2 class="section-title">3. Secure E-Commerce Architecture Workflow</h2>
+      <div class="diagram-container">
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-num">STEP 01</div>
+            <div class="step-title">Cart & Checkout</div>
+            <div class="step-desc">Khách chọn nón & áp mã <code>COIN10</code></div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step secure">
+            <div class="step-num">STEP 02</div>
+            <div class="step-title">HMAC Signed Order</div>
+            <div class="step-desc">Tạo order <code>pending</code> + sinh Token bí mật</div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step stripe">
+            <div class="step-num">STEP 03</div>
+            <div class="step-title">Stripe Checkout</div>
+            <div class="step-desc">Thanh toán an toàn thẻ / Apple Pay quốc tế</div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step supabase">
+            <div class="step-num">STEP 04</div>
+            <div class="step-title">Webhook Sync</div>
+            <div class="step-desc">Stripe bắn webhook ➔ Supabase đổi sang <code>paid</code></div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step secure">
+            <div class="step-num">STEP 05</div>
+            <div class="step-title">Protected Receipt</div>
+            <div class="step-desc">Verify HMAC token trước khi trả PII khách</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: What You Should Do vs What You Shouldn't Do -->
+    <section class="section-block">
+      <h2 class="section-title">4. Action Blueprint: DO vs DON'T</h2>
+      <div class="grid-2">
+        
+        <!-- DO Column -->
+        <div class="do-card">
+          <div class="do-header">
+            <span>⚡</span>
+            <span>WHAT YOU SHOULD DO</span>
+          </div>
+          <div class="action-item">
+            <strong>Bảo mật & Route Hardening</strong>
+            Tạo HMAC signature trong payload order và yêu cầu verify token tại <code>GET /api/orders/$id</code>. Thêm rate-limit nhẹ chống spam.
+          </div>
+          <div class="action-item">
+            <strong>Tích hợp Stripe SDK & Webhook</strong>
+            Dùng <code>@stripe/stripe-js</code> + <code>stripe</code>. Xử lý webhook <code>checkout.session.completed</code> cập nhật đơn hàng thành <code>paid</code>.
+          </div>
+          <div class="action-item">
+            <strong>Tối ưu Typography & Contrast</strong>
+            Bỏ font pixel trên thẻ body, dùng font dễ đọc cho đoạn văn. Tăng contrast <code>--muted</code> lên <code>#525252</code> và chỉnh hit-target 44px.
+          </div>
+          <div class="action-item">
+            <strong>Web Audio 8-Bit Synth Engine</strong>
+            Viết <code>arcade-audio.ts</code> dùng native <code>AudioContext</code> (sóng square/triangle). Gắn âm thanh vào click, cart, fanfare và toggle Mute.
+          </div>
+          <div class="action-item">
+            <strong>Interactive Coin Slot & Easter Egg</strong>
+            Biến nút "INSERT COIN" thành coin-drop animation. Nhấn thả xu nhận âm thanh 1-UP + auto điền mã giảm giá <code>COIN10</code>.
+          </div>
+        </div>
+
+        <!-- DON'T Column -->
+        <div class="dont-card">
+          <div class="dont-header">
+            <span>⚠️</span>
+            <span>WHAT YOU SHOULDN'T DO</span>
+          </div>
+          <div class="action-item">
+            <strong>Không dùng file âm thanh MP3/WAV nặng</strong>
+            Tải nhiều file âm thanh làm phình bundle size và gây lag audio playback. Phải tạo âm trực tiếp bằng Web Audio Oscillator.
+          </div>
+          <div class="action-item">
+            <strong>Không bắt buộc đăng ký tài khoản</strong>
+            Khách hàng mua đồ arcade cần luồng thanh toán chớp nhoáng "Insert Coin & Go". Đăng nhập rườm rà sẽ giết chết conversion rate.
+          </div>
+          <div class="action-item">
+            <strong>Không lạm dụng font Pixel cho văn bản dài</strong>
+            Font <code>Press Start 2P</code> ở cỡ chữ nhỏ hoặc đoạn mô tả dài gây nhức mắt nghiêm trọng và giảm điểm accessibility.
+          </div>
+          <div class="action-item">
+            <strong>Không để lộ dữ liệu PII qua Order ID</strong>
+            Không bao giờ trả thông tin địa chỉ/email chỉ dựa vào UUID mà không qua lớp kiểm tra HMAC signature hoặc token hợp lệ.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 5: Checklist & Success Metrics -->
+    <section class="section-block">
+      <h2 class="section-title">5. Implementation Checklist & Target Metrics</h2>
+      
+      <div class="card" style="margin-bottom: 24px;">
+        <h3 style="font-family: var(--font-pixel); font-size: 13px; color: var(--neon-cyan); margin-bottom: 16px;">
+          📋 TASK EXECUTION LIST (Click để đánh dấu hoàn thành)
+        </h3>
+        <div class="checklist-grid" id="checklist">
+          <div class="check-item" onclick="toggleTask(this)">
+            <span class="check-box">[ ]</span>
+            <span><code>src/lib/audio/arcade-audio.ts</code>: Web Audio Synth (0 KB) + <code>useArcadeAudio()</code></span>
+          </div>
+          <div class="check-item" onclick="toggleTask(this)">
+            <span class="check-box">[ ]</span>
+            <span><code>src/components/frankys/Header.tsx</code>: Thêm SFX Mute/Unmute toggle</span>
+          </div>
+          <div class="check-item" onclick="toggleTask(this)">
+            <span class="check-box">[ ]</span>
+            <span><code>src/styles.css</code> &amp; UI components: Sửa typography + WCAG AA contrast + 44px hit-target</span>
+          </div>
+          <div class="check-item" onclick="toggleTask(this)">
+            <span class="check-box">[ ]</span>
+            <span><code>src/routes/api/orders*</code>: HMAC Guest Token bảo vệ PII receipt</span>
+          </div>
+          <div class="check-item" onclick="toggleTask(this)">
+            <span class="check-box">[ ]</span>
+            <span><code>src/lib/stripe/</code>: Stripe Checkout session &amp; Webhook sync Supabase</span>
+          </div>
+          <div class="check-item" onclick="toggleTask(this)">
+            <span class="check-box">[ ]</span>
+            <span><code>src/routes/checkout.tsx</code>: Nhập Cheat Code discount &amp; Stripe redirect</span>
+          </div>
+          <div class="check-item" onclick="toggleTask(this)">
+            <span class="check-box">[ ]</span>
+            <span><code>src/routes/index.tsx</code>: Coin Slot Easter egg animation + tặng mã <code>COIN10</code></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-label">Lighthouse A11y</div>
+          <div class="metric-val" style="color: var(--neon-green);">≥ 98/100</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Không cảnh báo contrast / touch target</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Audio Asset Size</div>
+          <div class="metric-val" style="color: var(--neon-cyan);">0 KB</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Thuần Web Audio API, latency &lt; 10ms</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">PII Security</div>
+          <div class="metric-val" style="color: var(--neon-magenta);">401/403</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Chặn quét UUID không có HMAC token</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">E2E Checkout</div>
+          <div class="metric-val" style="color: var(--neon-yellow);">100% PASS</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Stripe ➔ Webhook ➔ Supabase 'paid'</div>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast">⭐ CHEAT UNLOCKED: DISCOUNT CODE 'COIN10' READY!</div>
+
+  <!-- Pure Web Audio Synthesizer Script -->
+  <script>
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playArcadeSound(type) {
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+
+        if (type === 'coin') {
+          // Classic 2-tone coin chime (B5 -> E6)
+          const osc1 = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc1.type = 'square';
+          osc1.frequency.setValueAtTime(987.77, now); // B5
+          osc1.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc1.connect(gain);
+          gain.connect(ctx.destination);
+          osc1.start(now);
+          osc1.stop(now + 0.35);
+
+          showToast("🪙 COIN INSERTED! +1 CREDIT");
+        } 
+        else if (type === 'beep') {
+          // Short crisp UI beep
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.06);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.06);
+        }
+        else if (type === 'cart') {
+          // Upward arp chime
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, now + (i * 0.05));
+            gain.gain.setValueAtTime(0.1, now + (i * 0.05));
+            gain.gain.exponentialRampToValueAtTime(0.001, now + (i * 0.05) + 0.12);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + (i * 0.05));
+            osc.stop(now + (i * 0.05) + 0.12);
+          });
+        }
+        else if (type === 'fanfare') {
+          // 8-bit Victory Fanfare
+          const notes = [523.25, 523.25, 523.25, 659.25, 783.99, 1046.50];
+          const times = [0, 0.1, 0.2, 0.35, 0.5, 0.7];
+          const lens  = [0.08, 0.08, 0.08, 0.12, 0.15, 0.4];
+
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + times[idx]);
+            gain.gain.setValueAtTime(0.18, now + times[idx]);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + times[idx] + lens[idx]);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + times[idx]);
+            osc.stop(now + times[idx] + lens[idx]);
+          });
+          showToast("🏆 STAGE CLEAR! FANFARE ACTIVATED");
+        }
+      } catch (e) {
+        console.warn("Web Audio not allowed before user interaction.", e);
+      }
+    }
+
+    function toggleTask(el) {
+      el.classList.toggle('completed');
+      const box = el.querySelector('.check-box');
+      if (el.classList.contains('completed')) {
+        box.textContent = '[✔]';
+        playArcadeSound('beep');
+      } else {
+        box.textContent = '[ ]';
+      }
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      toast.textContent = text;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2500);
+    }
+  </script>
+</body>
+</html>

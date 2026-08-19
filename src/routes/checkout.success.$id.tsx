@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
@@ -6,6 +6,9 @@ import { PixelHorse } from "@/components/frankys/PixelHorse";
 import { formatPrice, getOrder } from "@/lib/api/shop";
 
 export const Route = createFileRoute("/checkout/success/$id")({
+  validateSearch: (search: Record<string, unknown>): { token?: string } => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Order Confirmed — Franky's" },
@@ -23,6 +26,7 @@ export const Route = createFileRoute("/checkout/success/$id")({
 
 function SuccessPage() {
   const { id } = Route.useParams();
+  const search = useSearch({ from: "/checkout/success/$id" });
   const {
     data: order,
     isPending,
@@ -30,8 +34,8 @@ function SuccessPage() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["order", id],
-    queryFn: () => getOrder(id),
+    queryKey: ["order", id, search.token],
+    queryFn: () => getOrder(id, search.token),
     retry: 1,
   });
 

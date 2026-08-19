@@ -17,11 +17,14 @@ function json(body: unknown, status = 200): Response {
 export const Route = createFileRoute("/api/orders/$id")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params, request }) => {
         const id = params.id;
         if (!UUID_RE.test(id)) {
           return json({ code: "invalid_id", message: "Invalid order id" }, 400);
         }
+
+        const url = new URL(request.url);
+        const token = url.searchParams.get("token") || request.headers.get("x-guest-token");
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -39,6 +42,30 @@ export const Route = createFileRoute("/api/orders/$id")({
         }
         if (!row) {
           return json({ code: "not_found", message: "Order not found" }, 404);
+        }
+
+        // Verify token if not an authenticated admin request
+        const authHeader = request.headers.get("authorization");
+        let isAdmin = false;
+        if (authHeader?.startsWith("Bearer ")) {
+          const jwt = authHeader.slice(7);
+          const { data: userData } = await supabaseAdmin.auth.getUser(jwt);
+          if (userData.user) {
+            const { data: roleRow } = await supabaseAdmin
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", userData.user.id)
+              .eq("role", "admin")
+              .maybeSingle();
+            if (roleRow) isAdmin = true;
+          }
+        }
+
+        if (!isAdmin) {
+          const { verifyOrderToken } = await import("@/lib/server-crypto");
+          if (!token || !verifyOrderToken(row.id, row.customer_email, token)) {
+            return json({ code: "unauthorized", message: "Access token required to view order details" }, 401);
+          }
         }
 
         const { data: items, error: itemsErr } = await supabaseAdmin

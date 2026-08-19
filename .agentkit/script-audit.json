@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T01:57:50Z",
+  "report": {
+    "schema_version": 1,
+    "roots": [
+      "F:\\franky-s-arcade-studio"
+    ],
+    "summary": {
+      "total": 0,
+      "by_risk": {},
+      "by_language": {},
+      "findings": 0,
+      "executable_only": 0
+    },
+    "scripts": []
+  }
+}

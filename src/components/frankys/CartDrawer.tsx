@@ -130,37 +130,38 @@ export function CartDrawer() {
                   <div className="flex-1 flex flex-col gap-1" style={{ fontSize: 10 }}>
                     <span style={{ fontWeight: 700 }}>{it.product.name}</span>
                     <span className="text-muted">SIZE {it.size}</span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => cart.updateQty(it.productId, it.size, it.qty - 1)}
-                        className="w-6 h-6 border border-pixel rounded-btn arcade-bevel"
-                        aria-label="Decrease"
-                      >
-                        −
-                      </button>
-                      <span
-                        className="w-7 text-center"
-                        style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
-                      >
-                        {it.qty}
-                      </span>
-                      <button
-                        onClick={() =>
-                          cart.updateQty(it.productId, it.size, Math.min(9, it.qty + 1))
-                        }
-                        className="w-6 h-6 border border-pixel rounded-btn arcade-bevel"
-                        aria-label="Increase"
-                      >
-                        +
-                      </button>
-                      <button
-                        onClick={() => cart.removeItem(it.productId, it.size)}
-                        className="ml-auto px-2 h-6 border border-pixel rounded-btn arcade-bevel"
-                        style={{ fontSize: 9 }}
-                      >
-                        REMOVE
-                      </button>
-                    </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => cart.updateQty(it.productId, it.size, it.qty - 1)}
+                          className="min-w-[36px] min-h-[36px] md:min-w-[28px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center text-sm"
+                          aria-label={`Decrease quantity of ${it.product.name}`}
+                        >
+                          −
+                        </button>
+                        <span
+                          className="w-7 text-center"
+                          style={{ fontFamily: "VT323, monospace", fontSize: 18 }}
+                        >
+                          {it.qty}
+                        </span>
+                        <button
+                          onClick={() =>
+                            cart.updateQty(it.productId, it.size, Math.min(9, it.qty + 1))
+                          }
+                          className="min-w-[36px] min-h-[36px] md:min-w-[28px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center text-sm"
+                          aria-label={`Increase quantity of ${it.product.name}`}
+                        >
+                          +
+                        </button>
+                        <button
+                          onClick={() => cart.removeItem(it.productId, it.size)}
+                          className="ml-auto px-2 min-h-[36px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center"
+                          style={{ fontSize: 9 }}
+                          aria-label={`Remove ${it.product.name} from cart`}
+                        >
+                          REMOVE
+                        </button>
+                      </div>
                   </div>
                   <span style={{ fontSize: 10, fontWeight: 700 }}>
                     {formatPrice(it.lineTotalCents)}

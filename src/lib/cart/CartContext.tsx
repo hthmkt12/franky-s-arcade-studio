@@ -63,6 +63,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return [...prev, { productId, size, qty }];
     });
     setIsOpen(true);
+    import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => {
+      arcadeAudio.playAddCart();
+    });
   }, []);
 
   const updateQty = useCallback((productId: string, size: ProductSize, qty: number) => {

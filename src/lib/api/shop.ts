@@ -49,8 +49,9 @@ export async function createOrder(draft: OrderDraft): Promise<Order> {
   });
 }
 
-export async function getOrder(id: string): Promise<Order> {
-  return apiFetch<Order>(`/orders/${id}`);
+export async function getOrder(id: string, token?: string): Promise<Order> {
+  const query = token ? `?token=${encodeURIComponent(token)}` : "";
+  return apiFetch<Order>(`/orders/${id}${query}`);
 }
 
 

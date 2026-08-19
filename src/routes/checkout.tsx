@@ -50,10 +50,43 @@ function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const totals = useMemo(
-    () => (products ? computeTotals(cart.lines, products) : null),
-    [cart.lines, products],
-  );
+  // Promo code state
+  const [promoCode, setPromoCode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("frankys.promo.code") || "";
+    }
+    return "";
+  });
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("frankys.promo.code") === "COIN10" ? "COIN10" : null;
+    }
+    return null;
+  });
+
+  const handleApplyPromo = () => {
+    if (promoCode.trim().toUpperCase() === "COIN10" || promoCode.trim().toUpperCase() === "KONAMI") {
+      setAppliedPromo("COIN10");
+      toast.success("CHEAT CODE ACCEPTED: 10% OFF APPLIED!");
+      import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => arcadeAudio.playVictory());
+    } else {
+      toast.error("INVALID CHEAT CODE. TRY CLICKING INSERT COIN ON HOME!");
+    }
+  };
+
+  const totals = useMemo(() => {
+    if (!products) return null;
+    const base = computeTotals(cart.lines, products);
+    if (appliedPromo === "COIN10") {
+      const discount = Math.round(base.subtotalCents * 0.1);
+      return {
+        ...base,
+        discountCents: discount,
+        totalCents: Math.max(0, base.totalCents - discount),
+      };
+    }
+    return { ...base, discountCents: 0 };
+  }, [cart.lines, products, appliedPromo]);
   const items = products ? cart.buildView(products) : [];
 
 
@@ -87,10 +120,18 @@ function CheckoutPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const order = await createOrder({ items: cart.lines, customer });
+      const order = await createOrder({
+        items: cart.lines,
+        customer,
+        promoCode: appliedPromo ?? undefined,
+      });
       cart.clear();
       toast(`ORDER PLACED — ${order.number}`);
-      navigate({ to: "/checkout/success/$id", params: { id: order.id } });
+      navigate({
+        to: "/checkout/success/$id",
+        params: { id: order.id },
+        search: order.guestToken ? { token: order.guestToken } : undefined,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "ORDER FAILED");
       setSubmitting(false);
@@ -244,10 +285,35 @@ function CheckoutPage() {
           {totals && (
             <div className="border-t border-pixel border-dashed pt-2 flex flex-col gap-1">
               <Row label="SUBTOTAL" value={formatPrice(totals.subtotalCents)} />
+              {totals.discountCents ? (
+                <Row label="ARCADE DISCOUNT (10%)" value={`-${formatPrice(totals.discountCents)}`} />
+              ) : null}
               <Row label="SHIPPING" value={formatPrice(totals.shippingCents)} />
               <Row label="TOTAL" value={formatPrice(totals.totalCents)} bold />
             </div>
           )}
+
+          <div className="border-t border-pixel pt-2 flex flex-col gap-1.5 mt-2">
+            <span style={{ fontSize: 9, fontWeight: 700 }}>ARCADE CHEAT CODE</span>
+            <div className="flex gap-1">
+              <input
+                type="text"
+                placeholder="E.G. COIN10"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                className="flex-1 border border-pixel rounded-btn px-2 py-1 bg-cream text-xs uppercase"
+                style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
+              />
+              <button
+                type="button"
+                onClick={handleApplyPromo}
+                className="px-2 py-1 bg-ink text-cream rounded-btn arcade-bevel text-xs"
+                style={{ fontSize: 9 }}
+              >
+                APPLY
+              </button>
+            </div>
+          </div>
         </aside>
       </div>
     </div>

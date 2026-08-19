@@ -715,7 +715,7 @@ export function ArModal() {
                     setReticlePos(null);
                     setPhase("init");
                   }}
-                  className="px-3 py-2 rounded-btn border border-ink arcade-bevel text-cream"
+                  className="px-3 py-2 rounded-btn border border-ink arcade-bevel text-ink font-bold"
                   style={{ fontSize: 10, letterSpacing: 1, background: "var(--marquee)" }}
                 >
                   RETRY CAMERA

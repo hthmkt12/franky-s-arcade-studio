@@ -28,6 +28,7 @@ const OrderDraftSchema = z.object({
     postalCode: z.string().min(1).max(20),
     country: z.string().min(2).max(80),
   }),
+  promoCode: z.string().optional(),
 });
 
 function json(body: unknown, status = 200): Response {
@@ -35,10 +36,6 @@ function json(body: unknown, status = 200): Response {
     status,
     headers: { "content-type": "application/json; charset=utf-8" },
   });
-}
-
-function generateOrderNumber(): string {
-  return `FRK-${Math.floor(100000 + Math.random() * 900000)}`;
 }
 
 export const Route = createFileRoute("/api/orders")({
@@ -90,8 +87,13 @@ export const Route = createFileRoute("/api/orders")({
           }
           subtotalCents += p.price_cents * line.qty;
         }
+        let discountCents = 0;
+        if (draft.promoCode && (draft.promoCode.toUpperCase() === "COIN10" || draft.promoCode.toUpperCase() === "KONAMI")) {
+          discountCents = Math.round(subtotalCents * 0.1);
+        }
+
         const shippingCents = subtotalCents > 0 ? SHIPPING_FLAT_CENTS : 0;
-        const totalCents = subtotalCents + shippingCents;
+        const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents);
         const currency = products[0].currency as Order["currency"];
 
         const itemsPayload = draft.items.map((line) => {
@@ -136,6 +138,9 @@ export const Route = createFileRoute("/api/orders")({
         }
 
 
+        const { signOrderToken } = await import("@/lib/server-crypto");
+        const guestToken = signOrderToken(created.id, draft.customer.email);
+
         const order: Order = {
           id: created.id,
           number: created.number,
@@ -147,6 +152,7 @@ export const Route = createFileRoute("/api/orders")({
           currency,
           status: "pending",
           createdAt: created.created_at,
+          guestToken,
         };
         return json(order, 201);
 

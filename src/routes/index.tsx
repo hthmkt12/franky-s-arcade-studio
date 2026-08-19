@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://frankys.lovable.app/" }],
+    links: [{ rel: "canonical", href: `${process.env.VITE_APP_URL || "http://localhost:3000"}/` }],
   }),
 
   component: LandingPage,

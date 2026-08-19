@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
 
-const SITE = "https://frankys.lovable.app";
+const SITE = process.env.VITE_APP_URL || "http://localhost:3000";
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {

@@ -1,5 +1,10 @@
 // POST /api/webhooks/stripe
 // Syncs Stripe payment status with Supabase `orders` table.
+//
+// Fail-closed: the Stripe signature is always required. Without a configured
+// STRIPE_WEBHOOK_SECRET the endpoint refuses to run rather than trusting an
+// unsigned body. Event ids are recorded in `stripe_events` so duplicate
+// deliveries (Stripe retries / double-send) are no-ops.
 
 import { createFileRoute } from "@tanstack/react-router";
 import { stripe } from "@/lib/stripe.server";
@@ -11,29 +16,28 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-export const Route = createFileRoute("/api/webhooks/stripe" as unknown as "/api/products")({
+export const Route = createFileRoute("/api/webhooks/stripe")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
         const sig = request.headers.get("stripe-signature");
         const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+        if (!webhookSecret || !sig) {
+          console.error(
+            "[api/webhooks/stripe] Missing STRIPE_WEBHOOK_SECRET or stripe-signature header",
+          );
+          return json({ code: "bad_signature", message: "Webhook signature required" }, 400);
+        }
+
         let event;
         const rawBody = await request.text();
 
-        if (webhookSecret && sig) {
-          try {
-            event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-          } catch (err) {
-            console.error("[api/webhooks/stripe] Signature error", err);
-            return json({ code: "bad_signature", message: (err as Error).message }, 400);
-          }
-        } else {
-          try {
-            event = JSON.parse(rawBody);
-          } catch {
-            return json({ code: "invalid_body" }, 400);
-          }
+        try {
+          event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+        } catch (err) {
+          console.error("[api/webhooks/stripe] Signature error", err);
+          return json({ code: "bad_signature", message: (err as Error).message }, 400);
         }
 
         if (event.type === "checkout.session.completed") {
@@ -42,6 +46,19 @@ export const Route = createFileRoute("/api/webhooks/stripe" as unknown as "/api/
 
           if (orderId) {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+            // Idempotency: claim the event first. A prior (or concurrent)
+            // delivery already processed it, so return early as received.
+            const { data: claimed } = await supabaseAdmin
+              .from("stripe_events")
+              .insert({ event_id: event.id, event_type: event.type })
+              .select("event_id")
+              .maybeSingle();
+
+            if (!claimed) {
+              return json({ received: true, duplicate: true });
+            }
+
             const { data: updatedOrder, error } = await supabaseAdmin
               .from("orders")
               .update({ status: "paid" })
@@ -63,23 +80,27 @@ export const Route = createFileRoute("/api/webhooks/stripe" as unknown as "/api/
               const trackingUrl = `${origin}/checkout/success/${updatedOrder.id}?token=${guestToken}`;
 
               const currencySym = updatedOrder.currency === "EUR" ? "€" : "$";
-              void sendOrderConfirmationEmail({
-                to: updatedOrder.customer_email,
-                customerName: updatedOrder.customer_name,
-                orderNumber: updatedOrder.number,
-                orderId: updatedOrder.id,
-                guestToken,
-                items: (updatedOrder.order_items ?? []).map((it: { product_name: string; size: string; qty: number; unit_price_cents: number }) => ({
-                  name: it.product_name,
-                  size: it.size,
-                  qty: it.qty,
-                  price: `${currencySym}${(it.unit_price_cents / 100).toFixed(0)}`,
-                })),
-                subtotal: `${currencySym}${(updatedOrder.subtotal_cents / 100).toFixed(0)}`,
-                shipping: `${currencySym}${(updatedOrder.shipping_cents / 100).toFixed(0)}`,
-                total: `${currencySym}${(updatedOrder.total_cents / 100).toFixed(0)}`,
-                trackingUrl,
-              });
+              try {
+                await sendOrderConfirmationEmail({
+                  to: updatedOrder.customer_email,
+                  customerName: updatedOrder.customer_name,
+                  orderNumber: updatedOrder.number,
+                  orderId: updatedOrder.id,
+                  guestToken,
+                  items: (updatedOrder.order_items ?? []).map((it: { product_name: string; size: string; qty: number; unit_price_cents: number }) => ({
+                    name: it.product_name,
+                    size: it.size,
+                    qty: it.qty,
+                    price: `${currencySym}${(it.unit_price_cents / 100).toFixed(0)}`,
+                  })),
+                  subtotal: `${currencySym}${(updatedOrder.subtotal_cents / 100).toFixed(0)}`,
+                  shipping: `${currencySym}${(updatedOrder.shipping_cents / 100).toFixed(0)}`,
+                  total: `${currencySym}${(updatedOrder.total_cents / 100).toFixed(0)}`,
+                  trackingUrl,
+                });
+              } catch (emailErr) {
+                console.error("[api/webhooks/stripe] Confirmation email failed", emailErr);
+              }
             }
           }
         }

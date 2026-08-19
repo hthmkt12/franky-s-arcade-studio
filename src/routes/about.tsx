@@ -18,7 +18,7 @@ export const Route = createFileRoute("/about")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://frankys.lovable.app/about" }],
+    links: [{ rel: "canonical", href: `${process.env.VITE_APP_URL || "http://localhost:3000"}/about` }],
   }),
 
   component: AboutPage,

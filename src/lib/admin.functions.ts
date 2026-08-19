@@ -87,7 +87,7 @@ export const listOrders = createServerFn({ method: "GET" })
 
 export const updateOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
+  .validator(
     z.object({
       id: z.string().uuid(),
       status: StatusSchema,
@@ -96,7 +96,12 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ context, data }) => {
-    const updatePayload: Record<string, unknown> = { status: data.status };
+    const updatePayload: {
+      status: string;
+      tracking_number?: string | null;
+      carrier?: string | null;
+      shipped_at?: string;
+    } = { status: data.status };
     if (data.status === "shipped") {
       updatePayload.tracking_number = data.trackingNumber ?? null;
       updatePayload.carrier = data.carrier ?? "CTT Express";
@@ -118,7 +123,7 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
       import("@/lib/email.server").then(({ sendOrderShippedEmail }) => {
         const { signOrderToken } = require("@/lib/server-crypto");
         const guestToken = signOrderToken(row.id, row.customer_email);
-        const origin = process.env.VITE_APP_URL || "https://frankys.lovable.app";
+        const origin = process.env.VITE_APP_URL || "http://localhost:3000";
         const trackingUrl = `${origin}/checkout/success/${row.id}?token=${guestToken}`;
 
         void sendOrderShippedEmail({
@@ -156,7 +161,7 @@ export const listStock = createServerFn({ method: "GET" })
 
 export const updateStock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ id: z.string().uuid(), stockQty: z.number().int().min(0).max(9999) }))
+  .validator(z.object({ id: z.string().uuid(), stockQty: z.number().int().min(0).max(9999) }))
   .handler(async ({ context, data }) => {
     // Get current stock before update to check if transitioning from 0 -> >0
     const { data: currentProduct } = await context.supabase
@@ -188,7 +193,7 @@ export const updateStock = createServerFn({ method: "POST" })
 
       if (subscribers && subscribers.length > 0) {
         import("@/lib/email.server").then(async ({ sendRestockAlertEmail }) => {
-          const origin = process.env.VITE_APP_URL || "https://frankys.lovable.app";
+          const origin = process.env.VITE_APP_URL || "http://localhost:3000";
           const productUrl = `${origin}/shop/${row.slug}`;
 
           for (const sub of subscribers) {

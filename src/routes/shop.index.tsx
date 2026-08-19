@@ -4,32 +4,42 @@ import { useMemo, useState } from "react";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { VariantCard } from "@/components/frankys/VariantCard";
-
+import { arcadeAudio } from "@/lib/audio/arcade-audio";
 import { getProducts } from "@/lib/api/shop";
+import type { ProductCategory } from "@/lib/api/types";
 
 export const Route = createFileRoute("/shop/")({
   head: () => ({
     meta: [
-      { title: "Shop — Franky's Wool Caps" },
+      { title: "Shop — Franky's Arcade Merchandise & Caps" },
       {
         name: "description",
-        content: "Browse every Franky's cap. Handmade merino wool, five colors, one warm orange call.",
+        content: "Browse Franky's arcade shop: handmade merino caps, heavyweight hoodies, skate totes, and enamel pins.",
       },
-      { property: "og:title", content: "Shop — Franky's Wool Caps" },
+      { property: "og:title", content: "Shop — Franky's Merchandise & Caps" },
       {
         property: "og:description",
-        content: "Browse every Franky's cap: black, ochre, green, navy, red.",
+        content: "Browse Franky's arcade catalog: caps, hoodies, totes, pins.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://frankys.lovable.app/shop" }],
+    links: [{ rel: "canonical", href: `${process.env.VITE_APP_URL || "http://localhost:3000"}/shop` }],
   }),
 
   component: ShopPage,
 });
 
 type SortKey = "default" | "price-asc" | "price-desc" | "name";
+type CategoryFilter = "all" | ProductCategory;
+
+const CATEGORIES: { key: CategoryFilter; label: string; icon: string }[] = [
+  { key: "all", label: "ALL MERCH", icon: "★" },
+  { key: "caps", label: "CAPS", icon: "🧢" },
+  { key: "hoodies", label: "HOODIES", icon: "🧥" },
+  { key: "totes", label: "TOTES", icon: "👜" },
+  { key: "pins", label: "PINS", icon: "🪙" },
+];
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "default", label: "FEATURED" },
@@ -46,11 +56,19 @@ function ShopPage() {
     refetch,
   } = useQuery({ queryKey: ["products"], queryFn: getProducts });
 
+  const [category, setCategory] = useState<CategoryFilter>("all");
   const [sort, setSort] = useState<SortKey>("default");
   const [inStockOnly, setInStockOnly] = useState(false);
 
   const visible = useMemo(() => {
-    const list = (products ?? []).filter((p) => (inStockOnly ? p.inStock : true));
+    let list = products ?? [];
+    if (category !== "all") {
+      list = list.filter((p) => (p.category ?? "caps") === category);
+    }
+    if (inStockOnly) {
+      list = list.filter((p) => p.inStock);
+    }
+
     switch (sort) {
       case "price-asc":
         return [...list].sort((a, b) => a.priceCents - b.priceCents);
@@ -61,23 +79,52 @@ function ShopPage() {
       default:
         return list;
     }
-  }, [products, sort, inStockOnly]);
+  }, [products, category, sort, inStockOnly]);
+
+  const handleCategoryChange = (key: CategoryFilter) => {
+    arcadeAudio.playBeep(520);
+    setCategory(key);
+  };
 
   return (
     <div className="flex-1 bg-cream">
       <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col gap-6">
         <header className="flex items-end justify-between border-b border-ink pb-3">
           <h1 style={{ fontFamily: "var(--font-arcade)", fontSize: 18, letterSpacing: 2 }}>
-            ★ THE SHOP
+            ★ THE ARCADE SHOP
           </h1>
           <span
             className="text-muted"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 10 }}
           >
-            {products ? `${visible.length} CAPS` : isError ? "OFFLINE" : "LOADING..."}
+            {products ? `${visible.length} ITEMS` : isError ? "OFFLINE" : "LOADING..."}
           </span>
         </header>
 
+        {/* Category Tabs */}
+        <div
+          className="flex flex-wrap items-center gap-2"
+          style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 1 }}
+        >
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.key}
+              type="button"
+              aria-pressed={category === cat.key}
+              onClick={() => handleCategoryChange(cat.key)}
+              className={`px-4 py-2 rounded-btn border border-ink arcade-bevel flex items-center gap-1.5 transition-all ${
+                category === cat.key
+                  ? "bg-marquee text-ink font-bold scale-105"
+                  : "bg-cream text-ink hover:bg-ink hover:text-cream"
+              }`}
+            >
+              <span>{cat.icon}</span>
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Sort & Stock Filters */}
         {products && products.length > 0 && (
           <div
             className="flex flex-wrap items-center gap-2"
@@ -89,7 +136,7 @@ function ShopPage() {
                 type="button"
                 aria-pressed={sort === s.key}
                 onClick={() => setSort(s.key)}
-                className={`px-3 py-2 rounded-pill border border-ink arcade-bevel transition-colors ${
+                className={`px-3 py-1.5 rounded-pill border border-ink arcade-bevel transition-colors ${
                   sort === s.key ? "bg-ink text-cream" : "bg-cream hover:bg-ink hover:text-cream"
                 }`}
               >
@@ -100,7 +147,7 @@ function ShopPage() {
               type="button"
               aria-pressed={inStockOnly}
               onClick={() => setInStockOnly((v: boolean) => !v)}
-              className={`px-3 py-2 rounded-pill border border-ink arcade-bevel ml-auto transition-colors ${
+              className={`px-3 py-1.5 rounded-pill border border-ink arcade-bevel ml-auto transition-colors ${
                 inStockOnly ? "bg-buy text-cream" : "bg-cream hover:bg-ink hover:text-cream"
               }`}
             >
@@ -108,7 +155,6 @@ function ShopPage() {
             </button>
           </div>
         )}
-
 
         {isError ? (
           <ErrorState message="COULD NOT LOAD THE CATALOG." onRetry={() => void refetch()} />
@@ -126,12 +172,11 @@ function ShopPage() {
             ))}
           </div>
         ) : visible.length === 0 ? (
-
           <p
             className="border border-ink rounded-card p-6 text-center"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 12 }}
           >
-            {inStockOnly ? "NO CAPS IN STOCK RIGHT NOW." : "NO CAPS AVAILABLE. CHECK BACK SOON."}
+            {inStockOnly ? "NO ITEMS IN STOCK RIGHT NOW." : "NO ITEMS FOUND IN THIS CATEGORY. CHECK BACK SOON."}
           </p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -139,7 +184,6 @@ function ShopPage() {
               <VariantCard key={p.id} product={p} />
             ))}
           </div>
-
         )}
       </div>
     </div>

@@ -12,4 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Hard-pin the Nitro deploy target to Vercel. The Lovable wrapper defaults to
+  // the `cloudflare-module` preset, which would build the wrong runtime for a
+  // Vercel deployment. Outside Lovable builds (i.e. Vercel CI) this override is
+  // honored; inside Lovable builds it is forced back to Cloudflare.
+  nitro: { preset: "vercel" },
 });

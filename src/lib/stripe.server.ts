@@ -1,10 +1,14 @@
-// Server-side Stripe client & helpers
+// Server-side Stripe client & helpers.
+// Fail-closed: production MUST provide STRIPE_SECRET_KEY. Without it we refuse
+// to create a checkout session instead of silently falling back to a simulated
+// URL that would let customers "pay" without moving any money.
 
 import Stripe from "stripe";
 
-const stripeKey = process.env.STRIPE_SECRET_KEY || "sk_test_mock_arcade_key";
-
-export const stripe = new Stripe(stripeKey, {
+// The mock key only ever feeds the Stripe client constructor (used by the
+// webhook's signature verification, which needs no real key). The checkout
+// path below refuses to run without a real key in production.
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock_arcade_key", {
   apiVersion: "2023-10-16" as unknown as Stripe.LatestApiVersion,
   typescript: true,
 });
@@ -27,8 +31,14 @@ export interface CheckoutSessionOptions {
 }
 
 export async function createStripeSession(opts: CheckoutSessionOptions): Promise<{ url: string; id: string }> {
-  // If no live Stripe key is configured in env, fallback to simulated checkout URL
+  // Fail-closed: production refuses to run a simulated checkout. The simulated
+  // URL is dev/demo only, where a local build has no real key on purpose.
   if (!process.env.STRIPE_SECRET_KEY) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "[stripe] STRIPE_SECRET_KEY is not configured — refusing to create a simulated checkout session in production.",
+      );
+    }
     return {
       id: `sim_cs_${Math.random().toString(36).slice(2)}`,
       url: opts.successUrl,

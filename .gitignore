@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 .output
+.vercel
 .vinxi
 .tanstack/**
 .nitro
@@ -19,6 +20,11 @@ dist-ssr
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+
+# Environment files (secrets stay local / in the host's env)
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*

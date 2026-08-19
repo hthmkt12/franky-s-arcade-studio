@@ -2,7 +2,7 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 
-const SITE = "https://frankys.lovable.app";
+const SITE = process.env.VITE_APP_URL || "http://localhost:3000";
 
 export const Route = createFileRoute("/robots.txt")({
   server: {

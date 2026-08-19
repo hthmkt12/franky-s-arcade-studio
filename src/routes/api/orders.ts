@@ -94,6 +94,8 @@ export const Route = createFileRoute("/api/orders")({
             discountCents = Math.round(subtotalCents * 0.1);
           } else if (code === "RUNNER15") {
             discountCents = Math.round(subtotalCents * 0.15);
+          } else if (code === "CHAMP20") {
+            discountCents = Math.round(subtotalCents * 0.2);
           }
         }
 
@@ -146,32 +148,37 @@ export const Route = createFileRoute("/api/orders")({
         const { signOrderToken } = await import("@/lib/server-crypto");
         const guestToken = signOrderToken(created.id, draft.customer.email);
 
-        // Send confirmation email asynchronously
-        import("@/lib/email.server").then(({ sendOrderConfirmationEmail }) => {
-          const origin = new URL(request.url).origin;
-          const trackingUrl = `${origin}/checkout/success/${created.id}?token=${guestToken}`;
-          void sendOrderConfirmationEmail({
-            to: draft.customer.email,
-            customerName: draft.customer.name,
-            orderNumber: created.number,
-            orderId: created.id,
-            guestToken,
-            items: draft.items.map((line) => {
-              const p = productById.get(line.productId)!;
-              return {
-                name: p.name,
-                size: line.size,
-                qty: line.qty,
-                price: `${p.currency === "EUR" ? "€" : "$"}${(p.price_cents / 100).toFixed(0)}`,
-              };
-            }),
-            subtotal: `${currency === "EUR" ? "€" : "$"}${(subtotalCents / 100).toFixed(0)}`,
-            discount: discountCents > 0 ? `${currency === "EUR" ? "€" : "$"}${(discountCents / 100).toFixed(0)}` : undefined,
-            shipping: `${currency === "EUR" ? "€" : "$"}${(shippingCents / 100).toFixed(0)}`,
-            total: `${currency === "EUR" ? "€" : "$"}${(totalCents / 100).toFixed(0)}`,
-            trackingUrl,
+        // Send confirmation email asynchronously. Never allowed to break the
+        // order: email is log-only when RESEND_API_KEY is absent (see email.server.ts).
+        import("@/lib/email.server")
+          .then(({ sendOrderConfirmationEmail }) => {
+            const origin = new URL(request.url).origin;
+            const trackingUrl = `${origin}/checkout/success/${created.id}?token=${guestToken}`;
+            void sendOrderConfirmationEmail({
+              to: draft.customer.email,
+              customerName: draft.customer.name,
+              orderNumber: created.number,
+              orderId: created.id,
+              guestToken,
+              items: draft.items.map((line) => {
+                const p = productById.get(line.productId)!;
+                return {
+                  name: p.name,
+                  size: line.size,
+                  qty: line.qty,
+                  price: `${p.currency === "EUR" ? "€" : "$"}${(p.price_cents / 100).toFixed(0)}`,
+                };
+              }),
+              subtotal: `${currency === "EUR" ? "€" : "$"}${(subtotalCents / 100).toFixed(0)}`,
+              discount: discountCents > 0 ? `${currency === "EUR" ? "€" : "$"}${(discountCents / 100).toFixed(0)}` : undefined,
+              shipping: `${currency === "EUR" ? "€" : "$"}${(shippingCents / 100).toFixed(0)}`,
+              total: `${currency === "EUR" ? "€" : "$"}${(totalCents / 100).toFixed(0)}`,
+              trackingUrl,
+            });
+          })
+          .catch((err) => {
+            console.error("[api/orders] Confirmation email skipped", err);
           });
-        });
 
         const order: Order = {
           id: created.id,

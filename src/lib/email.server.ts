@@ -34,6 +34,67 @@ export interface OrderShippedEmailProps {
   trackingUrl: string;
 }
 
+export interface RestockAlertEmailProps {
+  to: string;
+  productName: string;
+  productUrl: string;
+}
+
+export async function sendRestockAlertEmail(data: RestockAlertEmailProps): Promise<{ success: boolean; id?: string }> {
+  if (!resend) {
+    console.log(`[Email Service - Simulated] Restock alert dispatched to ${data.to} for ${data.productName}`);
+    return { success: true, id: `sim_restock_email_${Date.now()}` };
+  }
+
+  const emailHtml = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>Back in Stock - Franky's</title>
+  </head>
+  <body style="margin: 0; padding: 20px; background-color: #f3e5df; font-family: 'Courier New', monospace; color: #000000;">
+    <div style="max-width: 500px; margin: 0 auto; background: #f3e5df; border: 2px solid #000000; padding: 24px; box-shadow: 4px 4px 0 #000000;">
+      <div style="text-align: center; border-bottom: 2px solid #000000; padding-bottom: 16px; margin-bottom: 20px;">
+        <h1 style="font-size: 24px; letter-spacing: 2px; margin: 0;">★ FRANKY'S ARCADE ★</h1>
+        <p style="margin: 6px 0 0 0; font-size: 12px; letter-spacing: 1px; color: #525252;">HANDMADE MERINO WOOL CAPS · PORTUGAL</p>
+      </div>
+
+      <div style="margin-bottom: 20px; text-align: center;">
+        <h2 style="font-size: 16px; margin: 0 0 8px 0; color: #128e44;">★ 1-UP! ITEM RESTOCKED ★</h2>
+        <p style="font-size: 14px; line-height: 1.4; margin: 0;">
+          Great news! <strong>${data.productName}</strong> has been freshly knitted and is back in stock at the studio.
+        </p>
+      </div>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${data.productUrl}" style="display: inline-block; background-color: #128e44; color: #f3e5df; padding: 12px 24px; text-decoration: none; font-weight: bold; border: 2px solid #000000; box-shadow: 2px 2px 0 #000000; font-size: 13px; letter-spacing: 1px;">
+          GRAB YOUR CAP NOW →
+        </a>
+      </div>
+
+      <div style="margin-top: 28px; text-align: center; border-top: 1px dashed #000000; padding-top: 12px; font-size: 11px; color: #525252;">
+        Stock is strictly limited. INSERT COIN & KEEP PLAYING.
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+
+  try {
+    const res = await resend.emails.send({
+      from: "Franky's Arcade <alerts@frankys.shop>",
+      to: data.to,
+      subject: `★ Restocked: ${data.productName} is back! - Franky's`,
+      html: emailHtml,
+    });
+    return { success: true, id: res.data?.id };
+  } catch (err) {
+    console.error("[Resend Error]", err);
+    return { success: false };
+  }
+}
+
 export async function sendOrderShippedEmail(data: OrderShippedEmailProps): Promise<{ success: boolean; id?: string }> {
   if (!resend) {
     console.log(`[Email Service - Simulated] Order shipped notification dispatched to ${data.to} for order ${data.orderNumber}`);

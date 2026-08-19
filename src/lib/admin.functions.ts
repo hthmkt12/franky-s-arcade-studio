@@ -158,13 +158,53 @@ export const updateStock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid(), stockQty: z.number().int().min(0).max(9999) }))
   .handler(async ({ context, data }) => {
+    // Get current stock before update to check if transitioning from 0 -> >0
+    const { data: currentProduct } = await context.supabase
+      .from("products")
+      .select("id, name, slug, stock_qty")
+      .eq("id", data.id)
+      .maybeSingle();
+
+    const wasOutOfStock = (currentProduct?.stock_qty ?? 0) === 0;
+
     const { data: row, error } = await context.supabase
       .from("products")
       .update({ stock_qty: data.stockQty, in_stock: data.stockQty > 0 })
       .eq("id", data.id)
-      .select("id, stock_qty, in_stock")
+      .select("id, name, slug, stock_qty, in_stock")
       .maybeSingle();
+
     if (error) throw new Error("Could not update stock");
     if (!row) throw new Error("Product not found or not permitted");
+
+    // If restocked from 0 to positive units, trigger restock alert emails
+    if (wasOutOfStock && data.stockQty > 0) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: subscribers } = await supabaseAdmin
+        .from("restock_subscriptions")
+        .select("id, email")
+        .eq("product_id", row.id)
+        .eq("notified", false);
+
+      if (subscribers && subscribers.length > 0) {
+        import("@/lib/email.server").then(async ({ sendRestockAlertEmail }) => {
+          const origin = process.env.VITE_APP_URL || "https://frankys.lovable.app";
+          const productUrl = `${origin}/shop/${row.slug}`;
+
+          for (const sub of subscribers) {
+            await sendRestockAlertEmail({
+              to: sub.email,
+              productName: row.name,
+              productUrl,
+            });
+            await supabaseAdmin
+              .from("restock_subscriptions")
+              .update({ notified: true, notified_at: new Date().toISOString() })
+              .eq("id", sub.id);
+          }
+        }).catch((err) => console.error("[Restock Alert Dispatch Error]", err));
+      }
+    }
+
     return row;
   });

@@ -39,7 +39,7 @@ Franky's Arcade Studio roadmap outlines past achievements, current architectural
 
 ## Long-Term Goals (Phase 3 — Future Horizons)
 
+- [x] **Automated Restock Alerts**: Email notifications via Resend when sold-out cap variants return to stock, with single-click subscriber notifications on Admin stock updates.
 - **Merchandise Expansion**: Add hoodies, tote bags, and enamel arcade pins to the inventory engine.
 - **Physical Arcade Machine Integration**: QR code kiosks at pop-up skate events syncing orders to the web backend.
 - **Web3 / Arcade Token Loyalty**: Optional arcade high-score leaderboard granting seasonal store discounts.
-- **Automated Restock Alerts**: Email notifications when sold-out cap variants return to stock.

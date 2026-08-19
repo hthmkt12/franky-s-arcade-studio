@@ -246,11 +246,15 @@ function ProductPage() {
             type="button"
             disabled={!product.inStock}
             onClick={add}
-            className="bg-buy text-cream py-4 rounded-btn border border-ink arcade-bevel disabled:bg-muted disabled:cursor-not-allowed"
+            className="w-full bg-buy text-cream py-4 rounded-btn border border-ink arcade-bevel disabled:bg-muted disabled:cursor-not-allowed cursor-pointer"
             style={{ fontSize: 14, letterSpacing: 2 }}
           >
             {product.inStock ? "ADD TO CART" : "SOLD OUT"}
           </button>
+
+          {!product.inStock && (
+            <RestockAlertBox productId={product.id} productName={product.name} />
+          )}
 
           {product.inStock && product.stockQty <= 5 && (
             <p className="text-muted text-center" style={{ fontSize: 10, letterSpacing: 1 }}>
@@ -299,6 +303,72 @@ function ProductPage() {
       </div>
     </div>
 
+  );
+}
+
+function RestockAlertBox({ productId, productName }: { productId: string; productName: string }) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/products/restock-alert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, email: email.trim() }),
+      });
+
+      if (!res.ok) throw new Error("Failed to register");
+
+      setSubscribed(true);
+      toast.success(`RESTOCK ALERT SET FOR ${productName.toUpperCase()}`);
+    } catch {
+      toast.error("COULD NOT SET RESTOCK ALERT");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (subscribed) {
+    return (
+      <div className="border border-ink bg-white p-3 rounded-card text-center flex flex-col gap-1">
+        <span className="text-buy font-bold" style={{ fontSize: 10 }}>★ 1-UP! YOU'RE ON THE LIST ★</span>
+        <span className="text-muted" style={{ fontSize: 8 }}>WE'LL EMAIL {email.toUpperCase()} WHEN THIS CAP IS KNITTED.</span>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="border border-ink bg-white p-3 rounded-card flex flex-col gap-2">
+      <div className="flex flex-col gap-0.5">
+        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>NOTIFY ME WHEN RESTOCKED</span>
+        <span className="text-muted" style={{ fontSize: 8 }}>GET AN 8-BIT EMAIL ONCE RESTOCKED</span>
+      </div>
+      <div className="flex gap-2">
+        <input
+          type="email"
+          placeholder="player1@arcade.shop"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border border-pixel rounded-btn px-2 py-1 bg-cream flex-1 text-xs"
+          style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-ink text-cream px-3 py-1 rounded-btn text-xs arcade-bevel disabled:opacity-50"
+          style={{ fontSize: 9, letterSpacing: 1 }}
+        >
+          {loading ? "SAVING..." : "NOTIFY ME"}
+        </button>
+      </div>
+    </form>
   );
 }
 

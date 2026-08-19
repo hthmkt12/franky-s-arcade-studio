@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { openArModal } from "@/components/frankys/ArModal";
+import { openSizeGuide } from "@/components/frankys/SizeGuideModal";
 import { Cap3DViewer } from "@/components/frankys/Cap3DViewer";
 import { formatPrice, getProductBySlug, getProducts } from "@/lib/api/shop";
 
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/shop/$slug")({
         { property: "og:type", content: "product" },
         { name: "twitter:card", content: "summary" },
       ],
-      links: [{ rel: "canonical", href: `https://frankys.lovable.app/shop/${params.slug}` }],
+      links: [{ rel: "canonical", href: `${process.env.VITE_APP_URL || "http://localhost:3000"}/shop/${params.slug}` }],
     };
   },
 
@@ -117,7 +118,7 @@ function ProductPage() {
       availability: product.inStock
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
-      url: `https://frankys.lovable.app/shop/${product.slug}`,
+      url: `${process.env.VITE_APP_URL || "http://localhost:3000"}/shop/${product.slug}`,
     },
   };
 
@@ -133,7 +134,7 @@ function ProductPage() {
           className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex flex-col items-center justify-center gap-3 p-6 md:sticky md:top-20 self-start"
         >
           <div className="bg-cream border border-ink rounded-card p-4 arcade-bevel w-full flex items-center justify-center min-h-[320px]">
-            {view3D ? (
+            {view3D && (product.category ?? "caps") === "caps" ? (
               <Cap3DViewer colorHex={product.colorHex} className="h-[300px]" />
             ) : (
               <img
@@ -147,17 +148,19 @@ function ProductPage() {
           </div>
           
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setView3D((v) => !v)}
-              className={`border border-ink rounded-btn px-3 py-2 arcade-bevel transition-colors ${
-                view3D ? "bg-ink text-cream" : "bg-cream text-ink hover:bg-marquee"
-              }`}
-              style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 2 }}
-              aria-label="Toggle 3D View"
-            >
-              {view3D ? "2D PHOTO" : "3D MODEL [360°]"}
-            </button>
+            {(product.category ?? "caps") === "caps" && (
+              <button
+                type="button"
+                onClick={() => setView3D((v) => !v)}
+                className={`border border-ink rounded-btn px-3 py-2 arcade-bevel transition-colors ${
+                  view3D ? "bg-ink text-cream" : "bg-cream text-ink hover:bg-marquee"
+                }`}
+                style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 2 }}
+                aria-label="Toggle 3D View"
+              >
+                {view3D ? "2D PHOTO" : "3D MODEL [360°]"}
+              </button>
+            )}
 
             <button
               type="button"
@@ -197,7 +200,17 @@ function ProductPage() {
           </p>
 
           <div className="flex flex-col gap-2">
-            <span style={{ fontSize: 10, letterSpacing: 1 }}>SIZE</span>
+            <div className="flex items-center justify-between">
+              <span style={{ fontSize: 10, letterSpacing: 1 }}>SIZE</span>
+              <button
+                type="button"
+                onClick={() => openSizeGuide(product.category ?? "caps")}
+                className="text-muted underline underline-offset-4 hover:text-ink transition-colors"
+                style={{ fontSize: 9, letterSpacing: 1 }}
+              >
+                SIZE GUIDE [?]
+              </button>
+            </div>
             <div className="flex gap-2">
               {product.sizes.map((s) => (
                 <button

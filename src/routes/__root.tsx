@@ -18,6 +18,7 @@ import { TopMarquee, BottomMarquee } from "../components/frankys/Marquee";
 import { CartDrawer } from "../components/frankys/CartDrawer";
 import { PixelHorse } from "../components/frankys/PixelHorse";
 import { ArModal } from "../components/frankys/ArModal";
+import { SizeGuideModal } from "../components/frankys/SizeGuideModal";
 
 
 function NotFoundComponent() {
@@ -133,6 +134,7 @@ function RootComponent() {
           <BottomMarquee />
           <CartDrawer />
           <ArModal />
+          <SizeGuideModal />
 
           <Toaster
             position="bottom-center"

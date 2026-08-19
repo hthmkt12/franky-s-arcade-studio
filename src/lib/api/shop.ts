@@ -44,8 +44,31 @@ export function computeTotals(
     if (!product) return sum;
     return sum + convertPrice(product.priceCents, currency) * line.qty;
   }, 0);
-  const shippingCents = subtotalCents > 0 ? getShippingRate(countryCode, currency) : 0;
+  // Free shipping on orders over €100 (10000 cents in base EUR currency)
+  const freeShippingThreshold = convertPrice(10000, currency);
+  const isFreeShipping = subtotalCents >= freeShippingThreshold;
+  const shippingCents = subtotalCents > 0 && !isFreeShipping ? getShippingRate(countryCode, currency) : 0;
   return { subtotalCents, shippingCents, totalCents: subtotalCents + shippingCents };
+}
+
+export interface FreeShippingProgress {
+  thresholdCents: number;
+  remainingCents: number;
+  progressPercent: number;
+  unlocked: boolean;
+}
+
+export function getFreeShippingProgress(
+  subtotalCents: number,
+  currency: Currency = "EUR",
+): FreeShippingProgress {
+  const thresholdCents = convertPrice(10000, currency);
+  const remainingCents = Math.max(0, thresholdCents - subtotalCents);
+  const unlocked = subtotalCents >= thresholdCents;
+  const progressPercent = thresholdCents > 0
+    ? Math.min(100, Math.round((subtotalCents / thresholdCents) * 100))
+    : 0;
+  return { thresholdCents, remainingCents, progressPercent, unlocked };
 }
 
 export async function createOrder(draft: OrderDraft): Promise<Order> {

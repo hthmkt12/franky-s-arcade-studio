@@ -1,19 +1,22 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { formatPrice } from "@/lib/api/shop";
 import { useCart } from "@/lib/cart/CartContext";
 import { openArModal } from "@/components/frankys/ArModal";
-import type { Product } from "@/lib/api/types";
+import { openSizeGuide } from "@/components/frankys/SizeGuideModal";
+import type { Product, ProductSize } from "@/lib/api/types";
 
 export function VariantCard({ product }: { product: Product }) {
 
   const cart = useCart();
   const defaultSize = product.sizes[0] ?? "ONE";
+  const [size, setSize] = useState<ProductSize>(defaultSize);
 
   const add = () => {
-    cart.addItem(product.id, defaultSize, 1);
-    toast(`ADDED — ${product.name} (${defaultSize})`);
+    cart.addItem(product.id, size, 1);
+    toast(`ADDED — ${product.name} (${size})`);
   };
 
   return (
@@ -61,6 +64,38 @@ export function VariantCard({ product }: { product: Product }) {
         </button>
 
       </div>
+
+      {product.sizes.length > 1 && (
+        <div
+          className="border-t border-dashed border-ink px-3 py-2 flex items-center justify-between gap-2"
+          style={{ fontSize: 8 }}
+        >
+          <div className="flex items-center gap-1">
+            {product.sizes.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setSize(s)}
+                aria-pressed={s === size}
+                className={`min-w-[26px] h-7 px-1 rounded-btn border border-ink arcade-bevel transition-colors ${
+                  s === size ? "bg-ink text-cream" : "bg-cream text-ink hover:bg-marquee"
+                }`}
+                style={{ fontSize: 8 }}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => openSizeGuide(product.category ?? "caps")}
+            className="text-muted underline underline-offset-2 hover:text-ink transition-colors"
+            style={{ fontSize: 8 }}
+          >
+            [?]
+          </button>
+        </div>
+      )}
 
       <button
         type="button"

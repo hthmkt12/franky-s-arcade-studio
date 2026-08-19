@@ -21,19 +21,19 @@ Franky's Arcade Studio roadmap outlines past achievements, current architectural
 ## Near-Term Milestones (Phase 2 — In Progress & Next Up)
 
 ### Milestone 2.1: Order Management & Tracking
-- [ ] Email order confirmation dispatch via transactional email service (e.g., Cloudflare Email Service / Resend).
-- [ ] Tracking number and shipment status updates in the Admin dashboard.
-- [ ] Self-service guest order status lookup portal with email verification.
+- [x] Email order confirmation dispatch via transactional email service (Resend).
+- [x] Tracking number and shipment status updates in the Admin dashboard.
+- [x] Self-service guest order status lookup portal (`/track`) with email verification and HMAC receipt access.
 
 ### Milestone 2.2: Enhanced Audio & Interactive Mini-Games
-- [ ] Konami Code Easter Egg (`↑ ↑ ↓ ↓ ← → ← → B A`) listener on home page unlocking hidden pixel sound bites.
-- [ ] Background 8-bit ambient track option with volume slider in header.
-- [ ] Pixel Horse arcade mini-runner game modal for unlocking exclusive secret discounts.
+- [x] Konami Code Easter Egg (`↑ ↑ ↓ ↓ ← → ← → B A`) listener on home page unlocking `KONAMI` discount & 8-bit victory fanfare.
+- [x] Pixel Horse arcade mini-runner game modal with jump physics and collision detection, unlocking `RUNNER15` (15% off at 100 points).
+- [x] Enhanced Web Audio Synthesizer with jump, hit, and fanfare sound synthesis.
 
 ### Milestone 2.3: Internationalization & Multi-Currency
-- [ ] Dynamic currency switching (`EUR` / `USD` / `GBP`) with localized pricing tiers.
-- [ ] Multi-language support for Portuguese (`pt-PT`) and English (`en-US`).
-- [ ] Automated international shipping calculation based on destination country.
+- [x] Dynamic currency switching (`EUR` / `USD` / `GBP`) with localized pricing tiers and header switcher.
+- [x] Multi-language dictionary support for Portuguese (`pt-PT`) and English (`en-US`).
+- [x] Automated international shipping calculation based on destination country (PT: €5, EU: €7, UK: £8, US: $12, Int'l: €15).
 
 ---
 

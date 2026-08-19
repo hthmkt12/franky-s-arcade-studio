@@ -1,7 +1,9 @@
 // Domain types shared between frontend and (future) backend.
 // Keep this file backend-agnostic — no React, no fetch.
 
-export type Currency = "EUR" | "USD";
+export type Currency = "EUR" | "USD" | "GBP";
+
+export type Language = "en" | "pt";
 
 export type ProductSize = "S" | "M" | "L" | "ONE";
 
@@ -65,6 +67,9 @@ export interface Order {
   status: "pending" | "paid" | "shipped" | "cancelled";
   createdAt: string;
   guestToken?: string;
+  trackingNumber?: string | null;
+  carrier?: string | null;
+  shippedAt?: string | null;
 }
 
 export interface ApiError {

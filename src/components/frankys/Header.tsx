@@ -9,6 +9,7 @@ import { PixelHorse } from "./PixelHorse";
 const NAV = [
   { to: "/", label: "HOME" },
   { to: "/shop", label: "SHOP" },
+  { to: "/track", label: "TRACK" },
   { to: "/about", label: "ABOUT" },
   { to: "/cart", label: "CART" },
 ] as const;
@@ -18,15 +19,35 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [currency, setCurrency] = useState<"EUR" | "USD" | "GBP">("EUR");
 
   useEffect(() => {
     setMounted(true);
     setIsMuted(arcadeAudio.getMuted());
+    try {
+      const savedCur = localStorage.getItem("frankys.currency") as "EUR" | "USD" | "GBP";
+      if (savedCur) setCurrency(savedCur);
+    } catch {}
   }, []);
 
   const handleToggleAudio = () => {
     const muted = arcadeAudio.toggleMute();
     setIsMuted(muted);
+  };
+
+  const handleToggleCurrency = () => {
+    arcadeAudio.playBeep(440);
+    const nextCur: Record<"EUR" | "USD" | "GBP", "EUR" | "USD" | "GBP"> = {
+      EUR: "USD",
+      USD: "GBP",
+      GBP: "EUR",
+    };
+    const next = nextCur[currency];
+    setCurrency(next);
+    try {
+      localStorage.setItem("frankys.currency", next);
+      window.dispatchEvent(new Event("frankys.currency.changed"));
+    } catch {}
   };
 
   return (
@@ -84,6 +105,16 @@ export function Header() {
         </Link>
 
         <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={handleToggleCurrency}
+            title="Switch Currency (EUR / USD / GBP)"
+            className="px-2 h-11 md:h-9 border border-ink rounded-btn bg-cream arcade-bevel hover:bg-ink hover:text-cream transition-colors flex items-center justify-center font-bold"
+            style={{ fontFamily: "var(--font-arcade)", fontSize: 9 }}
+          >
+            {currency}
+          </button>
+
           <button
             type="button"
             onClick={handleToggleAudio}

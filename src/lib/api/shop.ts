@@ -7,7 +7,8 @@
 
 import { apiFetch } from "./client";
 import { resolveProductImage } from "./product-images";
-import type { CartLine, Order, OrderDraft, Product } from "./types";
+import type { CartLine, Currency, Order, OrderDraft, Product } from "./types";
+import { convertPrice, CURRENCY_SYMBOLS, getShippingRate } from "../i18n";
 
 const SHIPPING_FLAT_CENTS = 700;
 
@@ -32,13 +33,18 @@ export interface PriceBreakdown {
   totalCents: number;
 }
 
-export function computeTotals(lines: CartLine[], products: Product[]): PriceBreakdown {
+export function computeTotals(
+  lines: CartLine[],
+  products: Product[],
+  countryCode = "PT",
+  currency: Currency = "EUR",
+): PriceBreakdown {
   const subtotalCents = lines.reduce((sum, line) => {
     const product = products.find((p) => p.id === line.productId);
     if (!product) return sum;
-    return sum + product.priceCents * line.qty;
+    return sum + convertPrice(product.priceCents, currency) * line.qty;
   }, 0);
-  const shippingCents = subtotalCents > 0 ? SHIPPING_FLAT_CENTS : 0;
+  const shippingCents = subtotalCents > 0 ? getShippingRate(countryCode, currency) : 0;
   return { subtotalCents, shippingCents, totalCents: subtotalCents + shippingCents };
 }
 
@@ -54,8 +60,7 @@ export async function getOrder(id: string, token?: string): Promise<Order> {
   return apiFetch<Order>(`/orders/${id}${query}`);
 }
 
-
-export function formatPrice(cents: number, currency: "EUR" | "USD" = "EUR"): string {
-  const symbol = currency === "EUR" ? "€" : "$";
+export function formatPrice(cents: number, currency: Currency = "EUR"): string {
+  const symbol = CURRENCY_SYMBOLS[currency] ?? "€";
   return `${symbol}${(cents / 100).toFixed(0)}`;
 }

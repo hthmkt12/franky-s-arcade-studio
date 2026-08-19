@@ -1,4 +1,4 @@
-import type { Currency, Language } from "./types";
+import type { Currency, Language } from "./api/types";
 
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
   EUR: "€",

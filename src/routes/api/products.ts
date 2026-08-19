@@ -11,11 +11,12 @@ import type { Database } from "@/integrations/supabase/types";
 
 type ProductRow = Database["public"]["Tables"]["products"]["Row"];
 
-function rowToProduct(row: ProductRow): Product {
+function rowToProduct(row: ProductRow & { category?: string }): Product {
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
+    category: (row.category as Product["category"]) ?? "caps",
     colorHex: row.color_hex,
     priceCents: row.price_cents,
     currency: row.currency as Product["currency"],

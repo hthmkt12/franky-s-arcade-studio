@@ -15,6 +15,9 @@ const ASSETS: Record<string, string> = {
   ochre: hatOchre,
   navy: hatNavy,
   red: hatRed,
+  "hoodie-black": hatBlack,
+  "tote-cream": hatOchre,
+  "pin-coin": hatRed,
 };
 
 const FALLBACK = hatBlack;

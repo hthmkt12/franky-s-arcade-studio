@@ -9,55 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as CartRouteImport } from './routes/cart'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SplatRouteImport } from './routes/$'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CartRouteImport } from './routes/cart'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TrackRouteImport } from './routes/track'
+import { Route as ApiOrdersRouteImport } from './routes/api/orders'
+import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
-import { Route as ApiProductsRouteImport } from './routes/api/products'
-import { Route as ApiOrdersRouteImport } from './routes/api/orders'
-import { Route as CheckoutSuccessIdRouteImport } from './routes/checkout.success.$id'
+import { Route as ApiArcadeScoresRouteImport } from './routes/api/arcade.scores'
 import { Route as ApiOrdersIdRouteImport } from './routes/api/orders.$id'
+import { Route as ApiOrdersLookupRouteImport } from './routes/api/orders.lookup'
+import { Route as ApiProductsRestockAlertRouteImport } from './routes/api/products.restock-alert'
+import { Route as ApiWebhooksStripeRouteImport } from './routes/api/webhooks.stripe'
+import { Route as CheckoutSuccessIdRouteImport } from './routes/checkout.success.$id'
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CartRoute = CartRouteImport.update({
-  id: '/cart',
-  path: '/cart',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplatRoute = SplatRouteImport.update({
@@ -65,9 +40,54 @@ const SplatRoute = SplatRouteImport.update({
   path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOrdersRoute = ApiOrdersRouteImport.update({
+  id: '/api/orders',
+  path: '/api/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProductsRoute = ApiProductsRouteImport.update({
+  id: '/api/products',
+  path: '/api/products',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShopIndexRoute = ShopIndexRouteImport.update({
@@ -80,25 +100,35 @@ const ShopSlugRoute = ShopSlugRouteImport.update({
   path: '/shop/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiProductsRoute = ApiProductsRouteImport.update({
-  id: '/api/products',
-  path: '/api/products',
+const ApiArcadeScoresRoute = ApiArcadeScoresRouteImport.update({
+  id: '/api/arcade/scores',
+  path: '/api/arcade/scores',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiOrdersRoute = ApiOrdersRouteImport.update({
-  id: '/api/orders',
-  path: '/api/orders',
+const ApiOrdersIdRoute = ApiOrdersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiOrdersRoute,
+} as any)
+const ApiOrdersLookupRoute = ApiOrdersLookupRouteImport.update({
+  id: '/lookup',
+  path: '/lookup',
+  getParentRoute: () => ApiOrdersRoute,
+} as any)
+const ApiProductsRestockAlertRoute = ApiProductsRestockAlertRouteImport.update({
+  id: '/restock-alert',
+  path: '/restock-alert',
+  getParentRoute: () => ApiProductsRoute,
+} as any)
+const ApiWebhooksStripeRoute = ApiWebhooksStripeRouteImport.update({
+  id: '/api/webhooks/stripe',
+  path: '/api/webhooks/stripe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutSuccessIdRoute = CheckoutSuccessIdRouteImport.update({
   id: '/success/$id',
   path: '/success/$id',
   getParentRoute: () => CheckoutRoute,
-} as any)
-const ApiOrdersIdRoute = ApiOrdersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ApiOrdersRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -111,11 +141,16 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/track': typeof TrackRoute
   '/api/orders': typeof ApiOrdersRouteWithChildren
-  '/api/products': typeof ApiProductsRoute
+  '/api/products': typeof ApiProductsRouteWithChildren
   '/shop/$slug': typeof ShopSlugRoute
   '/shop/': typeof ShopIndexRoute
+  '/api/arcade/scores': typeof ApiArcadeScoresRoute
   '/api/orders/$id': typeof ApiOrdersIdRoute
+  '/api/orders/lookup': typeof ApiOrdersLookupRoute
+  '/api/products/restock-alert': typeof ApiProductsRestockAlertRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/checkout/success/$id': typeof CheckoutSuccessIdRoute
 }
 export interface FileRoutesByTo {
@@ -128,11 +163,16 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/track': typeof TrackRoute
   '/api/orders': typeof ApiOrdersRouteWithChildren
-  '/api/products': typeof ApiProductsRoute
+  '/api/products': typeof ApiProductsRouteWithChildren
   '/shop/$slug': typeof ShopSlugRoute
   '/shop': typeof ShopIndexRoute
+  '/api/arcade/scores': typeof ApiArcadeScoresRoute
   '/api/orders/$id': typeof ApiOrdersIdRoute
+  '/api/orders/lookup': typeof ApiOrdersLookupRoute
+  '/api/products/restock-alert': typeof ApiProductsRestockAlertRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/checkout/success/$id': typeof CheckoutSuccessIdRoute
 }
 export interface FileRoutesById {
@@ -146,11 +186,16 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/track': typeof TrackRoute
   '/api/orders': typeof ApiOrdersRouteWithChildren
-  '/api/products': typeof ApiProductsRoute
+  '/api/products': typeof ApiProductsRouteWithChildren
   '/shop/$slug': typeof ShopSlugRoute
   '/shop/': typeof ShopIndexRoute
+  '/api/arcade/scores': typeof ApiArcadeScoresRoute
   '/api/orders/$id': typeof ApiOrdersIdRoute
+  '/api/orders/lookup': typeof ApiOrdersLookupRoute
+  '/api/products/restock-alert': typeof ApiProductsRestockAlertRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/checkout/success/$id': typeof CheckoutSuccessIdRoute
 }
 export interface FileRouteTypes {
@@ -165,11 +210,16 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/track'
     | '/api/orders'
     | '/api/products'
     | '/shop/$slug'
     | '/shop/'
+    | '/api/arcade/scores'
     | '/api/orders/$id'
+    | '/api/orders/lookup'
+    | '/api/products/restock-alert'
+    | '/api/webhooks/stripe'
     | '/checkout/success/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -182,11 +232,16 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/track'
     | '/api/orders'
     | '/api/products'
     | '/shop/$slug'
     | '/shop'
+    | '/api/arcade/scores'
     | '/api/orders/$id'
+    | '/api/orders/lookup'
+    | '/api/products/restock-alert'
+    | '/api/webhooks/stripe'
     | '/checkout/success/$id'
   id:
     | '__root__'
@@ -199,11 +254,16 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/track'
     | '/api/orders'
     | '/api/products'
     | '/shop/$slug'
     | '/shop/'
+    | '/api/arcade/scores'
     | '/api/orders/$id'
+    | '/api/orders/lookup'
+    | '/api/products/restock-alert'
+    | '/api/webhooks/stripe'
     | '/checkout/success/$id'
   fileRoutesById: FileRoutesById
 }
@@ -217,61 +277,22 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TrackRoute: typeof TrackRoute
   ApiOrdersRoute: typeof ApiOrdersRouteWithChildren
-  ApiProductsRoute: typeof ApiProductsRoute
+  ApiProductsRoute: typeof ApiProductsRouteWithChildren
   ShopSlugRoute: typeof ShopSlugRoute
   ShopIndexRoute: typeof ShopIndexRoute
+  ApiArcadeScoresRoute: typeof ApiArcadeScoresRoute
+  ApiWebhooksStripeRoute: typeof ApiWebhooksStripeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cart': {
-      id: '/cart'
-      path: '/cart'
-      fullPath: '/cart'
-      preLoaderRoute: typeof CartRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -281,11 +302,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/orders': {
+      id: '/api/orders'
+      path: '/api/orders'
+      fullPath: '/api/orders'
+      preLoaderRoute: typeof ApiOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/products': {
+      id: '/api/products'
+      path: '/api/products'
+      fullPath: '/api/products'
+      preLoaderRoute: typeof ApiProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shop/': {
@@ -302,18 +386,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/products': {
-      id: '/api/products'
-      path: '/api/products'
-      fullPath: '/api/products'
-      preLoaderRoute: typeof ApiProductsRouteImport
+    '/api/arcade/scores': {
+      id: '/api/arcade/scores'
+      path: '/api/arcade/scores'
+      fullPath: '/api/arcade/scores'
+      preLoaderRoute: typeof ApiArcadeScoresRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/orders': {
-      id: '/api/orders'
-      path: '/api/orders'
-      fullPath: '/api/orders'
-      preLoaderRoute: typeof ApiOrdersRouteImport
+    '/api/orders/$id': {
+      id: '/api/orders/$id'
+      path: '/$id'
+      fullPath: '/api/orders/$id'
+      preLoaderRoute: typeof ApiOrdersIdRouteImport
+      parentRoute: typeof ApiOrdersRoute
+    }
+    '/api/orders/lookup': {
+      id: '/api/orders/lookup'
+      path: '/lookup'
+      fullPath: '/api/orders/lookup'
+      preLoaderRoute: typeof ApiOrdersLookupRouteImport
+      parentRoute: typeof ApiOrdersRoute
+    }
+    '/api/products/restock-alert': {
+      id: '/api/products/restock-alert'
+      path: '/restock-alert'
+      fullPath: '/api/products/restock-alert'
+      preLoaderRoute: typeof ApiProductsRestockAlertRouteImport
+      parentRoute: typeof ApiProductsRoute
+    }
+    '/api/webhooks/stripe': {
+      id: '/api/webhooks/stripe'
+      path: '/api/webhooks/stripe'
+      fullPath: '/api/webhooks/stripe'
+      preLoaderRoute: typeof ApiWebhooksStripeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout/success/$id': {
@@ -322,13 +427,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/checkout/success/$id'
       preLoaderRoute: typeof CheckoutSuccessIdRouteImport
       parentRoute: typeof CheckoutRoute
-    }
-    '/api/orders/$id': {
-      id: '/api/orders/$id'
-      path: '/$id'
-      fullPath: '/api/orders/$id'
-      preLoaderRoute: typeof ApiOrdersIdRouteImport
-      parentRoute: typeof ApiOrdersRoute
     }
   }
 }
@@ -347,14 +445,28 @@ const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
 
 interface ApiOrdersRouteChildren {
   ApiOrdersIdRoute: typeof ApiOrdersIdRoute
+  ApiOrdersLookupRoute: typeof ApiOrdersLookupRoute
 }
 
 const ApiOrdersRouteChildren: ApiOrdersRouteChildren = {
   ApiOrdersIdRoute: ApiOrdersIdRoute,
+  ApiOrdersLookupRoute: ApiOrdersLookupRoute,
 }
 
 const ApiOrdersRouteWithChildren = ApiOrdersRoute._addFileChildren(
   ApiOrdersRouteChildren,
+)
+
+interface ApiProductsRouteChildren {
+  ApiProductsRestockAlertRoute: typeof ApiProductsRestockAlertRoute
+}
+
+const ApiProductsRouteChildren: ApiProductsRouteChildren = {
+  ApiProductsRestockAlertRoute: ApiProductsRestockAlertRoute,
+}
+
+const ApiProductsRouteWithChildren = ApiProductsRoute._addFileChildren(
+  ApiProductsRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
@@ -367,11 +479,24 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TrackRoute: TrackRoute,
   ApiOrdersRoute: ApiOrdersRouteWithChildren,
-  ApiProductsRoute: ApiProductsRoute,
+  ApiProductsRoute: ApiProductsRouteWithChildren,
   ShopSlugRoute: ShopSlugRoute,
   ShopIndexRoute: ShopIndexRoute,
+  ApiArcadeScoresRoute: ApiArcadeScoresRoute,
+  ApiWebhooksStripeRoute: ApiWebhooksStripeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

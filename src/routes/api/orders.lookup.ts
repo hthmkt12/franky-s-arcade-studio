@@ -18,7 +18,7 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-export const Route = createFileRoute("/api/orders/lookup" as unknown as "/api/products")({
+export const Route = createFileRoute("/api/orders/lookup")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {

@@ -5,7 +5,9 @@ export type Currency = "EUR" | "USD" | "GBP";
 
 export type Language = "en" | "pt";
 
-export type ProductSize = "S" | "M" | "L" | "ONE";
+export type ProductSize = "S" | "M" | "L" | "XL" | "ONE";
+
+export type ProductCategory = "caps" | "hoodies" | "totes" | "pins";
 
 export interface ProductImage {
   url: string;
@@ -16,6 +18,7 @@ export interface Product {
   id: string;
   slug: string;
   name: string;
+  category?: ProductCategory;
   colorHex: string;
   priceCents: number;
   currency: Currency;

@@ -65,12 +65,21 @@ function CheckoutPage() {
   });
 
   const handleApplyPromo = () => {
-    if (promoCode.trim().toUpperCase() === "COIN10" || promoCode.trim().toUpperCase() === "KONAMI") {
+    const code = promoCode.trim().toUpperCase();
+    if (code === "COIN10" || code === "KONAMI") {
       setAppliedPromo("COIN10");
       toast.success("CHEAT CODE ACCEPTED: 10% OFF APPLIED!");
       import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => arcadeAudio.playVictory());
+    } else if (code === "RUNNER15") {
+      setAppliedPromo("RUNNER15");
+      toast.success("ARCADE RUNNER BONUS: 15% OFF APPLIED!");
+      import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => arcadeAudio.playVictory());
+    } else if (code === "CHAMP20") {
+      setAppliedPromo("CHAMP20");
+      toast.success("★ TOP RANK CHAMPION REWARD: 20% OFF APPLIED! ★");
+      import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => arcadeAudio.playVictory());
     } else {
-      toast.error("INVALID CHEAT CODE. TRY CLICKING INSERT COIN ON HOME!");
+      toast.error("INVALID CHEAT CODE. PLAY RUNNER OR CLICK INSERT COIN!");
     }
   };
 
@@ -87,6 +96,14 @@ function CheckoutPage() {
     }
     if (appliedPromo === "RUNNER15") {
       const discount = Math.round(base.subtotalCents * 0.15);
+      return {
+        ...base,
+        discountCents: discount,
+        totalCents: Math.max(0, base.totalCents - discount),
+      };
+    }
+    if (appliedPromo === "CHAMP20") {
+      const discount = Math.round(base.subtotalCents * 0.2);
       return {
         ...base,
         discountCents: discount,

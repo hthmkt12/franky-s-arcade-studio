@@ -53,13 +53,11 @@ export const Route = createFileRoute("/api/products/restock-alert")({
         }
 
         // Insert or update restock subscription
-        const { error: insErr } = await supabaseAdmin
-          .from("restock_subscriptions")
-          .insert({
-            product_id: productId,
-            email: normalizedEmail,
-            notified: false,
-          });
+        const { error: insErr } = await supabaseAdmin.from("restock_subscriptions").insert({
+          product_id: productId,
+          email: normalizedEmail,
+          notified: false,
+        });
 
         if (insErr) {
           console.error("[api/products/restock-alert] insert error", insErr);

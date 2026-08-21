@@ -19,7 +19,6 @@ export const Route = createFileRoute("/checkout/success/$id")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
-
   }),
   component: SuccessPage,
 });

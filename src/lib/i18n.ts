@@ -23,9 +23,33 @@ export function getShippingRate(countryCode: string, currency: Currency = "EUR")
   let baseEur = 1500; // default international: €15
 
   const EU_COUNTRIES = [
-    "PT", "ES", "FR", "DE", "IT", "NL", "BE", "AT", "IE", "GR",
-    "FI", "SE", "DK", "PL", "CZ", "HU", "RO", "BG", "HR", "SK",
-    "SI", "LT", "LV", "EE", "CY", "LU", "MT"
+    "PT",
+    "ES",
+    "FR",
+    "DE",
+    "IT",
+    "NL",
+    "BE",
+    "AT",
+    "IE",
+    "GR",
+    "FI",
+    "SE",
+    "DK",
+    "PL",
+    "CZ",
+    "HU",
+    "RO",
+    "BG",
+    "HR",
+    "SK",
+    "SI",
+    "LT",
+    "LV",
+    "EE",
+    "CY",
+    "LU",
+    "MT",
   ];
 
   if (code === "PT") {

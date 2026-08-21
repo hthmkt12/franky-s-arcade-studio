@@ -64,7 +64,10 @@ export const Route = createFileRoute("/api/orders/$id")({
         if (!isAdmin) {
           const { verifyOrderToken } = await import("@/lib/server-crypto");
           if (!token || !verifyOrderToken(row.id, row.customer_email, token)) {
-            return json({ code: "unauthorized", message: "Access token required to view order details" }, 401);
+            return json(
+              { code: "unauthorized", message: "Access token required to view order details" },
+              401,
+            );
           }
         }
 

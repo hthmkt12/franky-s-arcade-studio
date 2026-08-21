@@ -59,7 +59,10 @@ function TrackOrderPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-4 py-12" style={{ fontFamily: "var(--font-arcade)" }}>
+    <div
+      className="flex-1 flex flex-col items-center justify-center p-4 py-12"
+      style={{ fontFamily: "var(--font-arcade)" }}
+    >
       <div className="max-w-md w-full border border-ink rounded-card bg-cream p-6 md:p-8 arcade-bevel flex flex-col gap-6">
         <div className="text-center border-b border-ink pb-4">
           <h1 style={{ fontSize: 16, letterSpacing: 2, margin: 0 }}>★ TRACK YOUR ORDER ★</h1>
@@ -69,7 +72,10 @@ function TrackOrderPage() {
         </div>
 
         {errorMessage && (
-          <div className="border border-red-500 bg-red-50 text-red-600 p-3 rounded-btn text-center" style={{ fontSize: 9 }}>
+          <div
+            className="border border-red-500 bg-red-50 text-red-600 p-3 rounded-btn text-center"
+            style={{ fontSize: 9 }}
+          >
             {errorMessage}
           </div>
         )}
@@ -117,7 +123,10 @@ function TrackOrderPage() {
           </button>
         </form>
 
-        <div className="text-center border-t border-pixel pt-3 text-muted" style={{ fontSize: 8, letterSpacing: 1 }}>
+        <div
+          className="text-center border-t border-pixel pt-3 text-muted"
+          style={{ fontSize: 8, letterSpacing: 1 }}
+        >
           NEED ASSISTANCE? EMAIL SUPPORT@FRANKYS.SHOP
         </div>
       </div>

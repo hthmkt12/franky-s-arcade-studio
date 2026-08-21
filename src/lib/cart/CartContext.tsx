@@ -36,7 +36,10 @@ function loadInitial(): CartLine[] {
     const parsed = JSON.parse(raw) as CartLine[];
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(
-      (l) => typeof l?.productId === "string" && typeof l?.size === "string" && typeof l?.qty === "number",
+      (l) =>
+        typeof l?.productId === "string" &&
+        typeof l?.size === "string" &&
+        typeof l?.qty === "number",
     );
   } catch {
     return [];

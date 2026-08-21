@@ -9,7 +9,6 @@ import { openSizeGuide } from "@/components/frankys/SizeGuideModal";
 import type { Product, ProductSize } from "@/lib/api/types";
 
 export function VariantCard({ product }: { product: Product }) {
-
   const cart = useCart();
   const defaultSize = product.sizes[0] ?? "ONE";
   const [size, setSize] = useState<ProductSize>(defaultSize);
@@ -62,7 +61,6 @@ export function VariantCard({ product }: { product: Product }) {
         >
           TRY IN [AR]
         </button>
-
       </div>
 
       {product.sizes.length > 1 && (

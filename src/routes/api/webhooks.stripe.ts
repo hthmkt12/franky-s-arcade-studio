@@ -87,12 +87,19 @@ export const Route = createFileRoute("/api/webhooks/stripe")({
                   orderNumber: updatedOrder.number,
                   orderId: updatedOrder.id,
                   guestToken,
-                  items: (updatedOrder.order_items ?? []).map((it: { product_name: string; size: string; qty: number; unit_price_cents: number }) => ({
-                    name: it.product_name,
-                    size: it.size,
-                    qty: it.qty,
-                    price: `${currencySym}${(it.unit_price_cents / 100).toFixed(0)}`,
-                  })),
+                  items: (updatedOrder.order_items ?? []).map(
+                    (it: {
+                      product_name: string;
+                      size: string;
+                      qty: number;
+                      unit_price_cents: number;
+                    }) => ({
+                      name: it.product_name,
+                      size: it.size,
+                      qty: it.qty,
+                      price: `${currencySym}${(it.unit_price_cents / 100).toFixed(0)}`,
+                    }),
+                  ),
                   subtotal: `${currencySym}${(updatedOrder.subtotal_cents / 100).toFixed(0)}`,
                   shipping: `${currencySym}${(updatedOrder.shipping_cents / 100).toFixed(0)}`,
                   total: `${currencySym}${(updatedOrder.total_cents / 100).toFixed(0)}`,

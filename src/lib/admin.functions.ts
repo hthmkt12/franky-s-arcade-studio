@@ -120,21 +120,22 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
 
     // Dispatch shipped email when order is marked shipped and tracking is present
     if (data.status === "shipped" && row.tracking_number && row.customer_email) {
-      import("@/lib/email.server").then(({ sendOrderShippedEmail }) => {
-        const { signOrderToken } = require("@/lib/server-crypto");
-        const guestToken = signOrderToken(row.id, row.customer_email);
-        const origin = process.env.VITE_APP_URL || "http://localhost:3000";
-        const trackingUrl = `${origin}/checkout/success/${row.id}?token=${guestToken}`;
+      Promise.all([import("@/lib/email.server"), import("@/lib/server-crypto")])
+        .then(([{ sendOrderShippedEmail }, { signOrderToken }]) => {
+          const guestToken = signOrderToken(row.id, row.customer_email);
+          const origin = process.env.VITE_APP_URL || "http://localhost:3000";
+          const trackingUrl = `${origin}/checkout/success/${row.id}?token=${guestToken}`;
 
-        void sendOrderShippedEmail({
-          to: row.customer_email,
-          customerName: row.customer_name,
-          orderNumber: row.number,
-          trackingNumber: row.tracking_number!,
-          carrier: row.carrier || "CTT Express",
-          trackingUrl,
-        });
-      }).catch((err) => console.error("[Admin Order Dispatch Error]", err));
+          void sendOrderShippedEmail({
+            to: row.customer_email,
+            customerName: row.customer_name,
+            orderNumber: row.number,
+            trackingNumber: row.tracking_number!,
+            carrier: row.carrier || "CTT Express",
+            trackingUrl,
+          });
+        })
+        .catch((err) => console.error("[Admin Order Dispatch Error]", err));
     }
 
     return row;
@@ -192,22 +193,24 @@ export const updateStock = createServerFn({ method: "POST" })
         .eq("notified", false);
 
       if (subscribers && subscribers.length > 0) {
-        import("@/lib/email.server").then(async ({ sendRestockAlertEmail }) => {
-          const origin = process.env.VITE_APP_URL || "http://localhost:3000";
-          const productUrl = `${origin}/shop/${row.slug}`;
+        import("@/lib/email.server")
+          .then(async ({ sendRestockAlertEmail }) => {
+            const origin = process.env.VITE_APP_URL || "http://localhost:3000";
+            const productUrl = `${origin}/shop/${row.slug}`;
 
-          for (const sub of subscribers) {
-            await sendRestockAlertEmail({
-              to: sub.email,
-              productName: row.name,
-              productUrl,
-            });
-            await supabaseAdmin
-              .from("restock_subscriptions")
-              .update({ notified: true, notified_at: new Date().toISOString() })
-              .eq("id", sub.id);
-          }
-        }).catch((err) => console.error("[Restock Alert Dispatch Error]", err));
+            for (const sub of subscribers) {
+              await sendRestockAlertEmail({
+                to: sub.email,
+                productName: row.name,
+                productUrl,
+              });
+              await supabaseAdmin
+                .from("restock_subscriptions")
+                .update({ notified: true, notified_at: new Date().toISOString() })
+                .eq("id", sub.id);
+            }
+          })
+          .catch((err) => console.error("[Restock Alert Dispatch Error]", err));
       }
     }
 

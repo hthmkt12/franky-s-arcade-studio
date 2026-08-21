@@ -14,7 +14,8 @@ export const Route = createFileRoute("/shop/")({
       { title: "Shop — Franky's Arcade Merchandise & Caps" },
       {
         name: "description",
-        content: "Browse Franky's arcade shop: handmade merino caps, heavyweight hoodies, skate totes, and enamel pins.",
+        content:
+          "Browse Franky's arcade shop: handmade merino caps, heavyweight hoodies, skate totes, and enamel pins.",
       },
       { property: "og:title", content: "Shop — Franky's Merchandise & Caps" },
       {
@@ -24,7 +25,9 @@ export const Route = createFileRoute("/shop/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: `${process.env.VITE_APP_URL || "http://localhost:3000"}/shop` }],
+    links: [
+      { rel: "canonical", href: `${process.env.VITE_APP_URL || "http://localhost:3000"}/shop` },
+    ],
   }),
 
   component: ShopPage,
@@ -93,10 +96,7 @@ function ShopPage() {
           <h1 style={{ fontFamily: "var(--font-arcade)", fontSize: 18, letterSpacing: 2 }}>
             ★ THE ARCADE SHOP
           </h1>
-          <span
-            className="text-muted"
-            style={{ fontFamily: "var(--font-arcade)", fontSize: 10 }}
-          >
+          <span className="text-muted" style={{ fontFamily: "var(--font-arcade)", fontSize: 10 }}>
             {products ? `${visible.length} ITEMS` : isError ? "OFFLINE" : "LOADING..."}
           </span>
         </header>
@@ -176,7 +176,9 @@ function ShopPage() {
             className="border border-ink rounded-card p-6 text-center"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 12 }}
           >
-            {inStockOnly ? "NO ITEMS IN STOCK RIGHT NOW." : "NO ITEMS FOUND IN THIS CATEGORY. CHECK BACK SOON."}
+            {inStockOnly
+              ? "NO ITEMS IN STOCK RIGHT NOW."
+              : "NO ITEMS FOUND IN THIS CATEGORY. CHECK BACK SOON."}
           </p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

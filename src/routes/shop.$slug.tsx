@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { openArModal } from "@/components/frankys/ArModal";
 import { openSizeGuide } from "@/components/frankys/SizeGuideModal";
-import { Cap3DViewer } from "@/components/frankys/Cap3DViewer";
+const Cap3DViewer = lazy(() =>
+  import("@/components/frankys/Cap3DViewer").then(({ Cap3DViewer }) => ({ default: Cap3DViewer })),
+);
 import { formatPrice, getProductBySlug, getProducts } from "@/lib/api/shop";
 
 import { useCart } from "@/lib/cart/CartContext";
@@ -26,7 +28,7 @@ export const Route = createFileRoute("/shop/$slug")({
         { property: "og:type", content: "product" },
         { name: "twitter:card", content: "summary" },
       ],
-      links: [{ rel: "canonical", href: `${process.env.VITE_APP_URL || "http://localhost:3000"}/shop/${params.slug}` }],
+      links: [{ rel: "canonical", href: `/shop/${params.slug}` }],
     };
   },
 
@@ -97,7 +99,7 @@ function ProductPage() {
     );
   }
 
-  const activeSize: ProductSize = product.sizes.includes(size) ? size : product.sizes[0] ?? "ONE";
+  const activeSize: ProductSize = product.sizes.includes(size) ? size : (product.sizes[0] ?? "ONE");
   const add = () => {
     cart.addItem(product.id, activeSize, qty);
     toast(`ADDED — ${product.name} (${activeSize}) ×${qty}`);
@@ -118,7 +120,6 @@ function ProductPage() {
       availability: product.inStock
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
-      url: `${process.env.VITE_APP_URL || "http://localhost:3000"}/shop/${product.slug}`,
     },
   };
 
@@ -129,24 +130,32 @@ function ProductPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-
-        <div
-          className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex flex-col items-center justify-center gap-3 p-6 md:sticky md:top-20 self-start"
-        >
+        <div className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex flex-col items-center justify-center gap-3 p-6 md:sticky md:top-20 self-start">
           <div className="bg-cream border border-ink rounded-card p-4 arcade-bevel w-full flex items-center justify-center min-h-[320px]">
             {view3D && (product.category ?? "caps") === "caps" ? (
-              <Cap3DViewer colorHex={product.colorHex} className="h-[300px]" />
+              <Suspense
+                fallback={
+                  <div
+                    className="h-[300px] w-full checker-bg animate-pulse"
+                    aria-label="Loading 3D model"
+                  />
+                }
+              >
+                <Cap3DViewer colorHex={product.colorHex} className="h-[300px]" />
+              </Suspense>
             ) : (
               <img
                 src={product.image.url}
                 alt={product.image.alt}
                 width={512}
                 height={512}
+                loading="eager"
+                fetchPriority="high"
                 className="max-h-[380px] w-auto object-contain"
               />
             )}
           </div>
-          
+
           <div className="flex gap-2">
             {(product.category ?? "caps") === "caps" && (
               <button
@@ -174,11 +183,7 @@ function ProductPage() {
           </div>
         </div>
 
-
-        <div
-          className="flex flex-col gap-4"
-          style={{ fontFamily: "var(--font-arcade)" }}
-        >
+        <div className="flex flex-col gap-4" style={{ fontFamily: "var(--font-arcade)" }}>
           <div className="flex flex-col gap-1">
             <Link
               to="/shop"
@@ -275,7 +280,6 @@ function ProductPage() {
             </p>
           )}
 
-
           <ul
             className="border border-pixel rounded-card p-3 flex flex-col gap-1"
             style={{ fontSize: 10 }}
@@ -288,8 +292,6 @@ function ProductPage() {
       </div>
 
       <MoreCaps slug={product.slug} />
-
-
 
       {/* Mobile sticky buy bar */}
       <div
@@ -315,7 +317,6 @@ function ProductPage() {
         </button>
       </div>
     </div>
-
   );
 }
 
@@ -350,17 +351,28 @@ function RestockAlertBox({ productId, productName }: { productId: string; produc
   if (subscribed) {
     return (
       <div className="border border-ink bg-white p-3 rounded-card text-center flex flex-col gap-1">
-        <span className="text-buy font-bold" style={{ fontSize: 10 }}>★ 1-UP! YOU'RE ON THE LIST ★</span>
-        <span className="text-muted" style={{ fontSize: 8 }}>WE'LL EMAIL {email.toUpperCase()} WHEN THIS CAP IS KNITTED.</span>
+        <span className="text-buy font-bold" style={{ fontSize: 10 }}>
+          ★ 1-UP! YOU'RE ON THE LIST ★
+        </span>
+        <span className="text-muted" style={{ fontSize: 8 }}>
+          WE'LL EMAIL {email.toUpperCase()} WHEN THIS CAP IS KNITTED.
+        </span>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border border-ink bg-white p-3 rounded-card flex flex-col gap-2">
+    <form
+      onSubmit={handleSubmit}
+      className="border border-ink bg-white p-3 rounded-card flex flex-col gap-2"
+    >
       <div className="flex flex-col gap-0.5">
-        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>NOTIFY ME WHEN RESTOCKED</span>
-        <span className="text-muted" style={{ fontSize: 8 }}>GET AN 8-BIT EMAIL ONCE RESTOCKED</span>
+        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>
+          NOTIFY ME WHEN RESTOCKED
+        </span>
+        <span className="text-muted" style={{ fontSize: 8 }}>
+          GET AN 8-BIT EMAIL ONCE RESTOCKED
+        </span>
       </div>
       <div className="flex gap-2">
         <input
@@ -410,7 +422,10 @@ function MoreCaps({ slug }: { slug: string }) {
             <img
               src={p.image.url}
               alt={p.image.alt}
+              width={512}
+              height={512}
               loading="lazy"
+              decoding="async"
               className="w-full aspect-square object-cover border-b border-ink"
             />
             <div className="p-2 flex items-center justify-between gap-2">

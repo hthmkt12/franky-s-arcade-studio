@@ -20,15 +20,19 @@ export function Cap3DViewer({
 
     // Scene & Camera
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      100,
+    );
     camera.position.set(0, 1.2, 3.8);
 
     // WebGL Renderer
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.shadowMap.enabled = false;
     container.appendChild(renderer.domElement);
 
     // Group for Cap Mesh
@@ -121,9 +125,13 @@ export function Cap3DViewer({
     window.addEventListener("pointerup", onPointerUp);
 
     // Animation Loop
-    let reqId: number;
+    let reqId: number | undefined;
+    let isVisible = true;
     const animate = () => {
-      reqId = requestAnimationFrame(animate);
+      if (!isVisible) {
+        reqId = undefined;
+        return;
+      }
 
       // Auto rotation when idle
       if (!isPointerDown) {
@@ -135,7 +143,19 @@ export function Cap3DViewer({
       capGroup.rotation.x += (targetRotationX - capGroup.rotation.x) * 0.08;
 
       renderer.render(scene, camera);
+      reqId = requestAnimationFrame(animate);
     };
+
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = Boolean(entry?.isIntersecting);
+        if (isVisible && reqId === undefined) {
+          animate();
+        }
+      },
+      { threshold: 0.01 },
+    );
+    visibilityObserver.observe(container);
     animate();
 
     // Resize handler
@@ -148,11 +168,17 @@ export function Cap3DViewer({
     window.addEventListener("resize", onResize);
 
     return () => {
-      cancelAnimationFrame(reqId);
+      if (reqId !== undefined) cancelAnimationFrame(reqId);
+      visibilityObserver.disconnect();
       window.removeEventListener("resize", onResize);
       domEl.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      domeGeo.dispose();
+      cuffGeo.dispose();
+      buttonGeo.dispose();
+      bodyMat.dispose();
+      cuffMat.dispose();
       renderer.dispose();
       if (container.contains(domEl)) {
         container.removeChild(domEl);
@@ -161,7 +187,9 @@ export function Cap3DViewer({
   }, [colorHex]);
 
   return (
-    <div className={`relative w-full h-[220px] select-none flex items-center justify-center ${className}`}>
+    <div
+      className={`relative w-full h-[220px] select-none flex items-center justify-center ${className}`}
+    >
       <div
         ref={containerRef}
         className="w-full h-full cursor-grab active:cursor-grabbing touch-none"

@@ -30,7 +30,9 @@ export interface CheckoutSessionOptions {
   cancelUrl: string;
 }
 
-export async function createStripeSession(opts: CheckoutSessionOptions): Promise<{ url: string; id: string }> {
+export async function createStripeSession(
+  opts: CheckoutSessionOptions,
+): Promise<{ url: string; id: string }> {
   // Fail-closed: production refuses to run a simulated checkout. The simulated
   // URL is dev/demo only, where a local build has no real key on purpose.
   if (!process.env.STRIPE_SECRET_KEY) {

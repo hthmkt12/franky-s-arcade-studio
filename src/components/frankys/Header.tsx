@@ -27,7 +27,9 @@ export function Header() {
     try {
       const savedCur = localStorage.getItem("frankys.currency") as "EUR" | "USD" | "GBP";
       if (savedCur) setCurrency(savedCur);
-    } catch {}
+    } catch {
+      // localStorage may be unavailable (private mode/SSR); ignore.
+    }
   }, []);
 
   const handleToggleAudio = () => {
@@ -47,7 +49,9 @@ export function Header() {
     try {
       localStorage.setItem("frankys.currency", next);
       window.dispatchEvent(new Event("frankys.currency.changed"));
-    } catch {}
+    } catch {
+      // localStorage may be unavailable (private mode/SSR); ignore.
+    }
   };
 
   return (
@@ -67,7 +71,6 @@ export function Header() {
           <span className="block w-5 h-px bg-ink" />
           <span className="block w-5 h-px bg-ink" />
         </button>
-
 
         <nav
           className="hidden md:flex items-center gap-3"
@@ -139,7 +142,6 @@ export function Header() {
             <span aria-live="polite">CART [{mounted ? cart.itemCount : 0}]</span>
           </button>
         </div>
-
       </div>
 
       {menuOpen && (

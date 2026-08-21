@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from "react";
 
 import type { ProductCategory } from "@/lib/api/types";
 
-const SIZE_TABLES: Record<"caps" | "hoodies", { label: string; rows: { size: string; cols: string[] }[] }> = {
+const SIZE_TABLES: Record<
+  "caps" | "hoodies",
+  { label: string; rows: { size: string; cols: string[] }[] }
+> = {
   caps: {
     label: "CAPS — HEAD CIRCUMFERENCE",
     rows: [
@@ -119,7 +122,10 @@ export function SizeGuideModal() {
           </button>
         </div>
 
-        <div className="border-b-2 border-ink px-3 py-2 flex gap-2" style={{ fontSize: 9, letterSpacing: 1 }}>
+        <div
+          className="border-b-2 border-ink px-3 py-2 flex gap-2"
+          style={{ fontSize: 9, letterSpacing: 1 }}
+        >
           {(Object.keys(SIZE_TABLES) as Array<keyof typeof SIZE_TABLES>).map((key) => (
             <button
               key={key}
@@ -161,7 +167,10 @@ export function SizeGuideModal() {
                     >
                       {row.size}
                     </td>
-                    <td className="py-2 px-2" style={{ fontFamily: "VT323, monospace", fontSize: 15 }}>
+                    <td
+                      className="py-2 px-2"
+                      style={{ fontFamily: "VT323, monospace", fontSize: 15 }}
+                    >
                       {row.cols[0]}
                       <span className="text-muted" style={{ fontSize: 10 }}>
                         {" "}

@@ -158,7 +158,11 @@ function OrdersPanel() {
   const qc = useQueryClient();
   const fetchOrders = useServerFn(listOrders);
   const setStatus = useServerFn(updateOrderStatus);
-  const [shippingForm, setShippingForm] = useState<{ id: string; trackingNumber: string; carrier: string } | null>(null);
+  const [shippingForm, setShippingForm] = useState<{
+    id: string;
+    trackingNumber: string;
+    carrier: string;
+  } | null>(null);
 
   const ordersQuery = useQuery({
     queryKey: ["admin", "orders"],
@@ -166,8 +170,12 @@ function OrdersPanel() {
   });
 
   const statusMutation = useMutation({
-    mutationFn: (v: { id: string; status: (typeof STATUSES)[number]; trackingNumber?: string; carrier?: string }) =>
-      setStatus({ data: v }),
+    mutationFn: (v: {
+      id: string;
+      status: (typeof STATUSES)[number];
+      trackingNumber?: string;
+      carrier?: string;
+    }) => setStatus({ data: v }),
     onSuccess: () => {
       toast.success("ORDER UPDATED");
       setShippingForm(null);
@@ -176,7 +184,11 @@ function OrdersPanel() {
     onError: (e) => toast.error((e as Error).message.toUpperCase()),
   });
 
-  const handleStatusClick = (orderId: string, currentStatus: string, targetStatus: (typeof STATUSES)[number]) => {
+  const handleStatusClick = (
+    orderId: string,
+    currentStatus: string,
+    targetStatus: (typeof STATUSES)[number],
+  ) => {
     if (targetStatus === "shipped") {
       setShippingForm({ id: orderId, trackingNumber: "", carrier: "CTT Express" });
     } else {
@@ -220,7 +232,9 @@ function OrdersPanel() {
 
               {o.trackingNumber && (
                 <div className="bg-ink text-cream p-2 rounded-btn flex items-center justify-between text-xs">
-                  <span>TRACKING [{o.carrier ?? "CARRIER"}]: {o.trackingNumber}</span>
+                  <span>
+                    TRACKING [{o.carrier ?? "CARRIER"}]: {o.trackingNumber}
+                  </span>
                   <span className="text-buy font-bold">DISPATCHED</span>
                 </div>
               )}
@@ -235,13 +249,17 @@ function OrdersPanel() {
 
               {shippingForm?.id === o.id ? (
                 <div className="border-2 border-dashed border-ink p-3 rounded-card bg-white flex flex-col gap-2">
-                  <span style={{ fontSize: 9, letterSpacing: 1, fontWeight: 700 }}>ENTER SHIPMENT DETAILS</span>
+                  <span style={{ fontSize: 9, letterSpacing: 1, fontWeight: 700 }}>
+                    ENTER SHIPMENT DETAILS
+                  </span>
                   <div className="flex gap-2 flex-wrap">
                     <input
                       type="text"
                       placeholder="CARRIER (e.g. CTT / DHL)"
                       value={shippingForm.carrier}
-                      onChange={(e) => setShippingForm({ ...shippingForm, carrier: e.target.value })}
+                      onChange={(e) =>
+                        setShippingForm({ ...shippingForm, carrier: e.target.value })
+                      }
                       className="border border-pixel rounded-btn px-2 py-1 bg-cream flex-1 text-xs"
                       style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
                     />
@@ -249,7 +267,9 @@ function OrdersPanel() {
                       type="text"
                       placeholder="TRACKING NUMBER"
                       value={shippingForm.trackingNumber}
-                      onChange={(e) => setShippingForm({ ...shippingForm, trackingNumber: e.target.value })}
+                      onChange={(e) =>
+                        setShippingForm({ ...shippingForm, trackingNumber: e.target.value })
+                      }
                       className="border border-pixel rounded-btn px-2 py-1 bg-cream flex-1 text-xs"
                       style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
                     />

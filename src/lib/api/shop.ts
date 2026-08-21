@@ -47,7 +47,8 @@ export function computeTotals(
   // Free shipping on orders over €100 (10000 cents in base EUR currency)
   const freeShippingThreshold = convertPrice(10000, currency);
   const isFreeShipping = subtotalCents >= freeShippingThreshold;
-  const shippingCents = subtotalCents > 0 && !isFreeShipping ? getShippingRate(countryCode, currency) : 0;
+  const shippingCents =
+    subtotalCents > 0 && !isFreeShipping ? getShippingRate(countryCode, currency) : 0;
   return { subtotalCents, shippingCents, totalCents: subtotalCents + shippingCents };
 }
 
@@ -65,9 +66,8 @@ export function getFreeShippingProgress(
   const thresholdCents = convertPrice(10000, currency);
   const remainingCents = Math.max(0, thresholdCents - subtotalCents);
   const unlocked = subtotalCents >= thresholdCents;
-  const progressPercent = thresholdCents > 0
-    ? Math.min(100, Math.round((subtotalCents / thresholdCents) * 100))
-    : 0;
+  const progressPercent =
+    thresholdCents > 0 ? Math.min(100, Math.round((subtotalCents / thresholdCents) * 100)) : 0;
   return { thresholdCents, remainingCents, progressPercent, unlocked };
 }
 

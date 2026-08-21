@@ -18,7 +18,6 @@ export const Route = createFileRoute("/cart")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, follow" },
     ],
-
   }),
   component: CartPage,
 });
@@ -56,10 +55,7 @@ function CartPage() {
             ))}
           </div>
         ) : items.length === 0 ? (
-
-          <div
-            className="border border-ink rounded-card p-10 flex flex-col items-center gap-4 checker-bg"
-          >
+          <div className="border border-ink rounded-card p-10 flex flex-col items-center gap-4 checker-bg">
             <div className="bg-cream border border-ink rounded-card p-6 flex flex-col items-center gap-3 arcade-bevel">
               <PixelHorse size={8} />
               <p style={{ fontFamily: "var(--font-arcade)", fontSize: 12 }}>
@@ -134,9 +130,7 @@ function CartPage() {
                       </button>
                     </div>
                   </div>
-                  <span
-                    style={{ fontFamily: "var(--font-arcade)", fontSize: 12, fontWeight: 700 }}
-                  >
+                  <span style={{ fontFamily: "var(--font-arcade)", fontSize: 12, fontWeight: 700 }}>
                     {formatPrice(it.lineTotalCents)}
                   </span>
                 </li>

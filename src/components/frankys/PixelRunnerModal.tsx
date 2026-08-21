@@ -38,7 +38,9 @@ export function PixelRunnerModal({ isOpen, onClose }: PixelRunnerProps) {
     try {
       const saved = localStorage.getItem("frankys.runner.highscore");
       if (saved) setHighScore(Number(saved) || 0);
-    } catch {}
+    } catch {
+      // localStorage may be unavailable; ignore.
+    }
   }, []);
 
   const fetchLeaderboard = async () => {
@@ -112,13 +114,17 @@ export function PixelRunnerModal({ isOpen, onClose }: PixelRunnerProps) {
             toast.success("100 PTS BONUS! CHEAT UNLOCKED: 'RUNNER15' (15% OFF)");
             try {
               localStorage.setItem("frankys.promo.code", "RUNNER15");
-            } catch {}
+            } catch {
+              // localStorage may be unavailable; ignore.
+            }
           } else if (next === 200) {
             arcadeAudio.playVictory();
             toast.success("★ 200 PTS CHAMPION! SECRET UNLOCKED: 'CHAMP20' (20% OFF) ★");
             try {
               localStorage.setItem("frankys.promo.code", "CHAMP20");
-            } catch {}
+            } catch {
+              // localStorage may be unavailable; ignore.
+            }
           } else {
             arcadeAudio.playBeep(700, "square", 0.04);
           }
@@ -136,7 +142,9 @@ export function PixelRunnerModal({ isOpen, onClose }: PixelRunnerProps) {
           const nh = Math.max(prev, score);
           try {
             localStorage.setItem("frankys.runner.highscore", String(nh));
-          } catch {}
+          } catch {
+            // localStorage may be unavailable; ignore.
+          }
           return nh;
         });
         return;
@@ -224,7 +232,9 @@ export function PixelRunnerModal({ isOpen, onClose }: PixelRunnerProps) {
                 void fetchLeaderboard();
               }}
               className={`px-3 py-1.5 rounded-btn border border-ink arcade-bevel text-xs ${
-                activeTab === "leaderboard" ? "bg-marquee text-ink font-bold" : "bg-cream text-muted"
+                activeTab === "leaderboard"
+                  ? "bg-marquee text-ink font-bold"
+                  : "bg-cream text-muted"
               }`}
             >
               🏆 HALL OF FAME
@@ -273,17 +283,24 @@ export function PixelRunnerModal({ isOpen, onClose }: PixelRunnerProps) {
 
               {!isPlaying && !gameOver && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-cream/80 text-center p-2">
-                  <span className="text-sm font-bold animate-pulse">PRESS SPACE OR TAP TO JUMP</span>
+                  <span className="text-sm font-bold animate-pulse">
+                    PRESS SPACE OR TAP TO JUMP
+                  </span>
                 </div>
               )}
 
               {gameOver && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-cream/95 text-center gap-2 p-3">
-                  <span className="text-red-600 font-bold" style={{ fontSize: 13 }}>GAME OVER</span>
+                  <span className="text-red-600 font-bold" style={{ fontSize: 13 }}>
+                    GAME OVER
+                  </span>
                   <span className="text-xs">FINAL SCORE: {score}</span>
-                  
+
                   {!hasSubmitted ? (
-                    <form onSubmit={handleSubmitScore} className="flex flex-col items-center gap-2 mt-1">
+                    <form
+                      onSubmit={handleSubmitScore}
+                      className="flex flex-col items-center gap-2 mt-1"
+                    >
                       <span style={{ fontSize: 9 }}>ENTER INITIALS:</span>
                       <div className="flex gap-1.5">
                         <input
@@ -306,7 +323,9 @@ export function PixelRunnerModal({ isOpen, onClose }: PixelRunnerProps) {
                       </div>
                     </form>
                   ) : (
-                    <span className="text-buy text-xs font-bold">★ SCORE SAVED TO HALL OF FAME ★</span>
+                    <span className="text-buy text-xs font-bold">
+                      ★ SCORE SAVED TO HALL OF FAME ★
+                    </span>
                   )}
 
                   <button

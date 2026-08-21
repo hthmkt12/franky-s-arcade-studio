@@ -1,17 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { PixelHorse } from "@/components/frankys/PixelHorse";
-import { Cap3DViewer } from "@/components/frankys/Cap3DViewer";
-import { PixelRunnerModal } from "@/components/frankys/PixelRunnerModal";
+const Cap3DViewer = lazy(() =>
+  import("@/components/frankys/Cap3DViewer").then(({ Cap3DViewer }) => ({ default: Cap3DViewer })),
+);
+const PixelRunnerModal = lazy(() =>
+  import("@/components/frankys/PixelRunnerModal").then(({ PixelRunnerModal }) => ({
+    default: PixelRunnerModal,
+  })),
+);
 import { arcadeAudio } from "@/lib/audio/arcade-audio";
 
 import { ViewModeToggle, type ViewMode } from "@/components/frankys/ViewModeToggle";
 import { formatPrice, getProducts } from "@/lib/api/shop";
-
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,7 +35,7 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: `${process.env.VITE_APP_URL || "http://localhost:3000"}/` }],
+    links: [{ rel: "canonical", href: "/" }],
   }),
 
   component: LandingPage,
@@ -71,12 +76,17 @@ function LandingPage() {
         if (currentIndex === konamiSequence.length) {
           currentIndex = 0;
           arcadeAudio.playKonamiFanfare();
-          toast.success("★ 30 LIVES GRANTED! KONAMI SECRET CODE ACTIVATED: 'KONAMI' FOR 10% OFF ★", {
-            duration: 6000,
-          });
+          toast.success(
+            "★ 30 LIVES GRANTED! KONAMI SECRET CODE ACTIVATED: 'KONAMI' FOR 10% OFF ★",
+            {
+              duration: 6000,
+            },
+          );
           try {
             localStorage.setItem("frankys.promo.code", "KONAMI");
-          } catch {}
+          } catch {
+            // localStorage may be unavailable; ignore.
+          }
         }
       } else {
         currentIndex = 0;
@@ -95,9 +105,10 @@ function LandingPage() {
     });
     try {
       localStorage.setItem("frankys.promo.code", "COIN10");
-    } catch {}
+    } catch {
+      // localStorage may be unavailable; ignore.
+    }
   };
-
 
   return (
     <div className="flex-1 flex flex-col">
@@ -106,12 +117,20 @@ function LandingPage() {
         <div className="checker-warp-floor" aria-hidden />
         <div className="checker-warp-fade" aria-hidden />
         <div className="relative max-w-6xl mx-auto px-4 py-10 md:py-16 flex flex-col items-center gap-6 text-center">
-
           <div className="bg-cream border border-ink rounded-card p-6 md:p-10 flex flex-col items-center gap-5 arcade-bevel max-w-xl w-full">
             <ViewModeToggle mode={viewMode} onChange={setViewMode} productName="FRANKY'S CAP" />
-            
+
             {viewMode === "3D" ? (
-              <Cap3DViewer colorHex="#faa21f" />
+              <Suspense
+                fallback={
+                  <div
+                    className="h-[220px] w-full checker-bg animate-pulse"
+                    aria-label="Loading 3D model"
+                  />
+                }
+              >
+                <Cap3DViewer colorHex="#faa21f" />
+              </Suspense>
             ) : (
               <PixelHorse size={12} />
             )}
@@ -122,7 +141,9 @@ function LandingPage() {
                   type="button"
                   onClick={handleInsertCoin}
                   className={`px-4 py-2 rounded-pill border border-ink arcade-bevel flex items-center gap-2 cursor-pointer transition-all duration-300 ${
-                    coinInserted ? "bg-buy text-cream animate-pulse" : "bg-marquee text-ink hover:scale-105"
+                    coinInserted
+                      ? "bg-buy text-cream animate-pulse"
+                      : "bg-marquee text-ink hover:scale-105"
                   }`}
                   style={{ fontFamily: "var(--font-arcade)", fontSize: 11, letterSpacing: 2 }}
                 >
@@ -204,7 +225,6 @@ function LandingPage() {
           {isError ? (
             <ErrorState message="COULD NOT LOAD FEATURED CAPS." onRetry={() => void refetch()} />
           ) : !products ? (
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[0, 1, 2].map((i) => (
                 <div
@@ -253,22 +273,22 @@ function LandingPage() {
           className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-3"
           style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 1 }}
         >
-          {[
-            "★ HANDMADE IN PORTUGAL",
-            "★ 100% MERINO WOOL",
-            "★ FREE SHIPPING OVER €100",
-          ].map((t) => (
-            <div
-              key={t}
-              className="border border-ink rounded-btn arcade-bevel px-4 py-4 text-center"
-            >
-              {t}
-            </div>
-          ))}
+          {["★ HANDMADE IN PORTUGAL", "★ 100% MERINO WOOL", "★ FREE SHIPPING OVER €100"].map(
+            (t) => (
+              <div
+                key={t}
+                className="border border-ink rounded-btn arcade-bevel px-4 py-4 text-center"
+              >
+                {t}
+              </div>
+            ),
+          )}
         </div>
       </section>
       {/* PIXEL RUNNER MODAL */}
-      <PixelRunnerModal isOpen={runnerOpen} onClose={() => setRunnerOpen(false)} />
+      <Suspense fallback={null}>
+        <PixelRunnerModal isOpen={runnerOpen} onClose={() => setRunnerOpen(false)} />
+      </Suspense>
     </div>
   );
 }

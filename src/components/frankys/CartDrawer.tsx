@@ -48,7 +48,6 @@ export function CartDrawer() {
   const items = products ? cart.buildView(products) : [];
   const totals = products ? computeTotals(cart.lines, products) : null;
 
-
   return (
     <div className="fixed inset-0 z-40 flex" onClick={cart.close}>
       <div className="flex-1" style={{ background: "rgba(0,0,0,0.55)" }} />
@@ -61,7 +60,6 @@ export function CartDrawer() {
         className="w-full max-w-md bg-cream border-l border-ink flex flex-col"
         style={{ fontFamily: "var(--font-arcade)" }}
       >
-
         <div className="marquee-sheen border-b border-ink flex items-center justify-between px-3 h-9">
           <span style={{ fontSize: 10, fontWeight: 700 }}>YOUR CART [{cart.itemCount}]</span>
           <button
@@ -82,11 +80,7 @@ export function CartDrawer() {
             />
           </div>
         ) : isPending ? (
-          <div
-            className="flex-1 flex flex-col gap-2 p-3"
-            aria-busy="true"
-            aria-live="polite"
-          >
+          <div className="flex-1 flex flex-col gap-2 p-3" aria-busy="true" aria-live="polite">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
@@ -95,7 +89,6 @@ export function CartDrawer() {
             ))}
           </div>
         ) : items.length === 0 ? (
-
           <div
             className="flex-1 flex flex-col items-center justify-center gap-3 p-6"
             style={{ fontSize: 10 }}
@@ -130,38 +123,38 @@ export function CartDrawer() {
                   <div className="flex-1 flex flex-col gap-1" style={{ fontSize: 10 }}>
                     <span style={{ fontWeight: 700 }}>{it.product.name}</span>
                     <span className="text-muted">SIZE {it.size}</span>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => cart.updateQty(it.productId, it.size, it.qty - 1)}
-                          className="min-w-[36px] min-h-[36px] md:min-w-[28px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center text-sm"
-                          aria-label={`Decrease quantity of ${it.product.name}`}
-                        >
-                          −
-                        </button>
-                        <span
-                          className="w-7 text-center"
-                          style={{ fontFamily: "VT323, monospace", fontSize: 18 }}
-                        >
-                          {it.qty}
-                        </span>
-                        <button
-                          onClick={() =>
-                            cart.updateQty(it.productId, it.size, Math.min(9, it.qty + 1))
-                          }
-                          className="min-w-[36px] min-h-[36px] md:min-w-[28px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center text-sm"
-                          aria-label={`Increase quantity of ${it.product.name}`}
-                        >
-                          +
-                        </button>
-                        <button
-                          onClick={() => cart.removeItem(it.productId, it.size)}
-                          className="ml-auto px-2 min-h-[36px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center"
-                          style={{ fontSize: 9 }}
-                          aria-label={`Remove ${it.product.name} from cart`}
-                        >
-                          REMOVE
-                        </button>
-                      </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => cart.updateQty(it.productId, it.size, it.qty - 1)}
+                        className="min-w-[36px] min-h-[36px] md:min-w-[28px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center text-sm"
+                        aria-label={`Decrease quantity of ${it.product.name}`}
+                      >
+                        −
+                      </button>
+                      <span
+                        className="w-7 text-center"
+                        style={{ fontFamily: "VT323, monospace", fontSize: 18 }}
+                      >
+                        {it.qty}
+                      </span>
+                      <button
+                        onClick={() =>
+                          cart.updateQty(it.productId, it.size, Math.min(9, it.qty + 1))
+                        }
+                        className="min-w-[36px] min-h-[36px] md:min-w-[28px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center text-sm"
+                        aria-label={`Increase quantity of ${it.product.name}`}
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={() => cart.removeItem(it.productId, it.size)}
+                        className="ml-auto px-2 min-h-[36px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center"
+                        style={{ fontSize: 9 }}
+                        aria-label={`Remove ${it.product.name} from cart`}
+                      >
+                        REMOVE
+                      </button>
+                    </div>
                   </div>
                   <span style={{ fontSize: 10, fontWeight: 700 }}>
                     {formatPrice(it.lineTotalCents)}
@@ -170,10 +163,7 @@ export function CartDrawer() {
               ))}
             </ul>
 
-            <div
-              className="border-t border-ink p-3 flex flex-col gap-1.5"
-              style={{ fontSize: 10 }}
-            >
+            <div className="border-t border-ink p-3 flex flex-col gap-1.5" style={{ fontSize: 10 }}>
               <FreeShippingBar subtotalCents={totals?.subtotalCents ?? 0} />
               <Row label="SUBTOTAL" value={formatPrice(totals?.subtotalCents ?? 0)} />
               <Row label="SHIPPING" value={formatPrice(totals?.shippingCents ?? 0)} />
@@ -209,7 +199,9 @@ function FreeShippingBar({ subtotalCents }: { subtotalCents: number }) {
       <div className="flex items-center justify-between" style={{ fontSize: 9, letterSpacing: 1 }}>
         <span>FREE SHIPPING</span>
         <span className={unlocked ? "text-buy font-bold" : "text-muted"}>
-          {unlocked ? "UNLOCKED ✓" : `€${((thresholdCents - remainingCents) / 100).toFixed(0)} / €${(thresholdCents / 100).toFixed(0)}`}
+          {unlocked
+            ? "UNLOCKED ✓"
+            : `€${((thresholdCents - remainingCents) / 100).toFixed(0)} / €${(thresholdCents / 100).toFixed(0)}`}
         </span>
       </div>
       <div

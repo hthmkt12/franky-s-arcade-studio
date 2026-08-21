@@ -20,7 +20,6 @@ import { PixelHorse } from "../components/frankys/PixelHorse";
 import { ArModal } from "../components/frankys/ArModal";
 import { SizeGuideModal } from "../components/frankys/SizeGuideModal";
 
-
 function NotFoundComponent() {
   return (
     <div
@@ -53,7 +52,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
       className="flex-1 flex flex-col items-center justify-center gap-4 py-16 px-4 text-center"
       style={{ fontFamily: "var(--font-arcade)" }}
     >
-      <h1 style={{ fontSize: 18, letterSpacing: 2 }}>SYSTEM  ERROR</h1>
+      <h1 style={{ fontSize: 18, letterSpacing: 2 }}>SYSTEM ERROR</h1>
       <p style={{ fontSize: 11 }}>SOMETHING BROKE. TRY AGAIN OR RETURN HOME.</p>
       <div className="flex gap-2">
         <button

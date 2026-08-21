@@ -33,6 +33,8 @@ export const Route = createFileRoute("/api/arcade/scores")({
         );
 
         const { data, error } = await supabase
+          // arcade_leaderboard is not yet in generated Supabase types.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .from("arcade_leaderboard" as any)
           .select("id, player_tag, score, created_at")
           .order("score", { ascending: false })
@@ -79,6 +81,8 @@ export const Route = createFileRoute("/api/arcade/scores")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data, error } = await supabaseAdmin
+          // arcade_leaderboard is not yet in generated Supabase types.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .from("arcade_leaderboard" as any)
           .insert({
             player_tag: normalizedTag,

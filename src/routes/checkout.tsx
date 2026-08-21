@@ -20,7 +20,6 @@ export const Route = createFileRoute("/checkout")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
-
   }),
   component: CheckoutPage,
 });
@@ -114,7 +113,6 @@ function CheckoutPage() {
   }, [cart.lines, products, appliedPromo]);
   const items = products ? cart.buildView(products) : [];
 
-
   const errors = useMemo(() => {
     const e: Partial<Record<keyof Customer, string>> = {};
     if (!customer.name.trim()) e.name = "REQUIRED";
@@ -166,10 +164,7 @@ function CheckoutPage() {
   if (productsError) {
     return (
       <div className="flex-1 flex items-center justify-center p-10">
-        <ErrorState
-          message="COULD NOT LOAD CHECKOUT DATA."
-          onRetry={() => void refetch()}
-        />
+        <ErrorState message="COULD NOT LOAD CHECKOUT DATA." onRetry={() => void refetch()} />
       </div>
     );
   }
@@ -183,7 +178,6 @@ function CheckoutPage() {
   }
 
   if (items.length === 0) {
-
     return (
       <div
         className="flex-1 flex flex-col items-center justify-center gap-4 p-10 text-center"
@@ -311,7 +305,10 @@ function CheckoutPage() {
             <div className="border-t border-pixel border-dashed pt-2 flex flex-col gap-1">
               <Row label="SUBTOTAL" value={formatPrice(totals.subtotalCents)} />
               {totals.discountCents ? (
-                <Row label="ARCADE DISCOUNT (10%)" value={`-${formatPrice(totals.discountCents)}`} />
+                <Row
+                  label="ARCADE DISCOUNT (10%)"
+                  value={`-${formatPrice(totals.discountCents)}`}
+                />
               ) : null}
               <Row label="SHIPPING" value={formatPrice(totals.shippingCents)} />
               <Row label="TOTAL" value={formatPrice(totals.totalCents)} bold />
@@ -380,9 +377,7 @@ function Field({
         inputMode={inputMode}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
-        className={`border rounded-btn px-3 py-2 bg-cream ${
-          error ? "border-ink" : "border-pixel"
-        }`}
+        className={`border rounded-btn px-3 py-2 bg-cream ${error ? "border-ink" : "border-pixel"}`}
         style={{ fontFamily: "VT323, monospace", fontSize: 18 }}
       />
       {error && (

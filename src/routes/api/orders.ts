@@ -144,7 +144,6 @@ export const Route = createFileRoute("/api/orders")({
           return json({ code: "insert_failed", message: "Could not create order" }, 500);
         }
 
-
         const { signOrderToken } = await import("@/lib/server-crypto");
         const guestToken = signOrderToken(created.id, draft.customer.email);
 
@@ -170,7 +169,10 @@ export const Route = createFileRoute("/api/orders")({
                 };
               }),
               subtotal: `${currency === "EUR" ? "€" : "$"}${(subtotalCents / 100).toFixed(0)}`,
-              discount: discountCents > 0 ? `${currency === "EUR" ? "€" : "$"}${(discountCents / 100).toFixed(0)}` : undefined,
+              discount:
+                discountCents > 0
+                  ? `${currency === "EUR" ? "€" : "$"}${(discountCents / 100).toFixed(0)}`
+                  : undefined,
               shipping: `${currency === "EUR" ? "€" : "$"}${(shippingCents / 100).toFixed(0)}`,
               total: `${currency === "EUR" ? "€" : "$"}${(totalCents / 100).toFixed(0)}`,
               trackingUrl,
@@ -194,7 +196,6 @@ export const Route = createFileRoute("/api/orders")({
           guestToken,
         };
         return json(order, 201);
-
       },
     },
   },

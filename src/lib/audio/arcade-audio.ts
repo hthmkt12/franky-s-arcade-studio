@@ -15,7 +15,9 @@ class ArcadeAudioEngine {
   private initCtx(): AudioContext | null {
     if (typeof window === "undefined") return null;
     if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (AudioCtx) this.ctx = new AudioCtx();
     }
     if (this.ctx && this.ctx.state === "suspended") {
@@ -166,8 +168,8 @@ class ArcadeAudioEngine {
         { f: 659.25, d: 0.12 }, // E5
         { f: 523.25, d: 0.12 }, // C5
         { f: 659.25, d: 0.15 }, // E5
-        { f: 783.99, d: 0.3 },  // G5
-        { f: 392.00, d: 0.35 }, // G4
+        { f: 783.99, d: 0.3 }, // G5
+        { f: 392.0, d: 0.35 }, // G4
       ];
       let t = now;
       notes.forEach((note) => {
@@ -186,7 +188,9 @@ class ArcadeAudioEngine {
         osc.stop(t + note.d);
         t += note.d + 0.03;
       });
-    } catch {}
+    } catch {
+      // Ignore audio failure
+    }
   }
 
   public playJump() {
@@ -209,7 +213,9 @@ class ArcadeAudioEngine {
       gain.connect(ctx.destination);
       osc.start(now);
       osc.stop(now + 0.15);
-    } catch {}
+    } catch {
+      // Ignore audio failure
+    }
   }
 
   public playHit() {
@@ -232,7 +238,9 @@ class ArcadeAudioEngine {
       gain.connect(ctx.destination);
       osc.start(now);
       osc.stop(now + 0.2);
-    } catch {}
+    } catch {
+      // Ignore audio failure
+    }
   }
 }
 

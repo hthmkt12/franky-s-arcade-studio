@@ -40,9 +40,13 @@ export interface RestockAlertEmailProps {
   productUrl: string;
 }
 
-export async function sendRestockAlertEmail(data: RestockAlertEmailProps): Promise<{ success: boolean; id?: string }> {
+export async function sendRestockAlertEmail(
+  data: RestockAlertEmailProps,
+): Promise<{ success: boolean; id?: string }> {
   if (!resend) {
-    console.log(`[Email Service - Simulated] Restock alert dispatched to ${data.to} for ${data.productName}`);
+    console.log(
+      `[Email Service - Simulated] Restock alert dispatched to ${data.to} for ${data.productName}`,
+    );
     return { success: true, id: `sim_restock_email_${Date.now()}` };
   }
 
@@ -95,9 +99,13 @@ export async function sendRestockAlertEmail(data: RestockAlertEmailProps): Promi
   }
 }
 
-export async function sendOrderShippedEmail(data: OrderShippedEmailProps): Promise<{ success: boolean; id?: string }> {
+export async function sendOrderShippedEmail(
+  data: OrderShippedEmailProps,
+): Promise<{ success: boolean; id?: string }> {
   if (!resend) {
-    console.log(`[Email Service - Simulated] Order shipped notification dispatched to ${data.to} for order ${data.orderNumber}`);
+    console.log(
+      `[Email Service - Simulated] Order shipped notification dispatched to ${data.to} for order ${data.orderNumber}`,
+    );
     return { success: true, id: `sim_ship_email_${Date.now()}` };
   }
 
@@ -159,9 +167,13 @@ export async function sendOrderShippedEmail(data: OrderShippedEmailProps): Promi
   }
 }
 
-export async function sendOrderConfirmationEmail(data: OrderEmailProps): Promise<{ success: boolean; id?: string }> {
+export async function sendOrderConfirmationEmail(
+  data: OrderEmailProps,
+): Promise<{ success: boolean; id?: string }> {
   if (!resend) {
-    console.log(`[Email Service - Simulated] Order confirmation dispatched to ${data.to} for order ${data.orderNumber}`);
+    console.log(
+      `[Email Service - Simulated] Order confirmation dispatched to ${data.to} for order ${data.orderNumber}`,
+    );
     return { success: true, id: `sim_email_${Date.now()}` };
   }
 

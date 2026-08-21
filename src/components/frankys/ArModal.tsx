@@ -11,7 +11,7 @@ const ERROR_COPY: Record<ErrorKind, { title: string; steps: string[] }> = {
     title: "CAMERA ACCESS DENIED",
     steps: [
       "1. CLICK THE 🔒 / CAMERA ICON IN THE ADDRESS BAR",
-      "2. SET CAMERA TO \"ALLOW\" FOR THIS SITE",
+      '2. SET CAMERA TO "ALLOW" FOR THIS SITE',
       "3. RELOAD THE PAGE, THEN PRESS RETRY",
     ],
   },
@@ -33,19 +33,11 @@ const ERROR_COPY: Record<ErrorKind, { title: string; steps: string[] }> = {
   },
   insecure: {
     title: "INSECURE CONNECTION",
-    steps: [
-      "1. CAMERA NEEDS HTTPS",
-      "2. OPEN THE SITE OVER HTTPS",
-      "3. PRESS RETRY",
-    ],
+    steps: ["1. CAMERA NEEDS HTTPS", "2. OPEN THE SITE OVER HTTPS", "3. PRESS RETRY"],
   },
   unknown: {
     title: "AR FAILED TO START",
-    steps: [
-      "1. CLOSE OTHER APPS USING THE CAMERA",
-      "2. RELOAD THE PAGE",
-      "3. PRESS RETRY",
-    ],
+    steps: ["1. CLOSE OTHER APPS USING THE CAMERA", "2. RELOAD THE PAGE", "3. PRESS RETRY"],
   },
 };
 
@@ -132,7 +124,6 @@ export function ArModal() {
     };
   }, [open]);
 
-
   // Stop the live camera stream
   const stopCamera = () => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -153,7 +144,9 @@ export function ArModal() {
       const run = async () => {
         const md = typeof navigator !== "undefined" ? navigator.mediaDevices : undefined;
         if (!md?.getUserMedia) {
-          fail(typeof window !== "undefined" && !window.isSecureContext ? "insecure" : "unsupported");
+          fail(
+            typeof window !== "undefined" && !window.isSecureContext ? "insecure" : "unsupported",
+          );
           return;
         }
         try {
@@ -209,7 +202,6 @@ export function ArModal() {
     if (!open) stopCamera();
     return () => stopCamera();
   }, [open]);
-
 
   // Flip anchor to "locked" after the snap transition finishes
   useEffect(() => {
@@ -308,9 +300,7 @@ export function ArModal() {
 
   const variantName = detail.name ? detail.name.toUpperCase() : "AR PREVIEW";
   const capTransform =
-    phase === "done"
-      ? `perspective(600px) rotateY(${rotation}deg) scale(${zoom})`
-      : "none";
+    phase === "done" ? `perspective(600px) rotateY(${rotation}deg) scale(${zoom})` : "none";
 
   // Face anchor sits at the forehead of the silhouette (percent of stage)
   const FACE_ANCHOR = { xPct: 50, yPct: 38 };
@@ -358,25 +348,49 @@ export function ArModal() {
           ] as const;
           const isError = phase === "error";
           const activeIdx =
-            phase === "idle" ? -1 :
-            phase === "init" || isError ? 0 :
-            phase === "scan" ? 1 :
-            !snapped ? 2 :
-            !anchorLocked ? 3 : 3;
-          const statusLabel =
-            isError ? "AR ERROR" :
-            phase === "idle" ? "AWAITING TAP" :
-            phase === "init" ? "INITIALIZING…" :
-            phase === "scan" ? "SCANNING FACE MESH…" :
-            !snapped ? "CAP PLACED" :
-            !anchorLocked ? "ANCHORING…" : "ANCHOR LOCKED";
+            phase === "idle"
+              ? -1
+              : phase === "init" || isError
+                ? 0
+                : phase === "scan"
+                  ? 1
+                  : !snapped
+                    ? 2
+                    : !anchorLocked
+                      ? 3
+                      : 3;
+          const statusLabel = isError
+            ? "AR ERROR"
+            : phase === "idle"
+              ? "AWAITING TAP"
+              : phase === "init"
+                ? "INITIALIZING…"
+                : phase === "scan"
+                  ? "SCANNING FACE MESH…"
+                  : !snapped
+                    ? "CAP PLACED"
+                    : !anchorLocked
+                      ? "ANCHORING…"
+                      : "ANCHOR LOCKED";
           return (
-            <div className="border-b-2 border-ink px-3 py-2 flex items-center gap-2 bg-cream" style={{ fontSize: 9, letterSpacing: 1 }}>
+            <div
+              className="border-b-2 border-ink px-3 py-2 flex items-center gap-2 bg-cream"
+              style={{ fontSize: 9, letterSpacing: 1 }}
+            >
               <span
                 className="inline-block w-2 h-2 rounded-full"
                 style={{
-                  background: isError ? "var(--ink)" : anchorLocked ? "var(--buy)" : phase === "idle" ? "var(--muted)" : "var(--marquee)",
-                  animation: !isError && phase !== "idle" && !anchorLocked ? "blink 0.8s steps(1) infinite" : "none",
+                  background: isError
+                    ? "var(--ink)"
+                    : anchorLocked
+                      ? "var(--buy)"
+                      : phase === "idle"
+                        ? "var(--muted)"
+                        : "var(--marquee)",
+                  animation:
+                    !isError && phase !== "idle" && !anchorLocked
+                      ? "blink 0.8s steps(1) infinite"
+                      : "none",
                 }}
                 aria-hidden
               />
@@ -412,7 +426,12 @@ export function ArModal() {
               </div>
               <span
                 aria-live="polite"
-                style={{ fontFamily: "VT323, monospace", fontSize: 13, letterSpacing: 1, whiteSpace: "nowrap" }}
+                style={{
+                  fontFamily: "VT323, monospace",
+                  fontSize: 13,
+                  letterSpacing: 1,
+                  whiteSpace: "nowrap",
+                }}
               >
                 {statusLabel}
               </span>
@@ -420,14 +439,19 @@ export function ArModal() {
           );
         })()}
 
-
-
         <div
           ref={stageRef}
           className="checker-bg border-b-2 border-ink relative flex items-center justify-center min-h-[260px] p-6 overflow-hidden select-none"
           style={{
             touchAction: phase === "done" ? "none" : "auto",
-            cursor: phase === "idle" ? "crosshair" : phase === "done" ? (dragState.current ? "grabbing" : "grab") : "default",
+            cursor:
+              phase === "idle"
+                ? "crosshair"
+                : phase === "done"
+                  ? dragState.current
+                    ? "grabbing"
+                    : "grab"
+                  : "default",
           }}
           onClick={onStageClick}
           onPointerDown={onPointerDown}
@@ -470,8 +494,13 @@ export function ArModal() {
             >
               {/* Head silhouette */}
               <ellipse
-                cx="50" cy="55" rx="28" ry="34"
-                fill="none" stroke="var(--ink)" strokeWidth="1.2"
+                cx="50"
+                cy="55"
+                rx="28"
+                ry="34"
+                fill="none"
+                stroke="var(--ink)"
+                strokeWidth="1.2"
                 strokeDasharray={phase === "done" ? "0" : "3 3"}
               />
               {/* Face mesh grid */}
@@ -486,10 +515,30 @@ export function ArModal() {
               {/* Forehead anchor crosshair */}
               <g stroke="var(--marquee)" strokeWidth="1.4" opacity={phase === "done" ? 1 : 0.9}>
                 <circle cx={FACE_ANCHOR.xPct} cy={FACE_ANCHOR.yPct} r="3" fill="none" />
-                <line x1={FACE_ANCHOR.xPct - 6} y1={FACE_ANCHOR.yPct} x2={FACE_ANCHOR.xPct - 3} y2={FACE_ANCHOR.yPct} />
-                <line x1={FACE_ANCHOR.xPct + 3} y1={FACE_ANCHOR.yPct} x2={FACE_ANCHOR.xPct + 6} y2={FACE_ANCHOR.yPct} />
-                <line x1={FACE_ANCHOR.xPct} y1={FACE_ANCHOR.yPct - 6} x2={FACE_ANCHOR.xPct} y2={FACE_ANCHOR.yPct - 3} />
-                <line x1={FACE_ANCHOR.xPct} y1={FACE_ANCHOR.yPct + 3} x2={FACE_ANCHOR.xPct} y2={FACE_ANCHOR.yPct + 6} />
+                <line
+                  x1={FACE_ANCHOR.xPct - 6}
+                  y1={FACE_ANCHOR.yPct}
+                  x2={FACE_ANCHOR.xPct - 3}
+                  y2={FACE_ANCHOR.yPct}
+                />
+                <line
+                  x1={FACE_ANCHOR.xPct + 3}
+                  y1={FACE_ANCHOR.yPct}
+                  x2={FACE_ANCHOR.xPct + 6}
+                  y2={FACE_ANCHOR.yPct}
+                />
+                <line
+                  x1={FACE_ANCHOR.xPct}
+                  y1={FACE_ANCHOR.yPct - 6}
+                  x2={FACE_ANCHOR.xPct}
+                  y2={FACE_ANCHOR.yPct - 3}
+                />
+                <line
+                  x1={FACE_ANCHOR.xPct}
+                  y1={FACE_ANCHOR.yPct + 3}
+                  x2={FACE_ANCHOR.xPct}
+                  y2={FACE_ANCHOR.yPct + 6}
+                />
               </g>
             </svg>
           )}
@@ -577,20 +626,21 @@ export function ArModal() {
 
           {/* Cap — snaps to face anchor on done */}
           {(phase === "init" || phase === "scan" || phase === "done") && (
-
             <div
               className="absolute pointer-events-none"
               style={{
-                left: phase === "done" ? `${FACE_ANCHOR.xPct}%` : (reticlePos ? reticlePos.x : "50%"),
-                top: phase === "done" ? `${FACE_ANCHOR.yPct}%` : (reticlePos ? reticlePos.y : "50%"),
+                left: phase === "done" ? `${FACE_ANCHOR.xPct}%` : reticlePos ? reticlePos.x : "50%",
+                top: phase === "done" ? `${FACE_ANCHOR.yPct}%` : reticlePos ? reticlePos.y : "50%",
                 transform: `translate(-50%, -85%) ${
                   phase === "done" && snapped ? capTransform : "scale(1.15)"
                 }`,
                 opacity: phase === "done" ? 1 : 0.5,
-                transition: dragState.current || pinchState.current
-                  ? "none"
-                  : "left 420ms cubic-bezier(0.22,1,0.36,1), top 420ms cubic-bezier(0.22,1,0.36,1), transform 420ms cubic-bezier(0.22,1,0.36,1), opacity 300ms ease-out",
-                filter: phase === "done" && snapped ? "drop-shadow(4px 4px 0 rgba(0,0,0,0.35))" : "none",
+                transition:
+                  dragState.current || pinchState.current
+                    ? "none"
+                    : "left 420ms cubic-bezier(0.22,1,0.36,1), top 420ms cubic-bezier(0.22,1,0.36,1), transform 420ms cubic-bezier(0.22,1,0.36,1), opacity 300ms ease-out",
+                filter:
+                  phase === "done" && snapped ? "drop-shadow(4px 4px 0 rgba(0,0,0,0.35))" : "none",
               }}
             >
               {detail.image ? (
@@ -607,7 +657,6 @@ export function ArModal() {
               )}
             </div>
           )}
-
 
           {/* Micro-interaction hint chips (done phase) */}
           {phase === "done" && hint && (
@@ -637,9 +686,7 @@ export function ArModal() {
 
           {phase === "idle" && (
             <div className="flex flex-col gap-1.5 text-left bg-cream border border-ink rounded-card p-3 arcade-bevel">
-              <p style={{ fontSize: 9, letterSpacing: 1, marginBottom: 2 }}>
-                HOW TO TRY ON:
-              </p>
+              <p style={{ fontSize: 9, letterSpacing: 1, marginBottom: 2 }}>HOW TO TRY ON:</p>
               <p style={{ fontSize: 10, letterSpacing: 1 }}>1. ALLOW CAMERA ACCESS</p>
               <p style={{ fontSize: 10, letterSpacing: 1 }}>2. TAP THE RETICLE TO PLACE</p>
               <p style={{ fontSize: 10, letterSpacing: 1 }}>3. DRAG & PINCH TO ADJUST</p>
@@ -732,9 +779,10 @@ export function ArModal() {
             </>
           )}
 
-
           <p className="text-muted" style={{ fontSize: 9, letterSpacing: 1 }}>
-            {camReady ? "LIVE CAMERA — CAP OVERLAY IS AN APPROXIMATION" : "AR TRY-ON BETA — CAMERA REQUIRED"}
+            {camReady
+              ? "LIVE CAMERA — CAP OVERLAY IS AN APPROXIMATION"
+              : "AR TRY-ON BETA — CAMERA REQUIRED"}
           </p>
           <button
             type="button"

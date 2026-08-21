@@ -32,7 +32,10 @@ export const Route = createFileRoute("/api/orders/lookup")({
         const parsed = LookupSchema.safeParse(raw);
         if (!parsed.success) {
           return json(
-            { code: "invalid_body", message: parsed.error.issues[0]?.message ?? "Invalid lookup details" },
+            {
+              code: "invalid_body",
+              message: parsed.error.issues[0]?.message ?? "Invalid lookup details",
+            },
             400,
           );
         }
@@ -55,7 +58,10 @@ export const Route = createFileRoute("/api/orders/lookup")({
         }
 
         if (!order) {
-          return json({ code: "not_found", message: "No order found matching this number and email." }, 404);
+          return json(
+            { code: "not_found", message: "No order found matching this number and email." },
+            404,
+          );
         }
 
         const { signOrderToken } = await import("@/lib/server-crypto");

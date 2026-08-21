@@ -18,7 +18,9 @@ export const Route = createFileRoute("/about")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: `${process.env.VITE_APP_URL || "http://localhost:3000"}/about` }],
+    links: [
+      { rel: "canonical", href: `${process.env.VITE_APP_URL || "http://localhost:3000"}/about` },
+    ],
   }),
 
   component: AboutPage,
@@ -40,8 +42,8 @@ function AboutPage() {
           style={{ fontFamily: "VT323, monospace", fontSize: 20, lineHeight: 1.35 }}
         >
           <p>
-            Franky's is a one-man arcade dressed as a hat shop. We make merino wool caps by
-            hand in a small workshop in Porto, one color at a time, in tiny runs.
+            Franky's is a one-man arcade dressed as a hat shop. We make merino wool caps by hand in
+            a small workshop in Porto, one color at a time, in tiny runs.
           </p>
           <p>
             No trend cycles, no seasonal drops, no logos three inches tall. Cream paper. Pixel
@@ -54,13 +56,25 @@ function AboutPage() {
           style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 1 }}
         >
           <Card title="SHIPPING">
-            FLAT €7 IN EUROPE.<br />FREE OVER €100.<br />2–5 DAYS.
+            FLAT €7 IN EUROPE.
+            <br />
+            FREE OVER €100.
+            <br />
+            2–5 DAYS.
           </Card>
           <Card title="RETURNS">
-            30 DAYS UNWORN.<br />EMAIL US FIRST.<br />NO QUESTIONS.
+            30 DAYS UNWORN.
+            <br />
+            EMAIL US FIRST.
+            <br />
+            NO QUESTIONS.
           </Card>
           <Card title="CONTACT">
-            HELLO@FRANKYS.SHOP<br />PORTO, PT<br />MON–FRI 10–18
+            HELLO@FRANKYS.SHOP
+            <br />
+            PORTO, PT
+            <br />
+            MON–FRI 10–18
           </Card>
         </section>
 

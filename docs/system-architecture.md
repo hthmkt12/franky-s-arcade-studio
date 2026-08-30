@@ -49,6 +49,12 @@ Guest checkouts allow friction-free purchases without creating an account. Secur
    - If user is Supabase admin with valid JWT, access is granted.
    - Otherwise, `verifyOrderToken` performs `crypto.timingSafeEqual` against the computed HMAC.
    - Unauthorized requests receive `401 Unauthorized`, preventing ID enumeration and PII leakage.
+   - **Fail-Closed Policy**: In production (`NODE_ENV === "production"`), the server throws if `ORDER_TOKEN_SECRET` is unset, refusing to run with insecure fallbacks.
+
+### Rate Limiting & Anti-Spam
+- Implemented in `src/lib/rate-limit.server.ts` using sliding window memory counters.
+- `POST /api/orders`: Max 10 attempts/min per IP to prevent stock-locking denial of service.
+- `POST /api/arcade/scores`: Max 5 submissions/min per IP to safeguard the arcade leaderboard from script flooding.
 
 ---
 

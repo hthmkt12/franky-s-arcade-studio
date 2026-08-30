@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { toast } from "sonner";
 
 import { computeTotals, formatPrice, getFreeShippingProgress, getProducts } from "@/lib/api/shop";
+import { arcadeAudio } from "@/lib/audio/arcade-audio";
 import { useCart } from "@/lib/cart/CartContext";
 import { useQuery } from "@tanstack/react-query";
 
@@ -47,6 +49,21 @@ export function CartDrawer() {
 
   const items = products ? cart.buildView(products) : [];
   const totals = products ? computeTotals(cart.lines, products) : null;
+
+  // Find upsell candidates not yet in cart (prioritize pins, then totes)
+  const upsellProduct = useMemo(() => {
+    if (!products || items.length === 0) return null;
+    const cartProductIds = new Set(cart.lines.map((l) => l.productId));
+    const pin = products.find((p) => p.category === "pins" && !cartProductIds.has(p.id) && p.inStock);
+    if (pin) return pin;
+    return products.find((p) => p.category === "totes" && !cartProductIds.has(p.id) && p.inStock) ?? null;
+  }, [products, items.length, cart.lines]);
+
+  const handleQuickAdd = (productId: string) => {
+    cart.addItem(productId, "ONE", 1);
+    arcadeAudio.playAddCart();
+    toast.success("★ 1-UP! ADDED TO CART ★");
+  };
 
   return (
     <div className="fixed inset-0 z-40 flex" onClick={cart.close}>
@@ -164,6 +181,32 @@ export function CartDrawer() {
             </ul>
 
             <div className="border-t border-ink p-3 flex flex-col gap-1.5" style={{ fontSize: 10 }}>
+              {upsellProduct && (
+                <div className="mx-3 my-1 border border-dashed border-pixel rounded-btn p-2 bg-white flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={upsellProduct.image.url}
+                      alt={upsellProduct.image.alt}
+                      width={36}
+                      height={36}
+                      className="w-9 h-9 object-contain border border-pixel rounded-btn bg-cream"
+                      loading="lazy"
+                    />
+                    <div className="flex flex-col" style={{ fontSize: 9 }}>
+                      <span className="text-muted">ATTACH ITEM</span>
+                      <span style={{ fontWeight: 700 }}>{upsellProduct.name}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleQuickAdd(upsellProduct.id)}
+                    className="bg-ink text-cream px-2 py-1.5 rounded-btn arcade-bevel text-center shrink-0 hover:bg-buy transition-colors"
+                    style={{ fontSize: 9, fontWeight: 700 }}
+                  >
+                    + {formatPrice(upsellProduct.priceCents)}
+                  </button>
+                </div>
+              )}
+
               <FreeShippingBar subtotalCents={totals?.subtotalCents ?? 0} />
               <Row label="SUBTOTAL" value={formatPrice(totals?.subtotalCents ?? 0)} />
               <Row label="SHIPPING" value={formatPrice(totals?.shippingCents ?? 0)} />

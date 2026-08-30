@@ -6,6 +6,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import type { Order } from "@/lib/api/types";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit.server";
 
 const SHIPPING_FLAT_CENTS = 700;
 
@@ -42,6 +43,20 @@ export const Route = createFileRoute("/api/orders")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const clientIp = getClientIp(request);
+        const rl = checkRateLimit(clientIp, {
+          prefix: "orders",
+          windowMs: 60 * 1000, // 1 minute
+          maxRequests: 10, // max 10 order attempts/min
+        });
+
+        if (!rl.success) {
+          return json(
+            { code: "rate_limited", message: `Too many checkout requests. Please retry in ${rl.resetInSeconds}s.` },
+            429,
+          );
+        }
+
         let raw: unknown;
         try {
           raw = await request.json();

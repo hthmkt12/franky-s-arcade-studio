@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit.server";
 
 const ScoreSubmissionSchema = z.object({
   playerTag: z
@@ -42,25 +43,27 @@ export const Route = createFileRoute("/api/arcade/scores")({
 
         if (error) {
           console.error("[api/arcade/scores] get error", error);
-          // Fallback mock top 10 if DB is initializing
-          return json([
-            { id: "1", player_tag: "FRK", score: 520, created_at: new Date().toISOString() },
-            { id: "2", player_tag: "PAC", score: 410, created_at: new Date().toISOString() },
-            { id: "3", player_tag: "DKG", score: 350, created_at: new Date().toISOString() },
-            { id: "4", player_tag: "MAR", score: 290, created_at: new Date().toISOString() },
-            { id: "5", player_tag: "LUX", score: 220, created_at: new Date().toISOString() },
-            { id: "6", player_tag: "SON", score: 180, created_at: new Date().toISOString() },
-            { id: "7", player_tag: "ACE", score: 150, created_at: new Date().toISOString() },
-            { id: "8", player_tag: "NEO", score: 120, created_at: new Date().toISOString() },
-            { id: "9", player_tag: "FLY", score: 105, created_at: new Date().toISOString() },
-            { id: "10", player_tag: "BOT", score: 80, created_at: new Date().toISOString() },
-          ]);
+          return json({ code: "fetch_failed", message: "Could not retrieve leaderboard scores" }, 500);
         }
 
         return json(data ?? []);
       },
 
       POST: async ({ request }: { request: Request }) => {
+        const clientIp = getClientIp(request);
+        const rl = checkRateLimit(clientIp, {
+          prefix: "arcade_scores",
+          windowMs: 60 * 1000,
+          maxRequests: 5, // max 5 score submissions per minute per IP
+        });
+
+        if (!rl.success) {
+          return json(
+            { code: "rate_limited", message: `Too many submissions. Please wait ${rl.resetInSeconds}s.` },
+            429,
+          );
+        }
+
         let raw: unknown;
         try {
           raw = await request.json();

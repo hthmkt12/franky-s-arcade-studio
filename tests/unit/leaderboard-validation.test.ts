@@ -28,7 +28,9 @@ describe("Arcade Leaderboard & Rewards validation", () => {
   });
 
   it("rejects invalid player tags (symbols, spaces, >3 chars, empty)", () => {
-    expect(ScoreSubmissionSchema.safeParse({ playerTag: "TOOLONG", score: 500 }).success).toBe(false);
+    expect(ScoreSubmissionSchema.safeParse({ playerTag: "TOOLONG", score: 500 }).success).toBe(
+      false,
+    );
     expect(ScoreSubmissionSchema.safeParse({ playerTag: "F@", score: 500 }).success).toBe(false);
     expect(ScoreSubmissionSchema.safeParse({ playerTag: "", score: 500 }).success).toBe(false);
     expect(ScoreSubmissionSchema.safeParse({ playerTag: "   ", score: 500 }).success).toBe(false);
@@ -37,7 +39,9 @@ describe("Arcade Leaderboard & Rewards validation", () => {
   it("rejects invalid scores (negative, 0, >99999)", () => {
     expect(ScoreSubmissionSchema.safeParse({ playerTag: "FRK", score: -10 }).success).toBe(false);
     expect(ScoreSubmissionSchema.safeParse({ playerTag: "FRK", score: 0 }).success).toBe(false);
-    expect(ScoreSubmissionSchema.safeParse({ playerTag: "FRK", score: 100000 }).success).toBe(false);
+    expect(ScoreSubmissionSchema.safeParse({ playerTag: "FRK", score: 100000 }).success).toBe(
+      false,
+    );
   });
 
   it("applies accurate tiered promo discounts including CHAMP20", () => {

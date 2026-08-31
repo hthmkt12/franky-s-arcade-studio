@@ -43,7 +43,10 @@ export const Route = createFileRoute("/api/arcade/scores")({
 
         if (error) {
           console.error("[api/arcade/scores] get error", error);
-          return json({ code: "fetch_failed", message: "Could not retrieve leaderboard scores" }, 500);
+          return json(
+            { code: "fetch_failed", message: "Could not retrieve leaderboard scores" },
+            500,
+          );
         }
 
         return json(data ?? []);
@@ -59,7 +62,10 @@ export const Route = createFileRoute("/api/arcade/scores")({
 
         if (!rl.success) {
           return json(
-            { code: "rate_limited", message: `Too many submissions. Please wait ${rl.resetInSeconds}s.` },
+            {
+              code: "rate_limited",
+              message: `Too many submissions. Please wait ${rl.resetInSeconds}s.`,
+            },
             429,
           );
         }

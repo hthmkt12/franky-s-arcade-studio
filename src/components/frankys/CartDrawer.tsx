@@ -45,19 +45,24 @@ export function CartDrawer() {
     return () => document.removeEventListener("keydown", onKey);
   }, [cart.isOpen, cart.close]);
 
+  // Find upsell candidates not yet in cart (prioritize pins, then totes).
+  // Computed before any early return so hook order stays stable across renders.
+  const upsellProduct = useMemo(() => {
+    if (!products || cart.lines.length === 0) return null;
+    const cartProductIds = new Set(cart.lines.map((l) => l.productId));
+    const pin = products.find(
+      (p) => p.category === "pins" && !cartProductIds.has(p.id) && p.inStock,
+    );
+    if (pin) return pin;
+    return (
+      products.find((p) => p.category === "totes" && !cartProductIds.has(p.id) && p.inStock) ?? null
+    );
+  }, [products, cart.lines]);
+
   if (!cart.isOpen) return null;
 
   const items = products ? cart.buildView(products) : [];
   const totals = products ? computeTotals(cart.lines, products) : null;
-
-  // Find upsell candidates not yet in cart (prioritize pins, then totes)
-  const upsellProduct = useMemo(() => {
-    if (!products || items.length === 0) return null;
-    const cartProductIds = new Set(cart.lines.map((l) => l.productId));
-    const pin = products.find((p) => p.category === "pins" && !cartProductIds.has(p.id) && p.inStock);
-    if (pin) return pin;
-    return products.find((p) => p.category === "totes" && !cartProductIds.has(p.id) && p.inStock) ?? null;
-  }, [products, items.length, cart.lines]);
 
   const handleQuickAdd = (productId: string) => {
     cart.addItem(productId, "ONE", 1);

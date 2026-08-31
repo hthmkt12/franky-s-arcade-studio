@@ -52,7 +52,10 @@ export const Route = createFileRoute("/api/orders")({
 
         if (!rl.success) {
           return json(
-            { code: "rate_limited", message: `Too many checkout requests. Please retry in ${rl.resetInSeconds}s.` },
+            {
+              code: "rate_limited",
+              message: `Too many checkout requests. Please retry in ${rl.resetInSeconds}s.`,
+            },
             429,
           );
         }

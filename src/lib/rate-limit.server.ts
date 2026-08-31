@@ -35,10 +35,7 @@ export interface RateLimitResult {
   resetInSeconds: number;
 }
 
-export function checkRateLimit(
-  identifier: string,
-  options: RateLimitOptions,
-): RateLimitResult {
+export function checkRateLimit(identifier: string, options: RateLimitOptions): RateLimitResult {
   const now = Date.now();
   purgeStale(now);
 

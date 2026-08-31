@@ -1,0 +1,24 @@
+{
+  "runId": "orchestrate-260830-1600",
+  "status": "completed",
+  "totalJobs": 3,
+  "completedJobs": 3,
+  "failedJobs": 0,
+  "jobs": [
+    {
+      "id": "step-1-migration-readiness",
+      "status": "success",
+      "durationMs": 1000
+    },
+    {
+      "id": "step-2-env-security-verification",
+      "status": "success",
+      "durationMs": 1000
+    },
+    {
+      "id": "step-3-e2e-funnel-validation",
+      "status": "success",
+      "durationMs": 1500
+    }
+  ]
+}

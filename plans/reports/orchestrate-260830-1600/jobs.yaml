@@ -1,0 +1,28 @@
+version: 1
+concurrency: 1
+jobs:
+  - id: step-1-migration-readiness
+    runtime: internal
+    task: db
+    cwd: F:/franky-s-arcade-studio
+    prompt: "Kiểm tra toàn bộ các file migration trong supabase/migrations/, xác thực cú pháp SQL và tính tương thích với PostgreSQL/Supabase production."
+    timeout: 5m
+    expected_output: "Xác thực danh sách SQL migrations sẵn sàng chạy remote."
+
+  - id: step-2-env-security-verification
+    runtime: internal
+    depends_on: [step-1-migration-readiness]
+    task: security
+    cwd: F:/franky-s-arcade-studio
+    prompt: "Kiểm tra các biến môi trường bắt buộc (ORDER_TOKEN_SECRET, SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY), cơ chế fail-closed và rate-limiting."
+    timeout: 5m
+    expected_output: "Báo cáo kiểm tra fail-closed & danh sách biến môi trường cần thiết lập khi deploy."
+
+  - id: step-3-e2e-funnel-validation
+    runtime: internal
+    depends_on: [step-2-env-security-verification]
+    task: test
+    cwd: F:/franky-s-arcade-studio
+    prompt: "Chạy test suite xác thực toàn diện: tính toán tiền giỏ hàng đa danh mục (Cap + Hoodie + Pin), Free shipping progress, mã giảm giá KONAMI/COIN10/RUNNER15, và HMAC guest token."
+    timeout: 5m
+    expected_output: "Kết quả kiểm thử tự động 100% PASS cho toàn bộ phễu mua sắm."

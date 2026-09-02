@@ -30,6 +30,12 @@ export interface CheckoutSessionOptions {
   cancelUrl: string;
 }
 
+// NOTE (demo mode): this helper is NOT currently wired into the checkout flow.
+// Franky's Arcade Studio is a demo/portfolio storefront that collects no live
+// payment — src/routes/checkout.tsx creates the order and goes straight to the
+// receipt without a Stripe redirect. Keep this function for when real payments
+// are enabled, but be aware it also does not yet apply `discountCents` to the
+// line items (see review finding H1) — fix that before going live.
 export async function createStripeSession(
   opts: CheckoutSessionOptions,
 ): Promise<{ url: string; id: string }> {

@@ -193,7 +193,7 @@ export async function sendOrderConfirmationEmail(
   <html>
   <head>
     <meta charset="utf-8">
-    <title>Order Confirmation - Franky's</title>
+    <title>Order Received - Franky's</title>
   </head>
   <body style="margin: 0; padding: 20px; background-color: #f3e5df; font-family: 'Courier New', monospace; color: #000000;">
     <div style="max-width: 500px; margin: 0 auto; background: #f3e5df; border: 2px solid #000000; padding: 24px; box-shadow: 4px 4px 0 #000000;">
@@ -203,9 +203,9 @@ export async function sendOrderConfirmationEmail(
       </div>
 
       <div style="margin-bottom: 20px;">
-        <h2 style="font-size: 16px; margin: 0 0 8px 0;">ORDER CONFIRMED: ${data.orderNumber}</h2>
+        <h2 style="font-size: 16px; margin: 0 0 8px 0;">ORDER RECEIVED: ${data.orderNumber}</h2>
         <p style="font-size: 14px; line-height: 1.4; margin: 0;">
-          Player 1 <strong>${data.customerName}</strong>, your caps have entered the production queue!
+          Player 1 <strong>${data.customerName}</strong>, we've received your order! You'll get another update once it's confirmed and dispatched.
         </p>
       </div>
 
@@ -262,7 +262,7 @@ export async function sendOrderConfirmationEmail(
     const res = await resend.emails.send({
       from: "Franky's Arcade <orders@frankys.shop>",
       to: data.to,
-      subject: `★ Order Confirmed: ${data.orderNumber} - Franky's`,
+      subject: `★ Order Received: ${data.orderNumber} - Franky's`,
       html: emailHtml,
     });
     return { success: true, id: res.data?.id };

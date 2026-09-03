@@ -70,6 +70,7 @@ export interface Order {
   status: "pending" | "paid" | "shipped" | "cancelled";
   createdAt: string;
   guestToken?: string;
+  stripeSessionUrl?: string | null;
   trackingNumber?: string | null;
   carrier?: string | null;
   shippedAt?: string | null;

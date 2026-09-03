@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { PixelHorse } from "@/components/frankys/PixelHorse";
 import { formatPrice, getOrder } from "@/lib/api/shop";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/checkout/success/$id")({
   validateSearch: (search: Record<string, unknown>): { token?: string } => ({
@@ -39,6 +41,22 @@ function SuccessPage() {
   });
 
   const notFound = isError && (error as { status?: number } | null)?.status === 404;
+
+  useEffect(() => {
+    if (order && typeof window !== "undefined") {
+      const storageKey = `frankys.tracked_order.${order.id}`;
+      if (!sessionStorage.getItem(storageKey)) {
+        trackEvent("purchase", {
+          orderId: order.id,
+          orderNumber: order.number,
+          totalCents: order.totalCents,
+          currency: order.currency,
+          itemsCount: order.items.reduce((acc, it) => acc + it.qty, 0),
+        });
+        sessionStorage.setItem(storageKey, "true");
+      }
+    }
+  }, [order]);
 
   return (
     <div className="flex-1 checker-bg">

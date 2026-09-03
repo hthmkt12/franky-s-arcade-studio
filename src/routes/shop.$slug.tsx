@@ -12,6 +12,7 @@ const Cap3DViewer = lazy(() =>
 import { formatPrice, getProductBySlug, getProducts } from "@/lib/api/shop";
 
 import { useCart } from "@/lib/cart/CartContext";
+import { trackEvent } from "@/lib/analytics";
 import type { ProductSize } from "@/lib/api/types";
 
 export const Route = createFileRoute("/shop/$slug")({
@@ -66,6 +67,18 @@ function ProductPage() {
   const [qty, setQty] = useState(1);
   const [view3D, setView3D] = useState(false);
 
+  useEffect(() => {
+    if (product) {
+      trackEvent("view_item", {
+        productId: product.id,
+        name: product.name,
+        priceCents: product.priceCents,
+        currency: product.currency,
+        category: product.category,
+      });
+    }
+  }, [product]);
+
   if (isError) {
     return (
       <div className="flex-1 bg-cream flex items-center justify-center p-10">
@@ -102,6 +115,13 @@ function ProductPage() {
   const activeSize: ProductSize = product.sizes.includes(size) ? size : (product.sizes[0] ?? "ONE");
   const add = () => {
     cart.addItem(product.id, activeSize, qty);
+    trackEvent("add_to_cart", {
+      productId: product.id,
+      name: product.name,
+      size: activeSize,
+      qty,
+      priceCents: product.priceCents,
+    });
     toast(`ADDED — ${product.name} (${activeSize}) ×${qty}`);
   };
 

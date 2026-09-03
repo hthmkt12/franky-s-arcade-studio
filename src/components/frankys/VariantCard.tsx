@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { formatPrice } from "@/lib/api/shop";
+import { trackEvent } from "@/lib/analytics";
 import { useCart } from "@/lib/cart/CartContext";
 import { openArModal } from "@/components/frankys/ArModal";
 import { openSizeGuide } from "@/components/frankys/SizeGuideModal";
@@ -15,7 +16,22 @@ export function VariantCard({ product }: { product: Product }) {
 
   const add = () => {
     cart.addItem(product.id, size, 1);
+    trackEvent("add_to_cart", {
+      productId: product.id,
+      name: product.name,
+      size,
+      qty: 1,
+      priceCents: product.priceCents,
+    });
     toast(`ADDED — ${product.name} (${size})`);
+  };
+
+  const handleSelect = () => {
+    trackEvent("select_item", {
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+    });
   };
 
   return (
@@ -24,6 +40,7 @@ export function VariantCard({ product }: { product: Product }) {
         to="/shop/$slug"
         params={{ slug: product.slug }}
         preload="intent"
+        onClick={handleSelect}
         className="flex-1 min-h-[180px] flex items-center justify-center p-3 bg-cream group relative"
         aria-label={`View ${product.name}`}
       >

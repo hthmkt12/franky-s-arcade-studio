@@ -91,12 +91,21 @@ function ShopPage() {
 
   return (
     <div className="flex-1 bg-cream">
-      <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col gap-6">
-        <header className="flex items-end justify-between border-b border-ink pb-3">
-          <h1 style={{ fontFamily: "var(--font-arcade)", fontSize: 18, letterSpacing: 2 }}>
-            ★ THE ARCADE SHOP
-          </h1>
-          <span className="text-muted" style={{ fontFamily: "var(--font-arcade)", fontSize: 10 }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+        <header className="flex items-end justify-between border-b-2 border-ink pb-4">
+          <div className="flex flex-col gap-1">
+            <span className="text-muted text-[10px] font-arcade tracking-wider">CATALOG V1.0</span>
+            <h1
+              style={{
+                fontFamily: "var(--font-arcade)",
+                fontSize: "clamp(18px, 3vw, 24px)",
+                letterSpacing: 2,
+              }}
+            >
+              ★ THE ARCADE SHOP
+            </h1>
+          </div>
+          <span className="bg-ink text-cream font-arcade px-3 py-1 rounded-btn text-[10px] font-bold shadow-arcade-sm">
             {products ? `${visible.length} ITEMS` : isError ? "OFFLINE" : "LOADING..."}
           </span>
         </header>
@@ -112,10 +121,10 @@ function ShopPage() {
               type="button"
               aria-pressed={category === cat.key}
               onClick={() => handleCategoryChange(cat.key)}
-              className={`px-4 py-2 rounded-btn border border-ink arcade-bevel flex items-center gap-1.5 transition-all ${
+              className={`px-4 py-2.5 rounded-btn border-2 border-ink shadow-arcade-sm arcade-btn-active flex items-center gap-2 transition-all ${
                 category === cat.key
-                  ? "bg-marquee text-ink font-bold scale-105"
-                  : "bg-cream text-ink hover:bg-ink hover:text-cream"
+                  ? "bg-marquee text-ink font-bold shadow-arcade"
+                  : "bg-cream text-ink hover:bg-marquee"
               }`}
             >
               <span>{cat.icon}</span>
@@ -127,17 +136,20 @@ function ShopPage() {
         {/* Sort & Stock Filters */}
         {products && products.length > 0 && (
           <div
-            className="flex flex-wrap items-center gap-2"
+            className="flex flex-wrap items-center gap-2 border-y border-dashed border-ink/40 py-3"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 9, letterSpacing: 1 }}
           >
+            <span className="text-muted mr-1">SORT:</span>
             {SORTS.map((s) => (
               <button
                 key={s.key}
                 type="button"
                 aria-pressed={sort === s.key}
                 onClick={() => setSort(s.key)}
-                className={`px-3 py-1.5 rounded-pill border border-ink arcade-bevel transition-colors ${
-                  sort === s.key ? "bg-ink text-cream" : "bg-cream hover:bg-ink hover:text-cream"
+                className={`px-3 py-1.5 rounded-btn border border-ink arcade-btn-active transition-all ${
+                  sort === s.key
+                    ? "bg-ink text-cream font-bold shadow-arcade-sm"
+                    : "bg-cream hover:bg-marquee text-ink"
                 }`}
               >
                 {s.label}
@@ -147,11 +159,13 @@ function ShopPage() {
               type="button"
               aria-pressed={inStockOnly}
               onClick={() => setInStockOnly((v: boolean) => !v)}
-              className={`px-3 py-1.5 rounded-pill border border-ink arcade-bevel ml-auto transition-colors ${
-                inStockOnly ? "bg-buy text-cream" : "bg-cream hover:bg-ink hover:text-cream"
+              className={`px-3 py-1.5 rounded-btn border-2 border-ink arcade-btn-active sm:ml-auto transition-all ${
+                inStockOnly
+                  ? "bg-buy text-white font-bold shadow-arcade-sm"
+                  : "bg-cream hover:bg-marquee text-ink"
               }`}
             >
-              IN STOCK ONLY
+              {inStockOnly ? "✓ IN STOCK ONLY" : "IN STOCK ONLY"}
             </button>
           </div>
         )}
@@ -160,28 +174,31 @@ function ShopPage() {
           <ErrorState message="COULD NOT LOAD THE CATALOG." onRetry={() => void refetch()} />
         ) : isPending ? (
           <div
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             aria-busy="true"
             aria-live="polite"
           >
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="border border-ink rounded-card h-64 checker-bg opacity-40 animate-pulse"
+                className="border-2 border-ink rounded-card h-72 checker-bg opacity-40 animate-pulse shadow-arcade"
               />
             ))}
           </div>
         ) : visible.length === 0 ? (
-          <p
-            className="border border-ink rounded-card p-6 text-center"
+          <div
+            className="border-2 border-ink rounded-card p-10 text-center bg-cream shadow-arcade max-w-lg mx-auto my-8"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 12 }}
           >
-            {inStockOnly
-              ? "NO ITEMS IN STOCK RIGHT NOW."
-              : "NO ITEMS FOUND IN THIS CATEGORY. CHECK BACK SOON."}
-          </p>
+            <p className="text-base font-bold mb-2">NO MATCHES FOUND</p>
+            <p className="text-muted text-[10px]">
+              {inStockOnly
+                ? "NO ITEMS IN STOCK IN THIS CATEGORY RIGHT NOW."
+                : "NO ITEMS FOUND IN THIS CATEGORY. CHECK BACK SOON."}
+            </p>
+          </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {visible.map((p) => (
               <VariantCard key={p.id} product={p} />
             ))}

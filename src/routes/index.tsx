@@ -117,14 +117,14 @@ function LandingPage() {
         <div className="checker-warp-floor" aria-hidden />
         <div className="checker-warp-fade" aria-hidden />
         <div className="relative max-w-6xl mx-auto px-4 py-10 md:py-16 flex flex-col items-center gap-6 text-center">
-          <div className="bg-cream border border-ink rounded-card p-6 md:p-10 flex flex-col items-center gap-5 arcade-bevel max-w-xl w-full">
+          <div className="bg-cream border-2 border-ink rounded-card p-6 md:p-10 flex flex-col items-center gap-5 shadow-arcade-modal max-w-xl w-full">
             <ViewModeToggle mode={viewMode} onChange={setViewMode} productName="FRANKY'S CAP" />
 
             {viewMode === "3D" ? (
               <Suspense
                 fallback={
                   <div
-                    className="h-[220px] w-full checker-bg animate-pulse"
+                    className="h-[220px] w-full checker-bg animate-pulse rounded-card border border-ink"
                     aria-label="Loading 3D model"
                   />
                 }
@@ -140,7 +140,7 @@ function LandingPage() {
                 <button
                   type="button"
                   onClick={handleInsertCoin}
-                  className={`px-4 py-2 rounded-pill border border-ink arcade-bevel flex items-center gap-2 cursor-pointer transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-pill border-2 border-ink shadow-arcade-sm arcade-btn-active flex items-center gap-2 cursor-pointer transition-all duration-300 ${
                     coinInserted
                       ? "bg-buy text-cream animate-pulse"
                       : "bg-marquee text-ink hover:scale-105"
@@ -157,7 +157,7 @@ function LandingPage() {
                     arcadeAudio.playBeep(480);
                     setRunnerOpen(true);
                   }}
-                  className="px-4 py-2 rounded-pill border border-ink bg-cream hover:bg-ink hover:text-cream arcade-bevel flex items-center gap-2 cursor-pointer transition-all duration-300"
+                  className="px-4 py-2 rounded-pill border-2 border-ink bg-cream hover:bg-ink hover:text-cream shadow-arcade-sm arcade-btn-active flex items-center gap-2 cursor-pointer transition-all duration-300"
                   style={{ fontFamily: "var(--font-arcade)", fontSize: 11, letterSpacing: 2 }}
                 >
                   <span>🎮</span>
@@ -169,25 +169,26 @@ function LandingPage() {
             <h1
               style={{
                 fontFamily: "var(--font-arcade)",
-                fontSize: "clamp(20px, 4vw, 40px)",
+                fontSize: "clamp(24px, 5vw, 42px)",
                 letterSpacing: 3,
                 lineHeight: 1.2,
               }}
+              className="text-ink font-bold drop-shadow-sm"
             >
               PRESS START
             </h1>
             <p
-              className="max-w-md text-muted"
-              style={{ fontFamily: "VT323, monospace", fontSize: 20, lineHeight: 1.3 }}
+              className="max-w-md text-charcoal font-medium"
+              style={{ fontFamily: "VT323, monospace", fontSize: 22, lineHeight: 1.4 }}
             >
               Handmade merino wool caps from Portugal. Arcade-shop energy, none of the chrome.
             </p>
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center mt-2">
               <Link
                 to="/shop"
                 preload="intent"
                 onClick={() => arcadeAudio.playBeep(440)}
-                className="bg-buy text-cream px-6 py-3 rounded-btn border border-ink arcade-bevel"
+                className="bg-buy text-white px-7 py-3.5 rounded-btn border-2 border-ink shadow-arcade arcade-btn-active hover:bg-buy/90 font-bold"
                 style={{ fontFamily: "var(--font-arcade)", fontSize: 12, letterSpacing: 2 }}
               >
                 SHOP NOW
@@ -196,7 +197,7 @@ function LandingPage() {
                 to="/about"
                 preload="intent"
                 onClick={() => arcadeAudio.playBeep(520)}
-                className="bg-cream text-ink px-6 py-3 rounded-btn border border-ink arcade-bevel"
+                className="bg-cream text-ink px-7 py-3.5 rounded-btn border-2 border-ink shadow-arcade arcade-btn-active hover:bg-marquee font-bold"
                 style={{ fontFamily: "var(--font-arcade)", fontSize: 12, letterSpacing: 2 }}
               >
                 OUR STORY

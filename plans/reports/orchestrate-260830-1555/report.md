@@ -9,6 +9,7 @@
 ## 1. Executive Summary
 
 Orchestration pipeline thực thi tuần tự 3 giai đoạn chuẩn bị phát hành production:
+
 1. **Job 1 (Database Migration Readiness)**: PASS. 15 file migration SQL trong `supabase/migrations/` hợp lệ, cấu trúc schema sẵn sàng đồng bộ sang Supabase Remote.
 2. **Job 2 (Environment & Security Verification)**: PASS. Cơ chế Fail-Closed (server chặn guest token / checkout session nếu thiếu secret trong production) và Rate Limiting hoạt động đúng cam kết bảo mật.
 3. **Job 3 (E2E Funnel Validation)**: PASS. 5 test suites (24 unit tests) chạy thành công 100%, build production Vercel Nitro SSR thành công (`.vercel/output/static` và `__server.func`).
@@ -18,12 +19,14 @@ Orchestration pipeline thực thi tuần tự 3 giai đoạn chuẩn bị phát 
 ## 2. Job Execution Details
 
 ### Job 1: Migration Readiness (`step-1-migration-readiness`)
+
 - **Phạm vi**: 15 file SQL migration.
 - **Kết quả**:
   - `20260830153000_add_product_category_and_arcade_leaderboard.sql`: Thêm cột `category` vào `products`, tạo bảng `arcade_leaderboard` kèm RLS.
   - `20260830160000_seed_merchandise_expansion.sql`: Seed Hoodies (85€), Totes (28€), Pins (12€).
 
 ### Job 2: Environment & Security Verification (`step-2-env-security-verification`)
+
 - **Danh sách Environment Variables bắt buộc cho Production**:
   - `SUPABASE_URL`: Endpoint Supabase production.
   - `SUPABASE_PUBLISHABLE_KEY`: Key công khai phía client.
@@ -34,6 +37,7 @@ Orchestration pipeline thực thi tuần tự 3 giai đoạn chuẩn bị phát 
   - `RESEND_API_KEY`: Key gửi email hoá đơn và thông báo restock tự động.
 
 ### Job 3: E2E Funnel & Quality Gates (`step-3-e2e-funnel-validation`)
+
 - **Unit Tests**: 5 passed, 24 passed (447ms).
   - `tests/unit/server-crypto.test.ts`: Xác thực tính toàn vẹn token HMAC 32 ký tự.
   - `tests/unit/rate-limit.test.ts`: Xác thực giới hạn rate-limiting theo từng IP.
@@ -55,4 +59,5 @@ Orchestration pipeline thực thi tuần tự 3 giai đoạn chuẩn bị phát 
 ---
 
 ## 4. Unresolved Questions
+
 - Không có.

@@ -1,9 +1,11 @@
 # Stabilization audit — 2026-08-20
 
 ## Scope
+
 Verified stabilization of F:\franky-s-arcade-studio after the read-only audit: toolchain gate, SEO URL foundation, TanStack SSR/data loading, Three.js runtime optimization, tests/release verification.
 
 ## Evidence
+
 - TypeScript check: `node node_modules/typescript/bin/tsc --noEmit` passed with no output.
 - Production build baseline previously passed. After dependency cleanup, Vite reaches the bundle stage but the MCP command exits non-zero after warnings; no new artifact was emitted, so the post-cleanup build is not yet a PASS gate.
 - Build artifact inspection: `.output/public/assets/index-oiZ3yuC0.js` is 906.88 KB and `Cap3DViewer-D3ZqT9B0.js` is 472.90 KB. The 3D viewer is already separated from the main entry. Current build confirms `arcade-audio.ts` is statically imported by Header/home/shop/track/PixelRunner and also dynamically imported by cart/checkout; the dynamic imports therefore do not split it.
@@ -15,6 +17,7 @@ Verified stabilization of F:\franky-s-arcade-studio after the read-only audit: t
 - Performance: main JS remains 906.88 KB in the last emitted artifact; Cap3DViewer remains a separate 472.90 KB chunk. Five product PNGs total about 886 KB. The unused UI scaffold was confirmed to have no imports outside itself and has been removed, reducing install/dependency surface rather than the already-emitted browser bundle.
 
 ## Execution plan
+
 1. Establish reliable lint/test/build verification.
 2. Centralize public site URL for canonical, robots, sitemap, OG and JSON-LD.
 3. Improve TanStack route-level SSR/preloading and avoid duplicate product/catalog fetches.
@@ -23,6 +26,7 @@ Verified stabilization of F:\franky-s-arcade-studio after the read-only audit: t
 6. Re-run verification; inspect git status/diff; remove generated artifacts that should not be tracked.
 
 ## Release gates
+
 - lint pass
 - tests pass
 - production build pass

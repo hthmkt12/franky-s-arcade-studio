@@ -55,7 +55,7 @@ export function Header() {
   };
 
   return (
-    <header className="border-b border-ink bg-cream sticky top-0 z-30">
+    <header className="border-b-2 border-ink bg-cream sticky top-0 z-30 shadow-arcade-sm">
       <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] md:flex items-center justify-between gap-2 px-4 h-14">
         <button
           type="button"
@@ -65,11 +65,11 @@ export function Header() {
             arcadeAudio.playBeep(350);
             setMenuOpen((v) => !v);
           }}
-          className="flex flex-col items-center justify-center gap-1.5 w-11 h-11 rounded-btn border border-pixel arcade-bevel md:hidden shrink-0"
+          className="flex flex-col items-center justify-center gap-1.5 w-11 h-11 rounded-btn border-2 border-ink shadow-arcade-sm arcade-btn-active md:hidden shrink-0"
         >
-          <span className="block w-5 h-px bg-ink" />
-          <span className="block w-5 h-px bg-ink" />
-          <span className="block w-5 h-px bg-ink" />
+          <span className="block w-5 h-0.5 bg-ink" />
+          <span className="block w-5 h-0.5 bg-ink" />
+          <span className="block w-5 h-0.5 bg-ink" />
         </button>
 
         <nav
@@ -83,8 +83,11 @@ export function Header() {
               preload="intent"
               onClick={() => arcadeAudio.playBeep(520)}
               activeOptions={{ exact: n.to === "/" }}
-              className="px-2 py-1 rounded-btn hover:bg-ink hover:text-cream transition-colors"
-              activeProps={{ className: "bg-ink text-cream px-2 py-1 rounded-btn" }}
+              className="px-2.5 py-1.5 rounded-btn border border-transparent hover:border-ink hover:bg-marquee transition-all arcade-btn-active"
+              activeProps={{
+                className:
+                  "bg-ink text-cream px-2.5 py-1.5 rounded-btn border-2 border-ink shadow-arcade-sm",
+              }}
             >
               {n.label}
             </Link>
@@ -94,25 +97,25 @@ export function Header() {
         <Link
           to="/"
           onClick={() => arcadeAudio.playBeep(587)}
-          className="flex items-center justify-center md:justify-start gap-2 min-w-0"
+          className="flex items-center justify-center md:justify-start gap-2 min-w-0 group"
           aria-label="Franky's home"
           preload="intent"
         >
           <PixelHorse size={4} color="var(--ink)" />
           <span
-            style={{ fontFamily: "VT323, monospace", fontSize: 28, lineHeight: 1 }}
-            className="mt-1 truncate"
+            style={{ fontFamily: "VT323, monospace", fontSize: 32, lineHeight: 1 }}
+            className="mt-1 truncate tracking-wider group-hover:text-marquee transition-colors"
           >
             franky's
           </span>
         </Link>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={handleToggleCurrency}
             title="Switch Currency (EUR / USD / GBP)"
-            className="px-2 h-11 md:h-9 border border-ink rounded-btn bg-cream arcade-bevel hover:bg-ink hover:text-cream transition-colors flex items-center justify-center font-bold"
+            className="px-2.5 h-10 border-2 border-ink rounded-btn bg-cream shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-all flex items-center justify-center font-bold"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 9 }}
           >
             {currency}
@@ -123,7 +126,7 @@ export function Header() {
             onClick={handleToggleAudio}
             title={isMuted ? "Unmute 8-bit Audio" : "Mute 8-bit Audio"}
             aria-label={isMuted ? "Unmute sound" : "Mute sound"}
-            className="px-2.5 h-11 md:h-9 border border-ink rounded-btn bg-cream arcade-bevel hover:bg-ink hover:text-cream transition-colors flex items-center justify-center text-xs"
+            className="px-2.5 h-10 border-2 border-ink rounded-btn bg-cream shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-all flex items-center justify-center text-xs"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 10 }}
           >
             {isMuted ? "🔇" : "🔊"}
@@ -136,10 +139,16 @@ export function Header() {
               cart.toggle();
             }}
             aria-label={`Open cart, ${mounted ? cart.itemCount : 0} items`}
-            className="relative px-3 h-11 md:h-9 border border-ink rounded-btn bg-cream arcade-bevel hover:bg-ink hover:text-cream transition-colors"
+            className="relative px-3 h-10 border-2 border-ink rounded-btn bg-cream shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-all flex items-center gap-1.5"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 1 }}
           >
-            <span aria-live="polite">CART [{mounted ? cart.itemCount : 0}]</span>
+            <span>CART</span>
+            <span
+              aria-live="polite"
+              className="bg-ink text-cream px-1.5 py-0.5 rounded-btn text-[9px] font-bold"
+            >
+              {mounted ? cart.itemCount : 0}
+            </span>
           </button>
         </div>
       </div>

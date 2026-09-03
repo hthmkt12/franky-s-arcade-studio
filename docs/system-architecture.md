@@ -1,6 +1,7 @@
 # System Architecture — Franky's Arcade Studio
 
 ## Overview
+
 Franky's Arcade Studio is architected as a modern, full-stack SSR application powered by TanStack Start (Nitro runtime), React 19, Supabase (PostgreSQL), and Stripe.
 
 ```
@@ -40,6 +41,7 @@ Located in `src/lib/audio/arcade-audio.ts`.
 Guest checkouts allow friction-free purchases without creating an account. Security is maintained via HMAC tokenization in `src/lib/server-crypto.ts`.
 
 ### Token Generation & Flow
+
 1. User posts order draft to `POST /api/orders`.
 2. Server executes `create_order_tx` in Supabase to insert order row and lock inventory.
 3. Server generates guest token:
@@ -52,6 +54,7 @@ Guest checkouts allow friction-free purchases without creating an account. Secur
    - **Fail-Closed Policy**: In production (`NODE_ENV === "production"`), the server throws if `ORDER_TOKEN_SECRET` is unset, refusing to run with insecure fallbacks.
 
 ### Rate Limiting & Anti-Spam
+
 - Implemented in `src/lib/rate-limit.server.ts` using sliding window memory counters.
 - `POST /api/orders`: Max 10 attempts/min per IP to prevent stock-locking denial of service.
 - `POST /api/arcade/scores`: Max 5 submissions/min per IP to safeguard the arcade leaderboard from script flooding.
@@ -61,12 +64,14 @@ Guest checkouts allow friction-free purchases without creating an account. Secur
 ## 3. Stripe & Promo Code Architecture
 
 ### Promo Code Flow
+
 1. User clicks "INSERT COIN" on the landing page, triggering `playCoin()` audio and storing `frankys.promo.code = "COIN10"`.
 2. On checkout (`src/routes/checkout.tsx`), user applies promo code (`COIN10` / `KONAMI`).
 3. Total recomputes with 10% subtotal discount.
 4. When order is submitted to `POST /api/orders`, the server re-validates the promo code independently and applies discount to database record.
 
 ### Stripe Payment & Webhook Lifecycle
+
 1. `src/lib/stripe.server.ts` prepares line items including product lines and shipping (`700` cents).
 2. Sets `client_reference_id` and metadata with `order_id` and `order_number`.
 3. Webhook endpoint `POST /api/webhooks/stripe` (`src/routes/api/webhooks.stripe.ts`) verifies `stripe-signature` with `STRIPE_WEBHOOK_SECRET`.

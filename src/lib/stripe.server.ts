@@ -77,6 +77,21 @@ export async function createStripeSession(
     });
   }
 
+  let discounts: Stripe.Checkout.SessionCreateParams.Discount[] | undefined;
+  if (opts.discountCents && opts.discountCents > 0) {
+    try {
+      const coupon = await stripe.coupons.create({
+        amount_off: opts.discountCents,
+        currency: opts.currency.toLowerCase(),
+        duration: "once",
+        name: "Arcade Cheat Code Discount",
+      });
+      discounts = [{ coupon: coupon.id }];
+    } catch (err) {
+      console.error("[stripe] Could not create dynamic coupon for discount", err);
+    }
+  }
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     mode: "payment",
@@ -87,6 +102,7 @@ export async function createStripeSession(
       order_number: opts.orderNumber,
     },
     line_items: lineItems,
+    discounts,
     success_url: opts.successUrl,
     cancel_url: opts.cancelUrl,
   });

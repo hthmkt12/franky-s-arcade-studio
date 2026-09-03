@@ -200,6 +200,41 @@ export const Route = createFileRoute("/api/orders")({
             console.error("[api/orders] Confirmation email skipped", err);
           });
 
+        let stripeSessionUrl: string | null = null;
+        try {
+          const { createStripeSession } = await import("@/lib/stripe.server");
+          const origin = new URL(request.url).origin;
+          const session = await createStripeSession({
+            orderId: created.id,
+            orderNumber: created.number,
+            customerEmail: draft.customer.email,
+            items: draft.items.map((it) => {
+              const p = productById.get(it.productId)!;
+              return {
+                name: p.name,
+                unitPriceCents: p.price_cents,
+                qty: it.qty,
+                size: it.size,
+              };
+            }),
+            shippingCents,
+            discountCents,
+            currency,
+            successUrl: `${origin}/checkout/success/${created.id}?token=${guestToken}&session_id={CHECKOUT_SESSION_ID}`,
+            cancelUrl: `${origin}/checkout`,
+          });
+          stripeSessionUrl = session.url;
+        } catch (stripeErr) {
+          console.error("[api/orders] Stripe session creation failed", stripeErr);
+          // Fail-closed: in production without valid key, return error
+          if (process.env.NODE_ENV === "production" && process.env.STRIPE_SECRET_KEY) {
+            return json(
+              { code: "payment_init_failed", message: "Could not initialize payment" },
+              502,
+            );
+          }
+        }
+
         const order: Order = {
           id: created.id,
           number: created.number,
@@ -212,6 +247,7 @@ export const Route = createFileRoute("/api/orders")({
           status: "pending",
           createdAt: created.created_at,
           guestToken,
+          stripeSessionUrl,
         };
         return json(order, 201);
       },

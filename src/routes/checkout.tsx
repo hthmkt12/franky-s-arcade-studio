@@ -150,6 +150,10 @@ function CheckoutPage() {
       });
       cart.clear();
       toast(`ORDER PLACED — ${order.number}`);
+      if (order.stripeSessionUrl && order.stripeSessionUrl.startsWith("http")) {
+        window.location.href = order.stripeSessionUrl;
+        return;
+      }
       navigate({
         to: "/checkout/success/$id",
         params: { id: order.id },

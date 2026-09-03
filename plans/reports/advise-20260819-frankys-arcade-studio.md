@@ -17,12 +17,14 @@ Franky's Arcade Studio sở hữu visual identity độc đáo (retro arcade-ska
 ## 2. Reframed Requirements & Scope
 
 ### A. Mục tiêu cốt lõi (Core Goals)
+
 1. **Hoàn thiện thanh toán**: Tích hợp Stripe Checkout / Payment Intents cho thị trường quốc tế (EUR/USD) với Webhook tự động cập nhật trạng thái đơn hàng trong Supabase từ `pending` sang `paid`.
 2. **Bảo mật PII & Authorization**: Khóa endpoint `GET /api/orders/$id` bằng HMAC Guest Access Token được tạo khi đặt hàng, ngăn chặn tấn công quét order UUID để lấy cắp thông tin cá nhân khách hàng.
 3. **Chuẩn hóa UI/UX & WCAG AA**: Phân tách typography rõ ràng (dùng `Press Start 2P` cho Tiêu đề/Nút bấm, dùng `VT323` cho đoạn văn), sửa lỗi tương phản màu `#737373` và nút camera, mở rộng hit-target mobile lên 44px.
 4. **Arcade Audio & Gamification**: Tạo Web Audio 8-bit Synthesizer (tiếng coin insert, click beep, add-to-cart jingle, purchase fanfare) với nút Mute/Unmute trên Header, và slot "INSERT COIN" thả xu nhận mã giảm giá Easter Egg.
 
 ### B. Non-Goals (Ngoài phạm vi giai đoạn này)
+
 - Chưa dựng 3D WebGL Mesh phức tạp với Three.js (giữ nguyên AR/3D 2D projection hiện tại để tối ưu bundle size).
 - Chưa làm hệ thống đăng ký tài khoản khách hàng (giữ Guest Checkout nhanh gọn).
 - Chưa xây dựng mini-game độc lập nhiều màn chơi (chỉ làm tương tác Coin Drop & Easter egg discount).
@@ -65,6 +67,7 @@ Franky's Arcade Studio sở hữu visual identity độc đáo (retro arcade-ska
 ## 5. Work Checklist & Success Metrics
 
 ### Work Checklist
+
 - [ ] `src/lib/audio/arcade-audio.ts`: Tạo Web Audio synth (bip, coin, add, win) + hook `useArcadeAudio()`.
 - [ ] `src/components/frankys/Header.tsx`: Thêm nút toggle âm thanh SFX (Mute/Unmute).
 - [ ] `src/styles.css` & `src/components/frankys/ArModal.tsx`: Chỉnh typography toàn trang, tăng contrast WCAG AA, chỉnh hit-target mobile 44px.
@@ -74,6 +77,7 @@ Franky's Arcade Studio sở hữu visual identity độc đáo (retro arcade-ska
 - [ ] `src/routes/index.tsx`: Thêm tương tác Click Coin Slot nhận mã giảm giá Easter Egg.
 
 ### Success Metrics
+
 1. **Lighthouse Accessibility Score**: Đạt **≥ 98/100** (không còn cảnh báo tương phản hay touch-target).
 2. **Audio Performance**: Bundle size audio tăng **0 KB** (hoàn toàn thuần Web Audio API), độ trễ âm thanh **< 10ms**.
 3. **Security Audit**: Thử gọi `GET /api/orders/<uuid>` không kèm token phải trả về HTTP `401/403`.

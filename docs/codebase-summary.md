@@ -1,6 +1,7 @@
 # Codebase Summary — Franky's Arcade Studio
 
 ## System Overview
+
 Franky's Arcade Studio is a full-stack e-commerce web application inspired by retro arcade aesthetics (cream paper background `#f3e5df`, thick pixel borders, black-and-white checkerboard patterns, signal-orange `#faa21f` marquee, and punchy green `#128e44` buy accents). It sells handmade merino wool caps from Portugal.
 
 The application runs on TanStack Start (Nitro server runtime) with React 19, TypeScript, TanStack Router (file-based routing), TanStack Query, Tailwind CSS v4, and Supabase for database storage and transactions.
@@ -9,16 +10,16 @@ The application runs on TanStack Start (Nitro server runtime) with React 19, Typ
 
 ## Architecture & Technology Stack
 
-| Layer | Technology | Details |
-|---|---|---|
-| **Frontend Framework** | React 19 & TanStack Start | Server and client hydration via TanStack Start (`@tanstack/react-start`) |
-| **Routing** | TanStack Router | File-based routes in `src/routes/` with automatic type-safe tree generation (`routeTree.gen.ts`) |
-| **State & Data Fetching** | TanStack Query | Client cache for products, order verification, and admin analytics |
-| **Styling & Theme** | Tailwind CSS v4 & Custom CSS | Retro arcade design tokens, custom bevel borders, VT323 & Arcade pixel fonts |
-| **Audio Engine** | Web Audio API | Zero-download native oscillator chiptune synthesizer (`src/lib/audio/arcade-audio.ts`) |
-| **Database & RPC** | Supabase (PostgreSQL) | Atomic order creation via `create_order_tx` stored procedure and inventory control |
-| **Security & Auth** | Node.js Crypto HMAC | Guest token signing for order verification without mandatory user login |
-| **Payments** | Stripe API | Server-side checkout session creation and webhook status synchronization |
+| Layer                     | Technology                   | Details                                                                                          |
+| ------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Frontend Framework**    | React 19 & TanStack Start    | Server and client hydration via TanStack Start (`@tanstack/react-start`)                         |
+| **Routing**               | TanStack Router              | File-based routes in `src/routes/` with automatic type-safe tree generation (`routeTree.gen.ts`) |
+| **State & Data Fetching** | TanStack Query               | Client cache for products, order verification, and admin analytics                               |
+| **Styling & Theme**       | Tailwind CSS v4 & Custom CSS | Retro arcade design tokens, custom bevel borders, VT323 & Arcade pixel fonts                     |
+| **Audio Engine**          | Web Audio API                | Zero-download native oscillator chiptune synthesizer (`src/lib/audio/arcade-audio.ts`)           |
+| **Database & RPC**        | Supabase (PostgreSQL)        | Atomic order creation via `create_order_tx` stored procedure and inventory control               |
+| **Security & Auth**       | Node.js Crypto HMAC          | Guest token signing for order verification without mandatory user login                          |
+| **Payments**              | Stripe API                   | Server-side checkout session creation and webhook status synchronization                         |
 
 ---
 
@@ -67,7 +68,9 @@ franky-s-arcade-studio/
 ## Key Modules & Implementations
 
 ### 1. Web Audio Synthesizer (`src/lib/audio/arcade-audio.ts`)
+
 Zero-download 8-bit sound generator leveraging browser `AudioContext` and native oscillators:
+
 - `playBeep(freq, type, duration)`: UI click and navigation sounds.
 - `playCoin()`: Double-tone frequency shift (`B5` to `E6`) on Insert Coin button click.
 - `playAddCart()`: 4-note ascending square wave chord (`C5`, `E5`, `G5`, `C6`).
@@ -75,6 +78,7 @@ Zero-download 8-bit sound generator leveraging browser `AudioContext` and native
 - State persisted to `localStorage` under `frankys.audio.muted`.
 
 ### 2. HMAC Guest Token Security (`src/lib/server-crypto.ts` & `src/routes/api/orders.*`)
+
 - **Order Placement (`POST /api/orders`)**:
   - Re-computes prices and stock on server via database RPC `create_order_tx`.
   - Generates HMAC-SHA256 digest `signOrderToken(orderId, email)` using `SUPABASE_SERVICE_ROLE_KEY`.
@@ -85,6 +89,7 @@ Zero-download 8-bit sound generator leveraging browser `AudioContext` and native
   - Prevents enumeration and unauthorized reading of guest customer addresses.
 
 ### 3. Stripe & Promo Code Integrations
+
 - **Promo Codes (`COIN10` / `KONAMI`)**:
   - Discovered via "INSERT COIN" interaction on landing page or Konami code entry.
   - Validated client-side in `src/routes/checkout.tsx` and recalculated server-side in `src/routes/api/orders.ts`.

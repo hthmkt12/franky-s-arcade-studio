@@ -43,7 +43,7 @@ export function CartDrawer() {
     document.addEventListener("keydown", onKey);
     panelRef.current?.querySelector<HTMLElement>("button")?.focus();
     return () => document.removeEventListener("keydown", onKey);
-  }, [cart.isOpen, cart.close]);
+  }, [cart]);
 
   // Find upsell candidates not yet in cart (prioritize pins, then totes).
   // Computed before any early return so hook order stays stable across renders.
@@ -79,17 +79,19 @@ export function CartDrawer() {
         aria-modal="true"
         aria-label="Your cart"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md bg-cream border-l border-ink flex flex-col"
+        className="w-full max-w-md bg-cream border-l-2 border-ink flex flex-col shadow-arcade-modal"
         style={{ fontFamily: "var(--font-arcade)" }}
       >
-        <div className="marquee-sheen border-b border-ink flex items-center justify-between px-3 h-9">
-          <span style={{ fontSize: 10, fontWeight: 700 }}>YOUR CART [{cart.itemCount}]</span>
+        <div className="bg-marquee border-b-2 border-ink flex items-center justify-between px-4 h-12">
+          <span style={{ fontSize: 11, fontWeight: 700 }} className="text-ink tracking-wider">
+            ★ YOUR CART [{cart.itemCount}]
+          </span>
           <button
             onClick={cart.close}
             aria-label="Close cart"
-            style={{ fontSize: 10, fontWeight: 700 }}
+            className="w-8 h-8 rounded-btn border-2 border-ink bg-cream text-ink font-bold shadow-arcade-sm arcade-btn-active flex items-center justify-center text-xs hover:bg-ink hover:text-cream"
           >
-            X
+            ✕
           </button>
         </div>
 
@@ -102,60 +104,62 @@ export function CartDrawer() {
             />
           </div>
         ) : isPending ? (
-          <div className="flex-1 flex flex-col gap-2 p-3" aria-busy="true" aria-live="polite">
+          <div className="flex-1 flex flex-col gap-3 p-4" aria-busy="true" aria-live="polite">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="border border-pixel rounded-btn h-20 checker-bg opacity-40 animate-pulse"
+                className="border-2 border-pixel rounded-btn h-20 checker-bg opacity-40 animate-pulse"
               />
             ))}
           </div>
         ) : items.length === 0 ? (
           <div
-            className="flex-1 flex flex-col items-center justify-center gap-3 p-6"
-            style={{ fontSize: 10 }}
+            className="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center"
+            style={{ fontSize: 11 }}
           >
             <PixelHorse size={6} />
-            <p>EMPTY CART — INSERT COIN</p>
+            <p className="font-bold tracking-wider">EMPTY CART — INSERT COIN</p>
             <Link
               to="/shop"
               onClick={cart.close}
-              className="bg-ink text-cream py-2 px-4 rounded-btn arcade-bevel border border-ink"
-              style={{ fontSize: 10 }}
+              className="bg-ink text-cream py-3 px-6 rounded-btn border-2 border-ink shadow-arcade-sm arcade-btn-active hover:bg-marquee hover:text-ink transition-colors font-bold"
+              style={{ fontSize: 10, letterSpacing: 1 }}
             >
               KEEP SHOPPING
             </Link>
           </div>
         ) : (
           <>
-            <ul className="flex-1 overflow-auto p-3 flex flex-col gap-2">
+            <ul className="flex-1 overflow-auto p-4 flex flex-col gap-3">
               {items.map((it) => (
                 <li
                   key={`${it.productId}-${it.size}`}
-                  className="border border-pixel rounded-btn p-2 flex items-center gap-2 bg-cream arcade-bevel"
+                  className="border-2 border-ink rounded-card p-3 flex items-center gap-3 bg-cream shadow-arcade-sm"
                 >
                   <img
                     src={it.product.image.url}
                     alt={it.product.image.alt}
                     width={56}
                     height={56}
-                    className="w-14 h-14 object-contain border border-pixel rounded-btn bg-cream"
+                    className="w-14 h-14 object-contain border-2 border-ink rounded-btn bg-white/60 p-1"
                     loading="lazy"
                   />
                   <div className="flex-1 flex flex-col gap-1" style={{ fontSize: 10 }}>
-                    <span style={{ fontWeight: 700 }}>{it.product.name}</span>
-                    <span className="text-muted">SIZE {it.size}</span>
-                    <div className="flex items-center gap-1">
+                    <span style={{ fontWeight: 700 }} className="truncate max-w-[180px]">
+                      {it.product.name}
+                    </span>
+                    <span className="text-muted font-bold text-[9px]">SIZE: {it.size}</span>
+                    <div className="flex items-center gap-1.5 mt-0.5">
                       <button
                         onClick={() => cart.updateQty(it.productId, it.size, it.qty - 1)}
-                        className="min-w-[36px] min-h-[36px] md:min-w-[28px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center text-sm"
+                        className="w-7 h-7 border-2 border-ink rounded-btn shadow-arcade-sm arcade-btn-active bg-cream hover:bg-marquee flex items-center justify-center font-bold"
                         aria-label={`Decrease quantity of ${it.product.name}`}
                       >
                         −
                       </button>
                       <span
-                        className="w-7 text-center"
-                        style={{ fontFamily: "VT323, monospace", fontSize: 18 }}
+                        className="w-6 text-center font-bold"
+                        style={{ fontFamily: "VT323, monospace", fontSize: 20 }}
                       >
                         {it.qty}
                       </span>
@@ -163,49 +167,54 @@ export function CartDrawer() {
                         onClick={() =>
                           cart.updateQty(it.productId, it.size, Math.min(9, it.qty + 1))
                         }
-                        className="min-w-[36px] min-h-[36px] md:min-w-[28px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center text-sm"
+                        className="w-7 h-7 border-2 border-ink rounded-btn shadow-arcade-sm arcade-btn-active bg-cream hover:bg-marquee flex items-center justify-center font-bold"
                         aria-label={`Increase quantity of ${it.product.name}`}
                       >
                         +
                       </button>
                       <button
                         onClick={() => cart.removeItem(it.productId, it.size)}
-                        className="ml-auto px-2 min-h-[36px] md:min-h-[28px] border border-pixel rounded-btn arcade-bevel flex items-center justify-center"
-                        style={{ fontSize: 9 }}
+                        className="ml-auto px-2 h-7 border border-destructive text-destructive rounded-btn hover:bg-destructive hover:text-white transition-colors flex items-center justify-center font-bold"
+                        style={{ fontSize: 8 }}
                         aria-label={`Remove ${it.product.name} from cart`}
                       >
                         REMOVE
                       </button>
                     </div>
                   </div>
-                  <span style={{ fontSize: 10, fontWeight: 700 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700 }} className="font-bold shrink-0">
                     {formatPrice(it.lineTotalCents)}
                   </span>
                 </li>
               ))}
             </ul>
 
-            <div className="border-t border-ink p-3 flex flex-col gap-1.5" style={{ fontSize: 10 }}>
+            <div
+              className="border-t-2 border-ink p-4 flex flex-col gap-2 bg-cream"
+              style={{ fontSize: 10 }}
+            >
               {upsellProduct && (
-                <div className="mx-3 my-1 border border-dashed border-pixel rounded-btn p-2 bg-white flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
+                <div className="mb-2 border-2 border-dashed border-ink rounded-card p-2.5 bg-white/70 flex items-center justify-between gap-2 shadow-arcade-sm">
+                  <div className="flex items-center gap-2 min-w-0">
                     <img
                       src={upsellProduct.image.url}
                       alt={upsellProduct.image.alt}
                       width={36}
                       height={36}
-                      className="w-9 h-9 object-contain border border-pixel rounded-btn bg-cream"
+                      className="w-10 h-10 object-contain border border-ink rounded-btn bg-cream p-0.5 shrink-0"
                       loading="lazy"
                     />
-                    <div className="flex flex-col" style={{ fontSize: 9 }}>
-                      <span className="text-muted">ATTACH ITEM</span>
-                      <span style={{ fontWeight: 700 }}>{upsellProduct.name}</span>
+                    <div className="flex flex-col min-w-0" style={{ fontSize: 9 }}>
+                      <span className="text-marquee font-bold">★ QUICK ATTACH</span>
+                      <span style={{ fontWeight: 700 }} className="truncate">
+                        {upsellProduct.name}
+                      </span>
                     </div>
                   </div>
                   <button
                     onClick={() => handleQuickAdd(upsellProduct.id)}
-                    className="bg-ink text-cream px-2 py-1.5 rounded-btn arcade-bevel text-center shrink-0 hover:bg-buy transition-colors"
-                    style={{ fontSize: 9, fontWeight: 700 }}
+                    className="bg-buy text-white px-3 py-2 rounded-btn border-2 border-ink shadow-arcade-sm arcade-btn-active text-center shrink-0 hover:bg-buy/90 transition-colors font-bold"
+                    style={{ fontSize: 9 }}
                   >
                     + {formatPrice(upsellProduct.priceCents)}
                   </button>
@@ -213,18 +222,20 @@ export function CartDrawer() {
               )}
 
               <FreeShippingBar subtotalCents={totals?.subtotalCents ?? 0} />
-              <Row label="SUBTOTAL" value={formatPrice(totals?.subtotalCents ?? 0)} />
-              <Row label="SHIPPING" value={formatPrice(totals?.shippingCents ?? 0)} />
-              <div className="border-t border-pixel border-dashed my-1" />
-              <Row label="TOTAL" value={formatPrice(totals?.totalCents ?? 0)} bold />
+              <div className="flex flex-col gap-1 mt-1">
+                <Row label="SUBTOTAL" value={formatPrice(totals?.subtotalCents ?? 0)} />
+                <Row label="SHIPPING" value={formatPrice(totals?.shippingCents ?? 0)} />
+                <div className="border-t border-ink border-dashed my-1" />
+                <Row label="TOTAL" value={formatPrice(totals?.totalCents ?? 0)} bold />
+              </div>
 
               <Link
                 to="/checkout"
                 onClick={cart.close}
-                className="mt-2 bg-buy text-cream py-3 rounded-btn arcade-bevel border border-ink text-center"
-                style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2 }}
+                className="mt-3 bg-buy text-white py-3.5 rounded-btn border-2 border-ink shadow-arcade arcade-btn-active text-center font-bold tracking-wider hover:bg-buy/90 transition-all flex items-center justify-center min-h-[44px]"
+                style={{ fontSize: 12, letterSpacing: 2 }}
               >
-                CHECKOUT
+                PROCEED TO CHECKOUT →
               </Link>
             </div>
           </>

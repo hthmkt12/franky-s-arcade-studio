@@ -129,19 +129,20 @@ function ProductPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="border border-ink rounded-card checker-bg min-h-[320px] md:min-h-[500px] flex flex-col items-center justify-center gap-3 p-6 md:sticky md:top-20 self-start">
-          <div className="bg-cream border border-ink rounded-card p-4 arcade-bevel w-full flex items-center justify-center min-h-[320px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column: Media & 3D Viewer */}
+        <div className="lg:col-span-7 border-2 border-ink rounded-card checker-bg min-h-[360px] md:min-h-[520px] flex flex-col items-center justify-center gap-4 p-6 shadow-arcade-card lg:sticky lg:top-20 self-start">
+          <div className="bg-cream border-2 border-ink rounded-card p-4 shadow-arcade-sm w-full flex items-center justify-center min-h-[320px]">
             {view3D && (product.category ?? "caps") === "caps" ? (
               <Suspense
                 fallback={
                   <div
-                    className="h-[300px] w-full checker-bg animate-pulse"
+                    className="h-[300px] w-full checker-bg animate-pulse rounded-card"
                     aria-label="Loading 3D model"
                   />
                 }
               >
-                <Cap3DViewer colorHex={product.colorHex} className="h-[300px]" />
+                <Cap3DViewer colorHex={product.colorHex} className="h-[320px]" />
               </Suspense>
             ) : (
               <img
@@ -151,17 +152,17 @@ function ProductPage() {
                 height={512}
                 loading="eager"
                 fetchPriority="high"
-                className="max-h-[380px] w-auto object-contain"
+                className="max-h-[380px] w-auto object-contain transition-transform duration-300 hover:scale-105"
               />
             )}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 justify-center">
             {(product.category ?? "caps") === "caps" && (
               <button
                 type="button"
                 onClick={() => setView3D((v) => !v)}
-                className={`border border-ink rounded-btn px-3 py-2 arcade-bevel transition-colors ${
+                className={`border-2 border-ink rounded-btn px-4 py-2 shadow-arcade-sm arcade-btn-active transition-all ${
                   view3D ? "bg-ink text-cream" : "bg-cream text-ink hover:bg-marquee"
                 }`}
                 style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 2 }}
@@ -174,7 +175,7 @@ function ProductPage() {
             <button
               type="button"
               onClick={() => openArModal({ name: product.name, image: product.image.url })}
-              className="bg-cream border border-ink rounded-btn px-3 py-2 arcade-bevel hover:bg-marquee transition-colors"
+              className="bg-cream border-2 border-ink rounded-btn px-4 py-2 shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-all"
               style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 2 }}
               aria-label={`Try ${product.name} in AR`}
             >
@@ -183,50 +184,65 @@ function ProductPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4" style={{ fontFamily: "var(--font-arcade)" }}>
-          <div className="flex flex-col gap-1">
+        {/* Right Column: Details & Actions */}
+        <div
+          className="lg:col-span-5 flex flex-col gap-5 bg-cream border-2 border-ink rounded-card p-6 shadow-arcade-card"
+          style={{ fontFamily: "var(--font-arcade)" }}
+        >
+          <div className="flex flex-col gap-1.5 border-b border-dashed border-ink/40 pb-4">
             <Link
               to="/shop"
               preload="intent"
-              style={{ fontSize: 9 }}
-              className="text-muted underline underline-offset-4 w-fit"
+              style={{ fontSize: 10 }}
+              className="text-muted hover:text-ink transition-colors w-fit font-bold"
             >
               ← BACK TO SHOP
             </Link>
-            <h1 style={{ fontSize: 20, letterSpacing: 2 }}>{product.name}</h1>
-            <p style={{ fontSize: 14 }}>{formatPrice(product.priceCents, product.currency)}</p>
+            <h1
+              style={{ fontSize: "clamp(20px, 3vw, 26px)", letterSpacing: 2 }}
+              className="font-bold"
+            >
+              {product.name}
+            </h1>
+            <p className="text-xl font-bold text-ink">
+              {formatPrice(product.priceCents, product.currency)}
+            </p>
           </div>
 
           <p
-            className="text-muted"
-            style={{ fontFamily: "VT323, monospace", fontSize: 18, lineHeight: 1.3 }}
+            className="text-charcoal font-medium"
+            style={{ fontFamily: "VT323, monospace", fontSize: 20, lineHeight: 1.4 }}
           >
             {product.description}
           </p>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             <div className="flex items-center justify-between">
-              <span style={{ fontSize: 10, letterSpacing: 1 }}>SIZE</span>
+              <span style={{ fontSize: 10, letterSpacing: 1 }} className="font-bold">
+                SIZE
+              </span>
               <button
                 type="button"
                 onClick={() => openSizeGuide(product.category ?? "caps")}
-                className="text-muted underline underline-offset-4 hover:text-ink transition-colors"
+                className="text-muted underline underline-offset-4 hover:text-ink transition-colors font-bold"
                 style={{ fontSize: 9, letterSpacing: 1 }}
               >
                 SIZE GUIDE [?]
               </button>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {product.sizes.map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setSize(s)}
                   aria-pressed={s === size}
-                  className={`px-3 h-10 rounded-btn border border-ink arcade-bevel ${
-                    s === activeSize ? "bg-ink text-cream" : "bg-cream text-ink"
+                  className={`px-4 h-11 rounded-btn border-2 border-ink arcade-btn-active font-bold transition-all ${
+                    s === activeSize
+                      ? "bg-ink text-cream shadow-none"
+                      : "bg-cream text-ink shadow-arcade-sm hover:bg-marquee"
                   }`}
-                  style={{ fontSize: 10, minWidth: 44 }}
+                  style={{ fontSize: 10, minWidth: 48 }}
                 >
                   {s}
                 </button>
@@ -235,24 +251,26 @@ function ProductPage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <span style={{ fontSize: 10, letterSpacing: 1 }}>QTY</span>
+            <span style={{ fontSize: 10, letterSpacing: 1 }} className="font-bold">
+              QUANTITY
+            </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setQty((v) => Math.max(1, v - 1))}
-                className="w-10 h-10 border border-ink rounded-btn arcade-bevel"
+                className="w-11 h-11 border-2 border-ink rounded-btn shadow-arcade-sm arcade-btn-active bg-cream hover:bg-marquee text-lg font-bold flex items-center justify-center"
                 aria-label="Decrease quantity"
               >
                 −
               </button>
               <span
-                className="w-10 text-center"
-                style={{ fontFamily: "VT323, monospace", fontSize: 20 }}
+                className="w-12 text-center font-bold"
+                style={{ fontFamily: "VT323, monospace", fontSize: 24 }}
               >
                 {qty}
               </span>
               <button
                 onClick={() => setQty((v) => Math.min(9, v + 1))}
-                className="w-10 h-10 border border-ink rounded-btn arcade-bevel"
+                className="w-11 h-11 border-2 border-ink rounded-btn shadow-arcade-sm arcade-btn-active bg-cream hover:bg-marquee text-lg font-bold flex items-center justify-center"
                 aria-label="Increase quantity"
               >
                 +
@@ -264,7 +282,7 @@ function ProductPage() {
             type="button"
             disabled={!product.inStock}
             onClick={add}
-            className="w-full bg-buy text-cream py-4 rounded-btn border border-ink arcade-bevel disabled:bg-muted disabled:cursor-not-allowed cursor-pointer"
+            className="w-full bg-buy text-white py-4 rounded-btn border-2 border-ink shadow-arcade arcade-btn-active disabled:bg-muted disabled:shadow-none disabled:cursor-not-allowed cursor-pointer font-bold transition-all"
             style={{ fontSize: 14, letterSpacing: 2 }}
           >
             {product.inStock ? "ADD TO CART" : "SOLD OUT"}
@@ -275,17 +293,22 @@ function ProductPage() {
           )}
 
           {product.inStock && product.stockQty <= 5 && (
-            <p className="text-muted text-center" style={{ fontSize: 10, letterSpacing: 1 }}>
-              LOW STOCK — ONLY {product.stockQty} LEFT
+            <p
+              className="bg-marquee text-ink px-3 py-1.5 rounded-btn border border-ink text-center font-bold shadow-arcade-sm"
+              style={{ fontSize: 9, letterSpacing: 1 }}
+            >
+              ★ LOW STOCK — ONLY {product.stockQty} LEFT IN VAULT ★
             </p>
           )}
 
           <ul
-            className="border border-pixel rounded-card p-3 flex flex-col gap-1"
+            className="border-2 border-pixel rounded-card p-4 flex flex-col gap-1.5 bg-white/40"
             style={{ fontSize: 10 }}
           >
             {product.materials.map((m) => (
-              <li key={m}>★ {m}</li>
+              <li key={m} className="flex items-center gap-1.5">
+                <span className="text-marquee">★</span> {m}
+              </li>
             ))}
           </ul>
         </div>
@@ -295,7 +318,7 @@ function ProductPage() {
 
       {/* Mobile sticky buy bar */}
       <div
-        className="md:hidden sticky bottom-0 z-20 border-t-2 border-ink bg-cream px-4 py-2 flex items-center gap-3"
+        className="md:hidden sticky bottom-0 z-20 border-t-2 border-ink bg-cream px-4 py-2 flex items-center gap-3 shadow-arcade-modal"
         style={{ fontFamily: "var(--font-arcade)" }}
       >
         <div className="flex flex-col min-w-0">
@@ -310,7 +333,7 @@ function ProductPage() {
           type="button"
           disabled={!product.inStock}
           onClick={add}
-          className="flex-1 bg-buy text-cream py-3 rounded-btn border border-ink arcade-bevel disabled:bg-muted disabled:cursor-not-allowed"
+          className="flex-1 bg-buy text-white py-3 rounded-btn border-2 border-ink shadow-arcade-sm arcade-btn-active disabled:bg-muted disabled:shadow-none disabled:cursor-not-allowed font-bold min-h-[44px]"
           style={{ fontSize: 11, letterSpacing: 2 }}
         >
           {product.inStock ? `ADD ${activeSize}` : "SOLD OUT"}

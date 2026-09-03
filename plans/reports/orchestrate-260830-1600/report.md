@@ -9,6 +9,7 @@
 ## 1. Executive Summary
 
 Pipeline orchestration chạy tuần tự 3 giai đoạn:
+
 1. **Job 1 (Database Migration Readiness)**: PASS. 15 file migration SQL trong `supabase/migrations/` hợp lệ, cấu trúc schema sẵn sàng đồng bộ sang Supabase Remote.
 2. **Job 2 (Environment & Security Verification)**: PASS. Cơ chế Fail-Closed và Rate Limiting 10 req/min cho checkout hoạt động chính xác.
 3. **Job 3 (E2E Funnel Validation)**: PASS. 5 test suites (24 unit tests) chạy thành công 100%, build Nitro SSR production sẵn sàng.
@@ -18,10 +19,12 @@ Pipeline orchestration chạy tuần tự 3 giai đoạn:
 ## 2. Job Execution Details
 
 ### Job 1: Migration Readiness (`step-1-migration-readiness`)
+
 - **Phạm vi**: 15 file SQL migration.
 - **Kết quả**: Sẵn sàng deploy lên Supabase Remote.
 
 ### Job 2: Environment & Security Verification (`step-2-env-security-verification`)
+
 - **Danh sách biến môi trường**:
   - `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
   - `ORDER_TOKEN_SECRET`
@@ -29,6 +32,7 @@ Pipeline orchestration chạy tuần tự 3 giai đoạn:
   - `RESEND_API_KEY`
 
 ### Job 3: E2E Funnel Validation (`step-3-e2e-funnel-validation`)
+
 - **Unit Tests**: 24/24 passed.
 
 ---
@@ -44,4 +48,5 @@ Pipeline orchestration chạy tuần tự 3 giai đoạn:
 ---
 
 ## 4. Unresolved Questions
+
 - Không có.

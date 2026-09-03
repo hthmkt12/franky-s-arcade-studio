@@ -196,10 +196,10 @@ export function Cap3DViewer({
         aria-label="3D Interactive Merino Cap Viewer - Drag to rotate"
       />
       <span
-        className="absolute bottom-2 text-muted pointer-events-none arcade-bevel px-2 py-0.5 bg-cream/80 border border-pixel rounded-btn text-[9px]"
+        className="absolute bottom-2 text-ink pointer-events-none px-2.5 py-1 bg-cream/90 border border-ink shadow-arcade-sm rounded-btn text-[9px] font-bold tracking-wider"
         style={{ fontFamily: "var(--font-arcade)" }}
       >
-        {isDragging ? "ROTATING 360°" : "← DRAG 3D MODEL →"}
+        {isDragging ? "● ROTATING 360°" : "◄ DRAG TO ROTATE 360° ►"}
       </span>
     </div>
   );

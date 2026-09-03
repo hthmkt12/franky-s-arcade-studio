@@ -19,12 +19,12 @@ export function VariantCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="border border-ink rounded-card overflow-hidden flex flex-col bg-cream transition-transform duration-200 hover:-translate-y-0.5">
+    <div className="border-2 border-ink rounded-card overflow-hidden flex flex-col bg-cream shadow-arcade transition-all duration-150 hover:-translate-y-1 hover:shadow-arcade-lg">
       <Link
         to="/shop/$slug"
         params={{ slug: product.slug }}
         preload="intent"
-        className="flex-1 min-h-[180px] flex items-center justify-center p-3 bg-cream group"
+        className="flex-1 min-h-[180px] flex items-center justify-center p-3 bg-cream group relative"
         aria-label={`View ${product.name}`}
       >
         <img
@@ -35,31 +35,34 @@ export function VariantCard({ product }: { product: Product }) {
           loading="lazy"
           className="max-h-[160px] w-auto object-contain transition-transform duration-200 group-hover:scale-105"
         />
+        {product.inStock && product.stockQty <= 5 && (
+          <span
+            className="absolute top-2 left-2 bg-marquee text-ink font-arcade px-2 py-0.5 rounded-btn border border-ink shadow-arcade-sm font-bold"
+            style={{ fontSize: 8 }}
+          >
+            LIMITED: {product.stockQty}
+          </span>
+        )}
       </Link>
       <div
-        className="border-t border-pixel px-3 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+        className="border-t-2 border-ink px-3 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-cream"
         style={{ fontSize: 10 }}
       >
         <div className="flex flex-col gap-0.5 min-w-0">
           <span style={{ fontWeight: 700 }} className="truncate">
             {product.name}
           </span>
-          <span>{formatPrice(product.priceCents, product.currency)}</span>
-          {product.inStock && product.stockQty <= 5 && (
-            <span className="text-muted" style={{ fontSize: 8 }}>
-              ONLY {product.stockQty} LEFT
-            </span>
-          )}
+          <span className="font-bold">{formatPrice(product.priceCents, product.currency)}</span>
         </div>
 
         <button
           type="button"
           onClick={() => openArModal({ name: product.name, image: product.image.url })}
-          className="border border-ink rounded-btn px-2 py-1 arcade-bevel hover:bg-marquee transition-colors shrink-0"
+          className="border-2 border-ink rounded-btn px-2 py-1 arcade-bevel shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-colors shrink-0 font-arcade"
           style={{ fontSize: 9 }}
           aria-label={`Try ${product.name} in AR`}
         >
-          TRY IN [AR]
+          TRY [AR]
         </button>
       </div>
 
@@ -75,8 +78,10 @@ export function VariantCard({ product }: { product: Product }) {
                 type="button"
                 onClick={() => setSize(s)}
                 aria-pressed={s === size}
-                className={`min-w-[26px] h-7 px-1 rounded-btn border border-ink arcade-bevel transition-colors ${
-                  s === size ? "bg-ink text-cream" : "bg-cream text-ink hover:bg-marquee"
+                className={`min-w-[28px] h-7 px-1.5 rounded-btn border-2 border-ink arcade-btn-active transition-all ${
+                  s === size
+                    ? "bg-ink text-cream shadow-none"
+                    : "bg-cream text-ink shadow-arcade-sm hover:bg-marquee"
                 }`}
                 style={{ fontSize: 8 }}
               >
@@ -87,10 +92,10 @@ export function VariantCard({ product }: { product: Product }) {
           <button
             type="button"
             onClick={() => openSizeGuide(product.category ?? "caps")}
-            className="text-muted underline underline-offset-2 hover:text-ink transition-colors"
+            className="text-muted underline underline-offset-2 hover:text-ink transition-colors font-arcade"
             style={{ fontSize: 8 }}
           >
-            [?]
+            [SIZE ?]
           </button>
         </div>
       )}
@@ -99,8 +104,8 @@ export function VariantCard({ product }: { product: Product }) {
         type="button"
         disabled={!product.inStock}
         onClick={add}
-        className="border-t border-dashed border-ink py-2 text-center disabled:text-muted disabled:cursor-not-allowed hover:bg-ink hover:text-cream transition-colors"
-        style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1 }}
+        className="border-t-2 border-ink py-2.5 px-3 text-center disabled:text-muted disabled:cursor-not-allowed hover:bg-ink hover:text-cream active:bg-charcoal arcade-btn-active transition-colors font-arcade font-bold"
+        style={{ fontSize: 10, letterSpacing: 1 }}
       >
         {product.inStock ? "ADD TO CART" : "OUT OF STOCK"}
       </button>

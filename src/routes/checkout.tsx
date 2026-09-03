@@ -277,60 +277,69 @@ function CheckoutPage() {
           <button
             type="submit"
             disabled={!valid || submitting}
-            className="bg-buy text-cream py-4 rounded-btn border border-ink arcade-bevel disabled:bg-muted disabled:cursor-not-allowed"
+            className="bg-buy text-white py-4 rounded-btn border-2 border-ink shadow-arcade arcade-btn-active disabled:bg-muted disabled:shadow-none disabled:cursor-not-allowed font-bold transition-all min-h-[48px]"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 14, letterSpacing: 2 }}
           >
-            {submitting ? "SENDING..." : "PLACE ORDER"}
+            {submitting ? "PROCESSING ORDER..." : "PLACE ORDER →"}
           </button>
         </form>
 
         <aside
-          className="border border-ink rounded-card p-4 bg-cream arcade-bevel h-fit flex flex-col gap-2 md:sticky md:top-4"
+          className="border-2 border-ink rounded-card p-5 bg-cream shadow-arcade h-fit flex flex-col gap-3 md:sticky md:top-20"
           style={{ fontFamily: "var(--font-arcade)", fontSize: 10 }}
         >
-          <h2 style={{ fontSize: 12, letterSpacing: 2 }} className="border-b border-pixel pb-2">
-            ORDER
-          </h2>
-          <ul className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between border-b-2 border-ink pb-2">
+            <h2 style={{ fontSize: 12, letterSpacing: 2 }} className="font-bold">
+              ★ ORDER SUMMARY
+            </h2>
+            <span className="text-[9px] text-muted font-bold">{items.length} ITEMS</span>
+          </div>
+          <ul className="flex flex-col gap-2">
             {items.map((it) => (
-              <li key={`${it.productId}-${it.size}`} className="flex justify-between">
-                <span>
-                  {it.product.name} ×{it.qty} ({it.size})
+              <li
+                key={`${it.productId}-${it.size}`}
+                className="flex justify-between items-center text-[10px]"
+              >
+                <span className="truncate max-w-[200px]">
+                  {it.product.name} ×{it.qty} <span className="text-muted">({it.size})</span>
                 </span>
-                <span>{formatPrice(it.lineTotalCents)}</span>
+                <span className="font-bold">{formatPrice(it.lineTotalCents)}</span>
               </li>
             ))}
           </ul>
           {totals && (
-            <div className="border-t border-pixel border-dashed pt-2 flex flex-col gap-1">
+            <div className="border-t-2 border-ink border-dashed pt-3 flex flex-col gap-1.5">
               <Row label="SUBTOTAL" value={formatPrice(totals.subtotalCents)} />
               {totals.discountCents ? (
                 <Row
-                  label="ARCADE DISCOUNT (10%)"
+                  label={`ARCADE DISCOUNT (${appliedPromo === "RUNNER15" ? "15" : appliedPromo === "CHAMP20" ? "20" : "10"}%)`}
                   value={`-${formatPrice(totals.discountCents)}`}
                 />
               ) : null}
               <Row label="SHIPPING" value={formatPrice(totals.shippingCents)} />
+              <div className="border-t border-ink border-dashed my-1" />
               <Row label="TOTAL" value={formatPrice(totals.totalCents)} bold />
             </div>
           )}
 
-          <div className="border-t border-pixel pt-2 flex flex-col gap-1.5 mt-2">
-            <span style={{ fontSize: 9, fontWeight: 700 }}>ARCADE CHEAT CODE</span>
-            <div className="flex gap-1">
+          <div className="border-t-2 border-ink pt-3 flex flex-col gap-2 mt-1">
+            <span style={{ fontSize: 9, fontWeight: 700 }} className="text-muted tracking-wider">
+              ARCADE CHEAT CODE
+            </span>
+            <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="E.G. COIN10"
+                placeholder="E.G. COIN10 / KONAMI"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                className="flex-1 border border-pixel rounded-btn px-2 py-1 bg-cream text-xs uppercase"
-                style={{ fontFamily: "VT323, monospace", fontSize: 16 }}
+                className="flex-1 border-2 border-ink rounded-btn px-3 py-2 bg-white text-ink text-sm uppercase shadow-arcade-sm focus:outline-hidden"
+                style={{ fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 700 }}
               />
               <button
                 type="button"
                 onClick={handleApplyPromo}
-                className="px-2 py-1 bg-ink text-cream rounded-btn arcade-bevel text-xs"
-                style={{ fontSize: 9 }}
+                className="px-4 py-2 bg-ink text-cream rounded-btn border-2 border-ink shadow-arcade-sm arcade-btn-active font-bold hover:bg-marquee hover:text-ink transition-colors"
+                style={{ fontSize: 10 }}
               >
                 APPLY
               </button>
@@ -364,7 +373,7 @@ function Field({
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }) {
   return (
-    <label className="flex flex-col gap-1">
+    <label className="flex flex-col gap-1.5">
       <span style={{ fontFamily: "var(--font-arcade)", fontSize: 10, fontWeight: 700 }}>
         {label}
       </span>
@@ -377,11 +386,16 @@ function Field({
         inputMode={inputMode}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
-        className={`border rounded-btn px-3 py-2 bg-cream ${error ? "border-ink" : "border-pixel"}`}
-        style={{ fontFamily: "VT323, monospace", fontSize: 18 }}
+        className={`border-2 rounded-btn px-3 py-2.5 bg-white text-ink transition-colors focus:outline-hidden focus:border-ink shadow-arcade-sm ${
+          error ? "border-destructive bg-destructive/5" : "border-ink"
+        }`}
+        style={{ fontFamily: "var(--font-sans)", fontSize: 15 }}
       />
       {error && (
-        <span style={{ fontFamily: "var(--font-arcade)", fontSize: 9 }} className="text-ink">
+        <span
+          style={{ fontFamily: "var(--font-arcade)", fontSize: 9 }}
+          className="text-destructive font-bold"
+        >
           ! {error}
         </span>
       )}

@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { VariantCard } from "@/components/frankys/VariantCard";
+import { trackEvent } from "@/lib/analytics";
 import { arcadeAudio } from "@/lib/audio/arcade-audio";
 import { getProducts } from "@/lib/api/shop";
 import type { ProductCategory } from "@/lib/api/types";
@@ -62,6 +63,15 @@ function ShopPage() {
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [sort, setSort] = useState<SortKey>("default");
   const [inStockOnly, setInStockOnly] = useState(false);
+
+  useEffect(() => {
+    if (products && products.length > 0) {
+      trackEvent("view_item_list", {
+        category: category !== "all" ? category : undefined,
+        itemCount: products.length,
+      });
+    }
+  }, [products, category]);
 
   const visible = useMemo(() => {
     let list = products ?? [];

@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
 import { computeTotals, createOrder, formatPrice, getProducts } from "@/lib/api/shop";
+import { trackEvent } from "@/lib/analytics";
 
 import { useCart } from "@/lib/cart/CartContext";
 import type { Customer } from "@/lib/api/types";
@@ -58,7 +59,9 @@ function CheckoutPage() {
   });
   const [appliedPromo, setAppliedPromo] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("frankys.promo.code") === "COIN10" ? "COIN10" : null;
+      const code = localStorage.getItem("frankys.promo.code");
+      if (code === "COIN10" || code === "KONAMI") return "COIN10";
+      if (code === "RUNNER15" || code === "CHAMP20") return code;
     }
     return null;
   });
@@ -67,17 +70,21 @@ function CheckoutPage() {
     const code = promoCode.trim().toUpperCase();
     if (code === "COIN10" || code === "KONAMI") {
       setAppliedPromo("COIN10");
+      trackEvent("apply_promo", { promoCode: code, valid: true, discountPercent: 10 });
       toast.success("CHEAT CODE ACCEPTED: 10% OFF APPLIED!");
       import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => arcadeAudio.playVictory());
     } else if (code === "RUNNER15") {
       setAppliedPromo("RUNNER15");
+      trackEvent("apply_promo", { promoCode: code, valid: true, discountPercent: 15 });
       toast.success("ARCADE RUNNER BONUS: 15% OFF APPLIED!");
       import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => arcadeAudio.playVictory());
     } else if (code === "CHAMP20") {
       setAppliedPromo("CHAMP20");
+      trackEvent("apply_promo", { promoCode: code, valid: true, discountPercent: 20 });
       toast.success("★ TOP RANK CHAMPION REWARD: 20% OFF APPLIED! ★");
       import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => arcadeAudio.playVictory());
     } else {
+      trackEvent("apply_promo", { promoCode: code, valid: false });
       toast.error("INVALID CHEAT CODE. PLAY RUNNER OR CLICK INSERT COIN!");
     }
   };
@@ -111,6 +118,22 @@ function CheckoutPage() {
     }
     return { ...base, discountCents: 0 };
   }, [cart.lines, products, appliedPromo]);
+
+  const totalQty = cart.lines.reduce((acc, l) => acc + l.qty, 0);
+  const totalCents = totals?.totalCents ?? 0;
+  const hasItems = cart.lines.length > 0;
+  const hasTotals = Boolean(totals);
+
+  const hasTrackedCheckout = useRef(false);
+  useEffect(() => {
+    if (!hasTrackedCheckout.current && hasItems && hasTotals) {
+      hasTrackedCheckout.current = true;
+      trackEvent("begin_checkout", {
+        itemCount: totalQty,
+        totalCents,
+      });
+    }
+  }, [hasItems, hasTotals, totalQty, totalCents]);
   const items = products ? cart.buildView(products) : [];
 
   const errors = useMemo(() => {

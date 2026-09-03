@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
 import { computeTotals, formatPrice, getFreeShippingProgress, getProducts } from "@/lib/api/shop";
+import { trackEvent } from "@/lib/analytics";
 import { arcadeAudio } from "@/lib/audio/arcade-audio";
 import { useCart } from "@/lib/cart/CartContext";
 import { useQuery } from "@tanstack/react-query";
@@ -59,15 +60,47 @@ export function CartDrawer() {
     );
   }, [products, cart.lines]);
 
-  if (!cart.isOpen) return null;
-
   const items = products ? cart.buildView(products) : [];
   const totals = products ? computeTotals(cart.lines, products) : null;
+  const totalQty = cart.lines.reduce((acc, l) => acc + l.qty, 0);
+  const subtotalCents = totals?.subtotalCents ?? 0;
+
+  useEffect(() => {
+    if (cart.isOpen) {
+      trackEvent("view_cart", {
+        itemCount: totalQty,
+        subtotalCents,
+      });
+    }
+  }, [cart.isOpen, totalQty, subtotalCents]);
+
+  if (!cart.isOpen) return null;
 
   const handleQuickAdd = (productId: string) => {
     cart.addItem(productId, "ONE", 1);
+    const p = products?.find((item) => item.id === productId);
+    trackEvent("add_to_cart", {
+      productId,
+      name: p?.name,
+      size: "ONE",
+      qty: 1,
+      priceCents: p?.priceCents,
+    });
     arcadeAudio.playAddCart();
     toast.success("★ 1-UP! ADDED TO CART ★");
+  };
+
+  const handleRemove = (productId: string, size: (typeof cart.lines)[0]["size"]) => {
+    trackEvent("remove_from_cart", { productId, size });
+    cart.removeItem(productId, size);
+  };
+
+  const handleProceedCheckout = () => {
+    trackEvent("begin_checkout", {
+      itemCount: cart.lines.reduce((acc, l) => acc + l.qty, 0),
+      totalCents: totals?.totalCents ?? 0,
+    });
+    cart.close();
   };
 
   return (
@@ -173,7 +206,7 @@ export function CartDrawer() {
                         +
                       </button>
                       <button
-                        onClick={() => cart.removeItem(it.productId, it.size)}
+                        onClick={() => handleRemove(it.productId, it.size)}
                         className="ml-auto px-2 h-7 border border-destructive text-destructive rounded-btn hover:bg-destructive hover:text-white transition-colors flex items-center justify-center font-bold"
                         style={{ fontSize: 8 }}
                         aria-label={`Remove ${it.product.name} from cart`}
@@ -231,7 +264,7 @@ export function CartDrawer() {
 
               <Link
                 to="/checkout"
-                onClick={cart.close}
+                onClick={handleProceedCheckout}
                 className="mt-3 bg-buy text-white py-3.5 rounded-btn border-2 border-ink shadow-arcade arcade-btn-active text-center font-bold tracking-wider hover:bg-buy/90 transition-all flex items-center justify-center min-h-[44px]"
                 style={{ fontSize: 12, letterSpacing: 2 }}
               >

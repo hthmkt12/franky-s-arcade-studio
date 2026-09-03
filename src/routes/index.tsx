@@ -14,6 +14,7 @@ const PixelRunnerModal = lazy(() =>
   })),
 );
 import { arcadeAudio } from "@/lib/audio/arcade-audio";
+import { trackEvent } from "@/lib/analytics";
 
 import { ViewModeToggle, type ViewMode } from "@/components/frankys/ViewModeToggle";
 import { formatPrice, getProducts } from "@/lib/api/shop";
@@ -76,6 +77,7 @@ function LandingPage() {
         if (currentIndex === konamiSequence.length) {
           currentIndex = 0;
           arcadeAudio.playKonamiFanfare();
+          trackEvent("arcade_cheat_unlocked", { code: "KONAMI", mechanism: "konami" });
           toast.success(
             "★ 30 LIVES GRANTED! KONAMI SECRET CODE ACTIVATED: 'KONAMI' FOR 10% OFF ★",
             {
@@ -100,6 +102,7 @@ function LandingPage() {
   const handleInsertCoin = () => {
     arcadeAudio.playCoin();
     setCoinInserted(true);
+    trackEvent("arcade_cheat_unlocked", { code: "COIN10", mechanism: "coin" });
     toast.success("1-UP! CHEAT CODE UNLOCKED: 'COIN10' FOR 10% OFF", {
       duration: 5000,
     });

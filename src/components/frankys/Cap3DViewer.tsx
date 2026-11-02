@@ -4,6 +4,19 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
+function isWebGLAvailable() {
+  if (typeof window === "undefined") return false;
+  try {
+    const canvas = document.createElement("canvas");
+    return Boolean(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl")),
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function Cap3DViewer({
   colorHex = "#faa21f",
   className = "",
@@ -13,10 +26,16 @@ export function Cap3DViewer({
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [webglSupported, setWebglSupported] = useState(true);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+
+    if (!isWebGLAvailable()) {
+      setWebglSupported(false);
+      return;
+    }
 
     // Scene & Camera
     const scene = new THREE.Scene();
@@ -33,6 +52,8 @@ export function Cap3DViewer({
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.shadowMap.enabled = false;
+    renderer.domElement.style.touchAction = "pan-y";
+    renderer.domElement.style.display = "block";
     container.appendChild(renderer.domElement);
 
     // Group for Cap Mesh
@@ -123,6 +144,7 @@ export function Cap3DViewer({
     domEl.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
 
     // Animation Loop
     let reqId: number | undefined;
@@ -174,6 +196,7 @@ export function Cap3DViewer({
       domEl.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
       domeGeo.dispose();
       cuffGeo.dispose();
       buttonGeo.dispose();
@@ -186,13 +209,29 @@ export function Cap3DViewer({
     };
   }, [colorHex]);
 
+  if (!webglSupported) {
+    return (
+      <div
+        className={`relative w-full h-[220px] select-none flex flex-col items-center justify-center p-4 border border-dashed border-ink/40 rounded-card checker-bg text-center ${className}`}
+        style={{ fontFamily: "var(--font-arcade)" }}
+      >
+        <span style={{ fontSize: 10, letterSpacing: 1 }} className="font-bold text-ink mb-1">
+          3D ACCELERATION OFF
+        </span>
+        <span style={{ fontSize: 8 }} className="text-charcoal">
+          ENABLE WEBGL IN BROWSER TO ROTATE 360°
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`relative w-full h-[220px] select-none flex items-center justify-center ${className}`}
     >
       <div
         ref={containerRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing touch-none"
+        className="w-full h-full cursor-grab active:cursor-grabbing touch-pan-y"
         aria-label="3D Interactive Merino Cap Viewer - Drag to rotate"
       />
       <span

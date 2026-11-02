@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { useCart } from "@/lib/cart/CartContext";
+import { useCart } from "@/lib/cart/cart-context";
 import { arcadeAudio } from "@/lib/audio/arcade-audio";
 
 import { PixelHorse } from "./PixelHorse";
@@ -115,7 +115,7 @@ export function Header() {
             type="button"
             onClick={handleToggleCurrency}
             title="Switch Currency (EUR / USD / GBP)"
-            className="px-2.5 h-10 border-2 border-ink rounded-btn bg-cream shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-all flex items-center justify-center font-bold"
+            className="px-2.5 h-11 min-w-[44px] border-2 border-ink rounded-btn bg-cream shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-all flex items-center justify-center font-bold"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 9 }}
           >
             {currency}
@@ -126,7 +126,7 @@ export function Header() {
             onClick={handleToggleAudio}
             title={isMuted ? "Unmute 8-bit Audio" : "Mute 8-bit Audio"}
             aria-label={isMuted ? "Unmute sound" : "Mute sound"}
-            className="px-2.5 h-10 border-2 border-ink rounded-btn bg-cream shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-all flex items-center justify-center text-xs"
+            className="px-2.5 h-11 min-w-[44px] border-2 border-ink rounded-btn bg-cream shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-all flex items-center justify-center text-xs"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 10 }}
           >
             {isMuted ? "🔇" : "🔊"}
@@ -139,7 +139,7 @@ export function Header() {
               cart.toggle();
             }}
             aria-label={`Open cart, ${mounted ? cart.itemCount : 0} items`}
-            className="relative px-3 h-10 border-2 border-ink rounded-btn bg-cream shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-all flex items-center gap-1.5"
+            className="relative px-3 h-11 min-h-[44px] border-2 border-ink rounded-btn bg-cream shadow-arcade-sm arcade-btn-active hover:bg-marquee transition-all flex items-center gap-1.5"
             style={{ fontFamily: "var(--font-arcade)", fontSize: 10, letterSpacing: 1 }}
           >
             <span>CART</span>

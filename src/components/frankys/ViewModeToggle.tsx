@@ -1,4 +1,4 @@
-import { openArModal } from "./ArModal";
+import { openArModal } from "./modal-events";
 
 export type ViewMode = "3D" | "AR";
 

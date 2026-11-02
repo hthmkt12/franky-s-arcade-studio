@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
 import { PixelHorse } from "./PixelHorse";
+import type { ArDetail } from "./modal-events";
 
-type ArDetail = { name?: string; image?: string };
 type Phase = "idle" | "init" | "scan" | "done" | "error";
 type ErrorKind = "denied" | "notfound" | "unsupported" | "insecure" | "unknown";
 
@@ -40,10 +40,6 @@ const ERROR_COPY: Record<ErrorKind, { title: string; steps: string[] }> = {
     steps: ["1. CLOSE OTHER APPS USING THE CAMERA", "2. RELOAD THE PAGE", "3. PRESS RETRY"],
   },
 };
-
-export function openArModal(detail: ArDetail = {}) {
-  window.dispatchEvent(new CustomEvent<ArDetail>("frankys:open-ar", { detail }));
-}
 
 export function ArModal() {
   const [open, setOpen] = useState(false);

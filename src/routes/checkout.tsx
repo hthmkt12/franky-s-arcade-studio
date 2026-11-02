@@ -4,10 +4,11 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
+import { arcadeAudio } from "@/lib/audio/arcade-audio";
 import { computeTotals, createOrder, formatPrice, getProducts } from "@/lib/api/shop";
 import { trackEvent } from "@/lib/analytics";
 
-import { useCart } from "@/lib/cart/CartContext";
+import { useCart } from "@/lib/cart/cart-context";
 import type { Customer } from "@/lib/api/types";
 
 export const Route = createFileRoute("/checkout")({
@@ -72,17 +73,17 @@ function CheckoutPage() {
       setAppliedPromo("COIN10");
       trackEvent("apply_promo", { promoCode: code, valid: true, discountPercent: 10 });
       toast.success("CHEAT CODE ACCEPTED: 10% OFF APPLIED!");
-      import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => arcadeAudio.playVictory());
+      arcadeAudio.playVictory();
     } else if (code === "RUNNER15") {
       setAppliedPromo("RUNNER15");
       trackEvent("apply_promo", { promoCode: code, valid: true, discountPercent: 15 });
       toast.success("ARCADE RUNNER BONUS: 15% OFF APPLIED!");
-      import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => arcadeAudio.playVictory());
+      arcadeAudio.playVictory();
     } else if (code === "CHAMP20") {
       setAppliedPromo("CHAMP20");
       trackEvent("apply_promo", { promoCode: code, valid: true, discountPercent: 20 });
       toast.success("★ TOP RANK CHAMPION REWARD: 20% OFF APPLIED! ★");
-      import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => arcadeAudio.playVictory());
+      arcadeAudio.playVictory();
     } else {
       trackEvent("apply_promo", { promoCode: code, valid: false });
       toast.error("INVALID CHEAT CODE. PLAY RUNNER OR CLICK INSERT COIN!");

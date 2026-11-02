@@ -4,9 +4,8 @@ import { toast } from "sonner";
 
 import { formatPrice } from "@/lib/api/shop";
 import { trackEvent } from "@/lib/analytics";
-import { useCart } from "@/lib/cart/CartContext";
-import { openArModal } from "@/components/frankys/ArModal";
-import { openSizeGuide } from "@/components/frankys/SizeGuideModal";
+import { useCart } from "@/lib/cart/cart-context";
+import { openArModal, openSizeGuide } from "@/components/frankys/modal-events";
 import type { Product, ProductSize } from "@/lib/api/types";
 
 export function VariantCard({ product }: { product: Product }) {

@@ -1,32 +1,10 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import type { CartItemView, CartLine, Product, ProductSize } from "@/lib/api/types";
+import { arcadeAudio } from "@/lib/audio/arcade-audio";
+import { CartContext, type CartContextValue } from "./cart-context";
 
 const STORAGE_KEY = "frankys.cart.v1";
-
-interface CartContextValue {
-  lines: CartLine[];
-  itemCount: number;
-  addItem: (productId: string, size: ProductSize, qty?: number) => void;
-  updateQty: (productId: string, size: ProductSize, qty: number) => void;
-  removeItem: (productId: string, size: ProductSize) => void;
-  clear: () => void;
-  isOpen: boolean;
-  open: () => void;
-  close: () => void;
-  toggle: () => void;
-  buildView: (products: Product[]) => CartItemView[];
-}
-
-const CartContext = createContext<CartContextValue | null>(null);
 
 function loadInitial(): CartLine[] {
   if (typeof window === "undefined") return [];
@@ -66,9 +44,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return [...prev, { productId, size, qty }];
     });
     setIsOpen(true);
-    import("@/lib/audio/arcade-audio").then(({ arcadeAudio }) => {
-      arcadeAudio.playAddCart();
-    });
+    arcadeAudio.playAddCart();
   }, []);
 
   const updateQty = useCallback((productId: string, size: ProductSize, qty: number) => {
@@ -119,10 +95,4 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
-}
-
-export function useCart(): CartContextValue {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used within CartProvider");
-  return ctx;
 }

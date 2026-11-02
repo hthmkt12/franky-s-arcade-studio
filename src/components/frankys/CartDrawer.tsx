@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { computeTotals, formatPrice, getFreeShippingProgress, getProducts } from "@/lib/api/shop";
 import { trackEvent } from "@/lib/analytics";
 import { arcadeAudio } from "@/lib/audio/arcade-audio";
-import { useCart } from "@/lib/cart/CartContext";
+import { useCart } from "@/lib/cart/cart-context";
 import { useQuery } from "@tanstack/react-query";
 
 import { ErrorState } from "./ErrorState";

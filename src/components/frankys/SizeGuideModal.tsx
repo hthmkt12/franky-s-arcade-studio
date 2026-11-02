@@ -26,10 +26,6 @@ const SIZE_TABLES: Record<
   },
 };
 
-export function openSizeGuide(category: ProductCategory = "caps") {
-  window.dispatchEvent(new CustomEvent("frankys:open-size-guide", { detail: { category } }));
-}
-
 export function SizeGuideModal() {
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<"caps" | "hoodies">("caps");

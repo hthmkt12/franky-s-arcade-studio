@@ -1,0 +1,37 @@
+version: 1
+concurrency: 1
+jobs:
+  - id: step-1-fix-lint-prettier
+    runtime: internal
+    task: lint
+    cwd: F:/franky-s-arcade-studio
+    prompt: "Sửa lỗi Prettier CRLF line endings bằng cách thêm endOfLine: auto vào .prettierrc, format codebase, và giải quyết các warning Fast Refresh trong ArModal.tsx và CartContext.tsx."
+    timeout: 5m
+    expected_output: "ESLint chạy pass 100% không còn lỗi prettier hay fast refresh."
+
+  - id: step-2-fix-ui-ux-fonts-mobile
+    runtime: internal
+    depends_on: [step-1-fix-lint-prettier]
+    task: frontend
+    cwd: F:/franky-s-arcade-studio
+    prompt: "Nạp Google Fonts (Press Start 2P, VT323) trong src/routes/__root.tsx, gỡ bỏ touch-none gây bẫy cuộn trang trong Cap3DViewer.tsx, thêm WebGL fallback an toàn, và đảm bảo touch target >= 44px."
+    timeout: 5m
+    expected_output: "Google Fonts nạp đầy đủ, touch mobile không bị bẫy cuộn, touch targets đạt chuẩn WCAG."
+
+  - id: step-3-optimize-bundle-chunks
+    runtime: internal
+    depends_on: [step-2-fix-ui-ux-fonts-mobile]
+    task: perf
+    cwd: F:/franky-s-arcade-studio
+    prompt: "Tách chunk Three.js và vendor bằng rollup manualChunks trong vite.config.ts để giảm kích thước chunk dưới 500 kB."
+    timeout: 5m
+    expected_output: "Build không còn cảnh báo chunk size vượt quá 500 kB."
+
+  - id: step-4-arbiter-verification
+    runtime: internal
+    depends_on: [step-3-optimize-bundle-chunks]
+    task: verify
+    cwd: F:/franky-s-arcade-studio
+    prompt: "Chạy lint, unit tests, và build production. Xác thực toàn bộ tiêu chuẩn nghiệm thu và lập báo cáo orchestration hoàn tất."
+    timeout: 5m
+    expected_output: "Lint pass 0 error 0 warning, 33/33 tests pass, build production sạch."

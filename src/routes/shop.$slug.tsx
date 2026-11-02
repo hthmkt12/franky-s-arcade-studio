@@ -4,14 +4,13 @@ import { lazy, Suspense, useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/frankys/ErrorState";
-import { openArModal } from "@/components/frankys/ArModal";
-import { openSizeGuide } from "@/components/frankys/SizeGuideModal";
+import { openArModal, openSizeGuide } from "@/components/frankys/modal-events";
 const Cap3DViewer = lazy(() =>
   import("@/components/frankys/Cap3DViewer").then(({ Cap3DViewer }) => ({ default: Cap3DViewer })),
 );
 import { formatPrice, getProductBySlug, getProducts } from "@/lib/api/shop";
 
-import { useCart } from "@/lib/cart/CartContext";
+import { useCart } from "@/lib/cart/cart-context";
 import { trackEvent } from "@/lib/analytics";
 import type { ProductSize } from "@/lib/api/types";
 
